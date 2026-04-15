@@ -39,7 +39,8 @@
     "url": "https://github.com/eclipse-fennec/emf.ts.codegen"
   },
   "files": [
-    "dist"
+    "dist",
+    "model"
   ],
   "dependencies": {
     "commander": "^12.0.0",
