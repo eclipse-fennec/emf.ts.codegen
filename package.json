@@ -1,0 +1,53 @@
+{
+  "name": "emfts-codegen",
+  "version": "1.0.0",
+  "description": "TypeScript code generator for Ecore models using emfts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "emfts-codegen": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "start": "node dist/cli/index.js",
+    "dev": "tsx src/cli/index.ts",
+    "generate": "tsx src/cli/index.ts generate",
+    "generate:example": "tsx src/cli/index.ts generate -m examples/model/library.ecore -c examples/model/library.genconfig.xmi -o examples/generated",
+    "typecheck:example": "tsc -p examples/tsconfig.json"
+  },
+  "keywords": [
+    "emf",
+    "ecore",
+    "codegen",
+    "typescript",
+    "generator"
+  ],
+  "author": "",
+  "license": "EPL-2.0",
+  "dependencies": {
+    "commander": "^12.0.0",
+    "ejs": "^3.1.10",
+    "emfts": "file:../emfts",
+    "sax": "^1.4.4"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
+  "volta": {
+    "node": "20.19.4"
+  }
+}

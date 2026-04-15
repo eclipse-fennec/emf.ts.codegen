@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genconfig:GenConfig xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:genconfig="http://www.emfts.org/genconfig/1.0"
+    ecorePackage="http://example.org/library#/">
+
+  <!-- Generation Settings -->
+  <generation mode="emf" outputDir="./generated"/>
+
+  <!-- Package Settings -->
+  <package prefix="Library" basePackage="org.example"
+      generateFactory="true"
+      generatePackage="true"
+      generateIndex="true"/>
+
+  <!-- Class Defaults -->
+  <classDefaults
+      generateInterface="true"
+      generateImpl="true"
+      rootExtendsClass="BasicEObject"/>
+
+  <!-- Feature Defaults -->
+  <featureDefaults notify="true" property="editable"/>
+
+  <!-- Class Overrides - References via nsURI -->
+  <classOverrides ecoreClass="http://example.org/library#//Book">
+    <featureOverrides ecoreFeature="http://example.org/library#//Book/author" notify="false"/>
+    <featureOverrides ecoreFeature="http://example.org/library#//Book/library" notify="false" property="readonly"/>
+  </classOverrides>
+
+  <classOverrides ecoreClass="http://example.org/library#//Author">
+    <featureOverrides ecoreFeature="http://example.org/library#//Author/books" notify="false"/>
+  </classOverrides>
+
+  <classOverrides ecoreClass="http://example.org/library#//Employee">
+    <featureOverrides ecoreFeature="http://example.org/library#//Employee/supervisor" notify="false"/>
+  </classOverrides>
+
+</genconfig:GenConfig>

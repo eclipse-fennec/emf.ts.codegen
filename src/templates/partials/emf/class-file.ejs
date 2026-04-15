@@ -1,0 +1,226 @@
+<%- header %>
+
+<% if (!extendsImport) { -%>
+import { BasicEObject } from 'emfts';
+<% } -%>
+import type { EClass, EStructuralFeature } from 'emfts';
+<%# Generate imports for referenced types -%>
+<%
+const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
+// Filter out types that are already hardcoded above or not needed for impl
+const skipTypes = ['BasicEObject', 'EClass', 'EStructuralFeature', 'EAttribute', 'EReference', 'EEnum'];
+// Separate into type-only and value imports
+const typeOnlyImports = [];
+const valueImports = [];
+for (const imp of imports) {
+  if (imp.typeName !== className && imp.typeName !== interfaceName &&
+      imp.typeName !== extendsClass &&
+      !skipTypes.some(t => imp.typeName.includes(t)) &&
+      imp.importPath !== 'emfts') {
+    // Check if this type is used as a runtime value (e.g., enum default values)
+    const usedAsValue = features.some(gf => {
+      const dv = typeMapper.getDefaultValue(gf.ecoreFeature);
+      return dv !== null && typeof dv === 'string' && dv.startsWith(imp.typeName + '.');
+    });
+    if (usedAsValue) {
+      valueImports.push(imp);
+    } else {
+      typeOnlyImports.push(imp);
+    }
+  }
+}
+for (const imp of typeOnlyImports) {
+-%>
+import type { <%- imp.typeName %> } from '<%- imp.importPath %>';
+<%
+}
+for (const imp of valueImports) {
+-%>
+import { <%- imp.typeName %> } from '<%- imp.importPath %>';
+<%
+}
+-%>
+<% if (extendsImport) { -%>
+import { <%- extendsClass %> } from '<%- extendsImport %>';
+<% } -%>
+import type { <%- interfaceName %> } from './<%- interfaceName %>';
+import { <%- packagePrefix %>Package } from './<%- packagePrefix %>Package';
+
+/**
+ * Implementation of <%- interfaceName %>
+ * @generated
+ */
+export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%- extendsClass %> implements <%- interfaceName %> {
+  // Feature ID Constants (eLiterals)
+<% for (const fid of featureIds) { -%>
+  static readonly <%- fid.name %>: number = <%- fid.id %>;
+<% } -%>
+
+  // Private fields
+<% for (const genFeature of features) {
+  const feature = genFeature.ecoreFeature;
+  const featureName = getName(feature);
+  const featureType = typeMapper.mapFeature(feature);
+  const defaultValue = typeMapper.getDefaultValue(feature);
+  const featureIsMany = isMany(feature);
+-%>
+  private _<%- featureName %><% if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
+<% } -%>
+
+  /**
+   * Returns the EClass of this object
+   */
+  override eClass(): EClass {
+    return <%- packagePrefix %>Package.Literals.<%- toUpperSnake(interfaceName) %>;
+  }
+
+  // Getters and Setters
+<% for (const genFeature of features) {
+  const feature = genFeature.ecoreFeature;
+  const featureName = getName(feature);
+  const featureType = typeMapper.mapFeature(feature);
+  const featureIsMany = isMany(feature);
+  const upperName = toUpperSnake(featureName);
+-%>
+  get <%- featureName %>(): <%- featureType %> {
+    return this._<%- featureName %><% if (!featureIsMany) { %>!<% } %>;
+  }
+
+<% if (genFeature.property !== 'readonly') { -%>
+  set <%- featureName %>(value: <%- featureType %>) {
+<% if (genFeature.notify) { -%>
+    const oldValue = this._<%- featureName %>;
+<% } -%>
+    this._<%- featureName %> = value;
+<% if (genFeature.notify) { -%>
+    if (this.eDeliver()) {
+      this.eNotify({
+        getNotifier: () => this,
+        getEventType: () => 1, // SET
+        getFeature: () => this.eClass().getEStructuralFeature(<%- className %>.<%- upperName %>),
+        getOldValue: () => oldValue,
+        getNewValue: () => value,
+        getPosition: () => -1,
+        wasSet: () => true,
+        isTouch: () => false,
+        isReset: () => false,
+        getFeatureID: () => <%- className %>.<%- upperName %>,
+        merge: () => false
+      });
+    }
+<% } -%>
+  }
+
+<% } -%>
+<% } -%>
+  // Reflective API
+
+  /**
+   * Returns the value of the given feature
+   */
+  override eGet(feature: EStructuralFeature): unknown {
+    const featureID = this.eClass().getFeatureID(feature);
+    switch (featureID) {
+<% for (const fid of featureIds) { -%>
+      case <%- className %>.<%- fid.name %>:
+        return this.<%- getName(fid.feature.ecoreFeature) %>;
+<% } -%>
+      default:
+        return super.eGet(feature);
+    }
+  }
+
+  /**
+   * Sets the value of the given feature
+   */
+  override eSet(feature: EStructuralFeature, newValue: unknown): void {
+    const featureID = this.eClass().getFeatureID(feature);
+    switch (featureID) {
+<% for (const fid of featureIds) {
+  const featureType = typeMapper.mapFeature(fid.feature.ecoreFeature);
+-%>
+      case <%- className %>.<%- fid.name %>:
+        this.<%- getName(fid.feature.ecoreFeature) %> = newValue as <%- featureType %>;
+        super.eSet(feature, newValue);
+        break;
+<% } -%>
+      default:
+        super.eSet(feature, newValue);
+    }
+  }
+
+  /**
+   * Returns whether the feature has been set
+   */
+  override eIsSet(feature: EStructuralFeature): boolean {
+    const featureID = this.eClass().getFeatureID(feature);
+    switch (featureID) {
+<% for (const fid of featureIds) {
+  const feature = fid.feature.ecoreFeature;
+  const featureIsMany = isMany(feature);
+  const defaultValue = typeMapper.getDefaultValue(feature);
+  const featureName = getName(feature);
+-%>
+      case <%- className %>.<%- fid.name %>:
+<% if (featureIsMany) { -%>
+        return this._<%- featureName %> !== undefined && this._<%- featureName %>.length > 0;
+<% } else if (defaultValue !== null) { -%>
+        return this._<%- featureName %> !== <%- defaultValue %>;
+<% } else { -%>
+        return this._<%- featureName %> !== undefined;
+<% } -%>
+<% } -%>
+      default:
+        return super.eIsSet(feature);
+    }
+  }
+
+  /**
+   * Unsets the given feature
+   */
+  override eUnset(feature: EStructuralFeature): void {
+    const featureID = this.eClass().getFeatureID(feature);
+    switch (featureID) {
+<% for (const fid of featureIds) {
+  const feature = fid.feature.ecoreFeature;
+  const featureIsMany = isMany(feature);
+  const defaultValue = typeMapper.getDefaultValue(feature);
+  const featureName = getName(feature);
+-%>
+      case <%- className %>.<%- fid.name %>:
+<% if (featureIsMany) { -%>
+        this._<%- featureName %> = [];
+<% } else if (defaultValue !== null) { -%>
+        this._<%- featureName %> = <%- defaultValue %>;
+<% } else { -%>
+        this._<%- featureName %> = undefined;
+<% } -%>
+        return;
+<% } -%>
+      default:
+        super.eUnset(feature);
+    }
+  }
+
+<% for (const genOp of operations) {
+  const op = genOp.ecoreOperation;
+  const opName = getName(op);
+  const opType = getEType(op);
+  const returnType = opType ? typeMapper.mapClassifier(opType) : 'void';
+  const params = [];
+  for (const param of getEParameters(op)) {
+    const paramName = getName(param);
+    const paramType = typeMapper.mapClassifier(getEType(param));
+    params.push(`${paramName}: ${paramType}`);
+  }
+-%>
+  <%- opName %>(<%- params.join(', ') %>): <%- returnType %> {
+<% if (genOp.body) { -%>
+    <%- genOp.body %>
+<% } else { -%>
+    throw new Error('<%- opName %> not implemented');
+<% } -%>
+  }
+
+<% } -%>
+}

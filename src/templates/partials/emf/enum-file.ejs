@@ -1,0 +1,36 @@
+<%- header %>
+
+/**
+ * <%- genEnum.documentation || enumName %>
+ * @generated
+ */
+export const <%- enumName %> = {
+<% for (let i = 0; i < literals.length; i++) {
+  const literal = literals[i];
+  const literalName = getName(literal);
+-%>
+  <%- literalName %>: '<%- literalName %>'<% if (i < literals.length - 1) { %>,<% } %>
+<% } -%>
+} as const;
+
+export type <%- enumName %> = typeof <%- enumName %>[keyof typeof <%- enumName %>];
+
+/**
+ * Get enum value by name
+ */
+export function get<%- enumName %>(name: string): <%- enumName %> | undefined {
+  return (<%- enumName %> as Record<string, string>)[name] as <%- enumName %> | undefined;
+}
+
+/**
+ * Get enum value by literal
+ */
+export function get<%- enumName %>ByLiteral(literal: string): <%- enumName %> | undefined {
+<% for (const literal of literals) {
+  const litName = getLiteral(literal) || getName(literal);
+  const enumName2 = getName(literal);
+-%>
+  if (literal === '<%- litName %>') return <%- enumName %>.<%- enumName2 %>;
+<% } -%>
+  return undefined;
+}

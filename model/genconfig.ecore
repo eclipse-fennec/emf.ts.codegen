@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="genconfig" nsURI="http://www.emfts.org/genconfig/1.0" nsPrefix="genconfig">
+
+  <!-- ============================================ -->
+  <!-- ROOT: GenConfig                              -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="GenConfig">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Root configuration for TypeScript code generation from Ecore models"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ecorePackage" lowerBound="1" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EPackage">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Reference to the EPackage to generate code for (resolved via nsURI)"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="generation" lowerBound="1" eType="#//GenerationSettings" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="package" lowerBound="1" eType="#//PackageSettings" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="classDefaults" eType="#//ClassDefaults" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="featureDefaults" eType="#//FeatureDefaults" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="classOverrides" upperBound="-1" eType="#//ClassOverride" containment="true"/>
+  </eClassifiers>
+
+  <!-- ============================================ -->
+  <!-- GENERATION SETTINGS                          -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="GenerationSettings">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Settings controlling how code is generated"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mode" lowerBound="1" eType="#//GenerationMode" defaultValueLiteral="emf"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="outputDir" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="./generated"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fileExtension" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral=".ts"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="headerComment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+  <eClassifiers xsi:type="ecore:EEnum" name="GenerationMode">
+    <eLiterals name="emf" value="0" literal="emf"/>
+    <eLiterals name="decorator" value="1" literal="decorator"/>
+    <eLiterals name="plain" value="2" literal="plain"/>
+  </eClassifiers>
+
+  <!-- ============================================ -->
+  <!-- PACKAGE SETTINGS                             -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="PackageSettings">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Settings for package structure and generated package artifacts"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prefix" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Prefix for generated Package and Factory classes (e.g. 'Library' -> LibraryPackage)"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="basePackage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Base package path (e.g. 'org.example' -> org/example/)"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generateFactory" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generatePackage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generateIndex" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+  </eClassifiers>
+
+  <!-- ============================================ -->
+  <!-- CLASS DEFAULTS                               -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="ClassDefaults">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Default settings applied to all generated classes"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generateInterface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generateImpl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rootExtendsClass" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="BasicEObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rootExtendsInterface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="EObject"/>
+  </eClassifiers>
+
+  <!-- ============================================ -->
+  <!-- FEATURE DEFAULTS                             -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="FeatureDefaults">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Default settings applied to all generated features"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="notify" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="property" eType="#//PropertyMode" defaultValueLiteral="editable"/>
+  </eClassifiers>
+
+  <eClassifiers xsi:type="ecore:EEnum" name="PropertyMode">
+    <eLiterals name="editable" value="0" literal="editable"/>
+    <eLiterals name="readonly" value="1" literal="readonly"/>
+    <eLiterals name="none" value="2" literal="none"/>
+  </eClassifiers>
+
+  <!-- ============================================ -->
+  <!-- CLASS OVERRIDE                               -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="ClassOverride">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Override settings for a specific EClass"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ecoreClass" lowerBound="1" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EClass">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Reference to the EClass (via nsURI#//ClassName)"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generateInterface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generateImpl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="extendsClass" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="implementsInterfaces" upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="featureOverrides" upperBound="-1" eType="#//FeatureOverride" containment="true"/>
+  </eClassifiers>
+
+  <!-- ============================================ -->
+  <!-- FEATURE OVERRIDE                             -->
+  <!-- ============================================ -->
+  <eClassifiers xsi:type="ecore:EClass" name="FeatureOverride">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+      <details key="documentation" value="Override settings for a specific EStructuralFeature"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ecoreFeature" lowerBound="1" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EStructuralFeature">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Reference to the EStructuralFeature (via nsURI#//ClassName/featureName)"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="notify" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="property" eType="#//PropertyMode"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="customGetter" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="customSetter" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+</ecore:EPackage>

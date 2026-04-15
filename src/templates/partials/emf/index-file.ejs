@@ -1,0 +1,29 @@
+<%- header %>
+
+// Package and Factory
+export { <%- packageName %>Package } from './<%- packageName %>Package';
+export { <%- packageName %>Factory } from './<%- packageName %>Factory';
+
+// Interfaces
+<% for (const genClass of genClasses) {
+  const name = getName(genClass.ecoreClass);
+-%>
+export type { <%- name %> } from './<%- name %>';
+<% } -%>
+
+// Implementations
+<% for (const genClass of genClasses) {
+  if (!checkIsAbstract(genClass.ecoreClass) && !checkIsInterface(genClass.ecoreClass)) {
+    const implName = genClass.implClassName || (getName(genClass.ecoreClass) + 'Impl');
+-%>
+export { <%- implName %> } from './<%- implName %>';
+<%
+  }
+} -%>
+
+// Enums
+<% for (const genEnum of genEnums) {
+  const name = getName(genEnum.ecoreEnum);
+-%>
+export { <%- name %>, get<%- name %>, get<%- name %>ByLiteral } from './<%- name %>';
+<% } -%>

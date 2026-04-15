@@ -1,0 +1,35 @@
+<%- header %>
+<%
+// Helper to get property from EEnumLiteral (handles both method calls and direct properties)
+function getLiteralProp(literal, prop) {
+  const getter = `get${prop.charAt(0).toUpperCase()}${prop.slice(1)}`;
+  if (typeof literal[getter] === 'function') {
+    return literal[getter]();
+  }
+  if (literal[prop] !== undefined) {
+    return literal[prop];
+  }
+  // Try eGet if available
+  if (typeof literal.eGet === 'function' && typeof literal.eClass === 'function') {
+    const eClass = literal.eClass();
+    const feature = eClass?.getEStructuralFeature?.(prop);
+    if (feature) {
+      return literal.eGet(feature);
+    }
+  }
+  return undefined;
+}
+-%>
+/**
+ * <%- genEnum.documentation || enumName %>
+ */
+export enum <%- enumName %> {
+<% for (let i = 0; i < literals.length; i++) {
+  const literal = literals[i];
+  const literalName = getLiteralProp(literal, 'literal') || getLiteralProp(literal, 'name');
+  const literalValue = getLiteralProp(literal, 'value');
+  const value = useStringValues ? `'${literalName}'` : literalValue;
+-%>
+  <%- getLiteralProp(literal, 'name') %> = <%- value %><% if (i < literals.length - 1) { %>,<% } %>
+<% } -%>
+}

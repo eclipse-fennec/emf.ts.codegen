@@ -1,0 +1,72 @@
+<%- header %>
+
+import type { EObject } from 'emfts';
+<%# Generate imports for referenced types -%>
+<%
+const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
+// Skip emfts types and self-references
+for (const imp of imports) {
+  if (imp.typeName !== interfaceName && imp.importPath !== 'emfts') {
+-%>
+import type { <%- imp.typeName %> } from '<%- imp.importPath %>';
+<%
+  }
+}
+-%>
+
+/**
+ * <%- genClass.documentation || interfaceName %>
+ * @generated
+ */
+export interface <%- interfaceName %><%
+if (typeParameters && typeParameters.length > 0) {
+  const params = [];
+  for (const tp of typeParameters) {
+    params.push(getName(tp));
+  }
+%><<%- params.join(', ') %>><%
+}
+%> extends <%
+if (superTypes && superTypes.length > 0) {
+  const superNames = [];
+  for (const st of superTypes) {
+    const stName = getName(st);
+    if (stName) {
+      superNames.push(stName);
+    }
+  }
+  if (superNames.length > 0) {
+%><%- superNames.join(', ') %><%
+  } else {
+%><%- rootExtendsInterface %><%
+  }
+} else {
+%><%- rootExtendsInterface %><%
+}
+%> {
+<% for (const genFeature of features) {
+  const feature = genFeature.ecoreFeature;
+  const featureName = getName(feature);
+  const featureType = typeMapper.mapFeature(feature);
+  const many = isMany(feature);
+  const lower = getLowerBound(feature);
+  const isReadonly = genFeature.property === 'readonly';
+-%>
+  <% if (isReadonly) { %>readonly <% } %><%- featureName %><% if (lower === 0 && !many) { %>?<% } %>: <%- featureType %>;
+<% } -%>
+
+<% for (const genOp of operations) {
+  const op = genOp.ecoreOperation;
+  const opName = getName(op);
+  const opType = getEType(op);
+  const returnType = opType ? typeMapper.mapClassifier(opType) : 'void';
+  const params = [];
+  for (const param of getEParameters(op)) {
+    const paramName = getName(param);
+    const paramType = typeMapper.mapClassifier(getEType(param));
+    params.push(`${paramName}: ${paramType}`);
+  }
+-%>
+  <%- opName %>(<%- params.join(', ') %>): <%- returnType %>;
+<% } -%>
+}
