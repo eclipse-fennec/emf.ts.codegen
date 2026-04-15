@@ -1,4 +1,4 @@
-import type { EEnum } from 'emfts';
+import type { EEnum } from '@emfts/core';
 
 /**
  * Generation configuration for an EEnum

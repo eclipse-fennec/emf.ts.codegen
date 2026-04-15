@@ -1,4 +1,4 @@
-import type { EPackage, EClass, EStructuralFeature } from 'emfts';
+import type { EPackage, EClass, EStructuralFeature } from '@emfts/core';
 
 /**
  * Generation mode for code output

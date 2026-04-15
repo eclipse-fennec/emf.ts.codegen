@@ -1,4 +1,4 @@
-import type { EDataType } from 'emfts';
+import type { EDataType } from '@emfts/core';
 
 /**
  * Generation configuration for an EDataType

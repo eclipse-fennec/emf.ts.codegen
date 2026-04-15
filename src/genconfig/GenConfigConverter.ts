@@ -1,4 +1,4 @@
-import type { EPackage, EClass, EEnum, EDataType, EStructuralFeature } from 'emfts';
+import type { EPackage, EClass, EEnum, EDataType, EStructuralFeature } from '@emfts/core';
 import type { GenConfig, ClassOverride, FeatureOverride } from './GenConfig.js';
 import type { GenModel } from '../genmodel/GenModel.js';
 import type { GenPackage } from '../genmodel/GenPackage.js';

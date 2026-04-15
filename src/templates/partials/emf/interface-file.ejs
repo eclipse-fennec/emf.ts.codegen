@@ -1,12 +1,12 @@
 <%- header %>
 
-import type { EObject } from 'emfts';
+import type { EObject } from '@emfts/core';
 <%# Generate imports for referenced types -%>
 <%
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
 // Skip emfts types and self-references
 for (const imp of imports) {
-  if (imp.typeName !== interfaceName && imp.importPath !== 'emfts') {
+  if (imp.typeName !== interfaceName && imp.importPath !== '@emfts/core') {
 -%>
 import type { <%- imp.typeName %> } from '<%- imp.importPath %>';
 <%

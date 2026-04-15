@@ -1,4 +1,4 @@
-import type { EClassifier, EDataType, EClass, EEnum, EStructuralFeature, EAttribute, EReference, EGenericType } from 'emfts';
+import type { EClassifier, EDataType, EClass, EEnum, EStructuralFeature, EAttribute, EReference, EGenericType } from '@emfts/core';
 import * as EObjectHelper from '../util/EObjectHelper.js';
 
 /**

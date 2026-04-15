@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import type { EPackage, Resource, ResourceSet } from 'emfts';
+import type { EPackage, Resource, ResourceSet } from '@emfts/core';
 
 /**
  * Loads Ecore models using emfts
@@ -12,7 +12,7 @@ export class EcoreLoader {
    * Initialize with a resource set
    */
   async init(): Promise<void> {
-    const { BasicResourceSet, getEcorePackage, ECORE_NS_URI } = await import('emfts');
+    const { BasicResourceSet, getEcorePackage, ECORE_NS_URI } = await import('@emfts/core');
 
     // Initialize EcorePackage
     getEcorePackage();
@@ -32,7 +32,7 @@ export class EcoreLoader {
       await this.init();
     }
 
-    const { XMIResource, URI } = await import('emfts');
+    const { XMIResource, URI } = await import('@emfts/core');
 
     // Read file content
     const content = await readFile(ecorePath, 'utf-8');

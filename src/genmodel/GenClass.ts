@@ -1,4 +1,4 @@
-import type { EClass } from 'emfts';
+import type { EClass } from '@emfts/core';
 import type { GenFeature } from './GenFeature.js';
 import type { GenOperation } from './GenOperation.js';
 

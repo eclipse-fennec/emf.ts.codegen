@@ -1,7 +1,7 @@
 <%- header %>
 
-import { BasicEFactory } from 'emfts';
-import type { EClass, EObject } from 'emfts';
+import { BasicEFactory } from '@emfts/core';
+import type { EClass, EObject } from '@emfts/core';
 import { <%- packageName %>Package } from './<%- packageName %>Package';
 <% for (const genClass of concreteClasses) {
   const className = genClass.ecoreClass.getName();

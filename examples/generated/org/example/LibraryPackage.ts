@@ -5,8 +5,8 @@
  * @generated
  */
 
-import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference } from 'emfts';
-import type { EClass, EAttribute, EReference, EEnum } from 'emfts';
+import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference } from '@emfts/core';
+import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
 
 /**
  * Library Package

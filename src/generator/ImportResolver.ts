@@ -1,4 +1,4 @@
-import type { EClass, EClassifier, EPackage, EStructuralFeature, EReference, EGenericType } from 'emfts';
+import type { EClass, EClassifier, EPackage, EStructuralFeature, EReference, EGenericType } from '@emfts/core';
 import type { GenPackage } from '../genmodel/GenPackage.js';
 import type { GenerationMode } from '../genmodel/GenerationMode.js';
 
@@ -348,17 +348,17 @@ export class ImportResolver {
       case 'emf':
         imports.set('BasicEObject', {
           typeName: 'BasicEObject',
-          importPath: 'emfts',
+          importPath: '@emfts/core',
           isTypeOnly: false
         });
         imports.set('EClass', {
           typeName: 'EClass',
-          importPath: 'emfts',
+          importPath: '@emfts/core',
           isTypeOnly: true
         });
         imports.set('EStructuralFeature', {
           typeName: 'EStructuralFeature',
-          importPath: 'emfts',
+          importPath: '@emfts/core',
           isTypeOnly: true
         });
         break;

@@ -5,8 +5,8 @@
  * @generated
  */
 
-import { BasicEObject } from 'emfts';
-import type { EClass, EStructuralFeature } from 'emfts';
+import { BasicEObject } from '@emfts/core';
+import type { EClass, EStructuralFeature } from '@emfts/core';
 import type { Person } from './Person';
 import { LibraryPackage } from './LibraryPackage';
 

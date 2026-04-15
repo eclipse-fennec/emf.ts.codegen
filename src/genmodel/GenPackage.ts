@@ -1,4 +1,4 @@
-import type { EPackage } from 'emfts';
+import type { EPackage } from '@emfts/core';
 import type { GenClass } from './GenClass.js';
 import type { GenEnum } from './GenEnum.js';
 import type { GenDataType } from './GenDataType.js';
