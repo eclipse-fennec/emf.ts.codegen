@@ -1,9 +1,9 @@
 <%- header %>
 
 <% if (!extendsImport) { -%>
-import { BasicEObject } from 'emfts';
+import { BasicEObject } from '@emfts/core';
 <% } -%>
-import type { EClass, EStructuralFeature } from 'emfts';
+import type { EClass, EStructuralFeature } from '@emfts/core';
 <%# Generate imports for referenced types -%>
 <%
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
@@ -16,7 +16,7 @@ for (const imp of imports) {
   if (imp.typeName !== className && imp.typeName !== interfaceName &&
       imp.typeName !== extendsClass &&
       !skipTypes.some(t => imp.typeName.includes(t)) &&
-      imp.importPath !== 'emfts') {
+      imp.importPath !== '@emfts/core') {
     // Check if this type is used as a runtime value (e.g., enum default values)
     const usedAsValue = features.some(gf => {
       const dv = typeMapper.getDefaultValue(gf.ecoreFeature);

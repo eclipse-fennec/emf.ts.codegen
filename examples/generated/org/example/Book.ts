@@ -5,7 +5,7 @@
  * @generated
  */
 
-import type { EObject } from 'emfts';
+import type { EObject } from '@emfts/core';
 import type { BookCategory } from './BookCategory';
 import type { Author } from './Author';
 import type { Library } from './Library';

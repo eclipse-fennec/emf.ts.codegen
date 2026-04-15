@@ -1,6 +1,6 @@
 {
-  "name": "emfts-codegen",
-  "version": "1.0.0",
+  "name": "@emfts/codegen",
+  "version": "0.0.1-next.1",
   "description": "TypeScript code generator for Ecore models using emfts",
   "type": "module",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/templates dist/templates",
     "watch": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest run",
@@ -34,10 +34,17 @@
   ],
   "author": "",
   "license": "EPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse-fennec/emf.ts.codegen"
+  },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "commander": "^12.0.0",
     "ejs": "^3.1.10",
-    "emfts": "file:../emfts",
+    "@emfts/core": "^0.1.1-next.2",
     "sax": "^1.4.4"
   },
   "devDependencies": {

@@ -5,7 +5,7 @@
  * @generated
  */
 
-import type { EClass, EStructuralFeature } from 'emfts';
+import type { EClass, EStructuralFeature } from '@emfts/core';
 import { Person } from './Person';
 import { Book } from './Book';
 import { PersonImpl } from './PersonImpl';

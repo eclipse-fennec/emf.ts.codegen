@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 import { writeFile, mkdir } from 'fs/promises';
 import { dirname, join } from 'path';
-import type { EPackage, ResourceSet } from 'emfts';
+import type { EPackage, ResourceSet } from '@emfts/core';
 import { getFeatureValue, getName } from '../util/EObjectHelper.js';
 
 /**
@@ -64,7 +64,7 @@ export class RestClientGenerator {
    * Load and parse the XMI model into ApiModel
    */
   private async loadModel(metamodelPath: string, instancePath: string): Promise<ApiModel> {
-    const { BasicResourceSet, XMIResource, URI, getEcorePackage, ECORE_NS_URI } = await import('emfts');
+    const { BasicResourceSet, XMIResource, URI, getEcorePackage, ECORE_NS_URI } = await import('@emfts/core');
 
     // Initialize
     getEcorePackage();
@@ -260,7 +260,7 @@ export class RestClientGenerator {
  *
  * @generated
  */
-import { XMIResource, URI, BasicResourceSet, type EPackage, type EObject } from 'emfts'
+import { XMIResource, URI, BasicResourceSet, type EPackage, type EObject } from '@emfts/core'
 
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -350,7 +350,7 @@ export function serializeXml(eObject: EObject): string {
     lines.push(` *`);
     lines.push(` * @generated`);
     lines.push(` */`);
-    lines.push(`import type { EObject } from 'emfts'`);
+    lines.push(`import type { EObject } from '@emfts/core'`);
     lines.push(`import { BASE_URL, ApiError, deserializeXml, deserializeXmlList, serializeXml } from './api-base.js'`);
     lines.push(``);
 

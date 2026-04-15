@@ -405,7 +405,7 @@ function toArray(value: any): any[] {
   if (Array.isArray(value)) return value;
   // EList with size()/get()
   if (typeof value.size === 'function' && typeof value.get === 'function') {
-    const arr = [];
+    const arr: any[] = [];
     for (let i = 0; i < value.size(); i++) {
       arr.push(value.get(i));
     }

@@ -5,8 +5,8 @@
  * @generated
  */
 
-import { BasicEFactory } from 'emfts';
-import type { EClass, EObject } from 'emfts';
+import { BasicEFactory } from '@emfts/core';
+import type { EClass, EObject } from '@emfts/core';
 import { LibraryPackage } from './LibraryPackage';
 import type { Library } from './Library';
 import { LibraryImpl } from './LibraryImpl';

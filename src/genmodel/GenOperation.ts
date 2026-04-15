@@ -1,4 +1,4 @@
-import type { EOperation } from 'emfts';
+import type { EOperation } from '@emfts/core';
 
 /**
  * Generation configuration for an EOperation

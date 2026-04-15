@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
-import type { EPackage, EClass, EStructuralFeature, ResourceSet } from 'emfts';
+import type { EPackage, EClass, EStructuralFeature, ResourceSet } from '@emfts/core';
 import type {
   GenConfig,
   GenerationSettings,
@@ -31,7 +31,7 @@ export class GenConfigLoader {
    * Initialize the loader
    */
   async init(): Promise<void> {
-    const { BasicResourceSet, getEcorePackage, ECORE_NS_URI, XMIResource, URI } = await import('emfts');
+    const { BasicResourceSet, getEcorePackage, ECORE_NS_URI, XMIResource, URI } = await import('@emfts/core');
 
     // Initialize Ecore
     getEcorePackage();
@@ -49,7 +49,7 @@ export class GenConfigLoader {
    * Load the genconfig.ecore metamodel
    */
   private async loadGenConfigMetamodel(path: string): Promise<void> {
-    const { XMIResource, URI } = await import('emfts');
+    const { XMIResource, URI } = await import('@emfts/core');
 
     const content = await readFile(path, 'utf-8');
     const uri = URI.createURI(path);
@@ -88,7 +88,7 @@ export class GenConfigLoader {
       await this.init();
     }
 
-    const { XMIResource, URI } = await import('emfts');
+    const { XMIResource, URI } = await import('@emfts/core');
 
     // Load the .genconfig.xmi file
     const content = await readFile(configPath, 'utf-8');

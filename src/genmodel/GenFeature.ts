@@ -1,4 +1,4 @@
-import type { EStructuralFeature } from 'emfts';
+import type { EStructuralFeature } from '@emfts/core';
 import { PropertyMode } from './GenerationMode.js';
 
 /**
