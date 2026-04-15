@@ -1,6 +1,74 @@
 <%- header %>
 
+<%
+const ECORE_NS_URI = 'http://www.eclipse.org/emf/2002/Ecore';
+
+// Helper: check if a classifier belongs to the current package
+function isLocalClassifier(classifier) {
+  const pkg = getEPackage(classifier);
+  if (pkg) {
+    const pkgNsURI = pkg.getNsURI?.() ?? null;
+    return pkgNsURI === nsURI;
+  }
+  // For proxies, check the proxy URI
+  if (typeof classifier.eIsProxy === 'function' && classifier.eIsProxy() && typeof classifier.eProxyURI === 'function') {
+    const proxyURI = classifier.eProxyURI()?.toString() ?? '';
+    return !proxyURI.startsWith('http://') && !proxyURI.startsWith('https://');
+  }
+  return true; // assume local if unknown
+}
+
+// Helper: check if a classifier is from the Ecore metamodel
+function isEcoreClassifier(classifier) {
+  const pkg = getEPackage(classifier);
+  if (pkg) {
+    const pkgNsURI = pkg.getNsURI?.() ?? null;
+    return pkgNsURI === ECORE_NS_URI;
+  }
+  // For proxies, check the proxy URI
+  if (typeof classifier.eIsProxy === 'function' && classifier.eIsProxy() && typeof classifier.eProxyURI === 'function') {
+    const proxyURI = classifier.eProxyURI()?.toString() ?? '';
+    return proxyURI.startsWith(ECORE_NS_URI);
+  }
+  return false;
+}
+
+// Helper: generate the right expression for a type reference
+function typeRefExpr(classifier) {
+  const typeName = getName(classifier);
+  if (isLocalClassifier(classifier)) {
+    const typeUpperName = typeName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+    return packageName + 'Package.Literals.' + typeUpperName;
+  }
+  if (isEcoreClassifier(classifier)) {
+    return "getEcorePackage().getEClassifier('" + typeName + "')!";
+  }
+  // Fallback for other external packages
+  return "getEcorePackage().getEClassifier('" + typeName + "')!";
+}
+
+// Pre-scan: check if any cross-package Ecore references exist
+let needsEcoreImport = false;
+for (const genClass of genClasses) {
+  const eClass = genClass.ecoreClass;
+  for (const superType of getESuperTypes(eClass)) {
+    if (!isLocalClassifier(superType)) { needsEcoreImport = true; break; }
+  }
+  if (needsEcoreImport) break;
+  for (const genFeature of genClass.genFeatures) {
+    const eType = getEType(genFeature.ecoreFeature);
+    if (eType && typeMapper.isReference(genFeature.ecoreFeature) && !isLocalClassifier(eType)) {
+      needsEcoreImport = true; break;
+    }
+  }
+  if (needsEcoreImport) break;
+}
+-%>
+<% if (needsEcoreImport) { -%>
+import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, getEcorePackage } from '@emfts/core';
+<% } else { -%>
 import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference } from '@emfts/core';
+<% } -%>
 import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
 
 /**
@@ -96,9 +164,8 @@ export class <%- packageName %>Package extends BasicEPackage {
      for (const superType of superTypes) {
        const superTypeName = getName(superType);
        if (superTypeName) {
-         const superTypeUpperName = superTypeName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
 -%>
-    (<%- packageName %>Package.Literals.<%- upperName %> as BasicEClass).getESuperTypes().push(<%- packageName %>Package.Literals.<%- superTypeUpperName %>);
+    (<%- packageName %>Package.Literals.<%- upperName %> as BasicEClass).getESuperTypes().push(<%- typeRefExpr(superType) %>);
 <%       }
      }
    } -%>
@@ -118,10 +185,8 @@ export class <%- packageName %>Package extends BasicEPackage {
        if (isRef) {
          const eType = getEType(feature);
          if (eType) {
-           const typeName = getName(eType);
-           const typeUpperName = typeName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
 -%>
-    (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as BasicEReference).setEType(<%- packageName %>Package.Literals.<%- typeUpperName %>);
+    (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as BasicEReference).setEType(<%- typeRefExpr(eType) %>);
 <%       }
        }
      }
