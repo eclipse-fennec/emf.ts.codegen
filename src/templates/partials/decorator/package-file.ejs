@@ -1,0 +1,7 @@
+<%- header %>
+
+// Re-export all types from this package
+<% for (const exp of exports) { -%>
+export * from './<%- exp %>';
+<% } -%>
+export * from './ModelAnnotations';

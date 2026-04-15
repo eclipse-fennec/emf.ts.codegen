@@ -1,0 +1,149 @@
+<%- header %>
+
+import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference } from 'emfts';
+import type { EClass, EAttribute, EReference, EEnum } from 'emfts';
+
+/**
+ * <%- packageName %> Package
+ * @generated
+ */
+export class <%- packageName %>Package extends BasicEPackage {
+  static readonly eNAME = '<%- getName(ePackage) %>';
+  static readonly eNS_URI = '<%- nsURI %>';
+  static readonly eNS_PREFIX = '<%- nsPrefix %>';
+
+  // Singleton instance
+  private static _instance: <%- packageName %>Package;
+
+  static get eINSTANCE(): <%- packageName %>Package {
+    if (!this._instance) {
+      this._instance = new <%- packageName %>Package();
+      this._instance.init();
+    }
+    return this._instance;
+  }
+
+  /**
+   * Literals for quick access to metaclasses and features
+   */
+  static readonly Literals = {
+<% for (const cls of classLiterals) { -%>
+    <%- cls.upperName %>: null as unknown as EClass,
+<% for (const feat of cls.features) { -%>
+    <%- cls.upperName %>__<%- feat.upperName %>: null as unknown as EAttribute | EReference,
+<% } -%>
+<% } -%>
+  };
+
+  private constructor() {
+    super();
+    this.setName(<%- packageName %>Package.eNAME);
+    this.setNsURI(<%- packageName %>Package.eNS_URI);
+    this.setNsPrefix(<%- packageName %>Package.eNS_PREFIX);
+  }
+
+  /**
+   * Initialize package contents
+   */
+  private init(): void {
+<% for (const genClass of genClasses) {
+  const eClass = genClass.ecoreClass;
+  const className = getName(eClass);
+  const upperName = className.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+-%>
+    // Create <%- className %> class
+    const <%- uncapitalize(className) %>Class = new BasicEClass();
+    <%- uncapitalize(className) %>Class.setName('<%- className %>');
+    <%- uncapitalize(className) %>Class.setAbstract(<%- checkIsAbstract(eClass) %>);
+    <%- uncapitalize(className) %>Class.setInterface(<%- checkIsInterface(eClass) %>);
+    this.getEClassifiers().push(<%- uncapitalize(className) %>Class);
+    <%- uncapitalize(className) %>Class.setEPackage(this);
+    <%- packageName %>Package.Literals.<%- upperName %> = <%- uncapitalize(className) %>Class;
+
+<% let featureIndex = 0;
+   for (const genFeature of genClass.genFeatures) {
+     const feature = genFeature.ecoreFeature;
+     const featureName = getName(feature);
+     const featureUpperName = featureName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+     const isRef = typeMapper.isReference(feature);
+-%>
+    // Create <%- featureName %> feature
+<% if (isRef) { -%>
+    const <%- uncapitalize(className) %>_<%- featureName %> = new BasicEReference();
+    <%- uncapitalize(className) %>_<%- featureName %>.setContainment(<%- isContainment(feature) %>);
+<% } else { -%>
+    const <%- uncapitalize(className) %>_<%- featureName %> = new BasicEAttribute();
+<% } -%>
+    <%- uncapitalize(className) %>_<%- featureName %>.setName('<%- featureName %>');
+    <%- uncapitalize(className) %>_<%- featureName %>.setLowerBound(<%- getLowerBound(feature) %>);
+    <%- uncapitalize(className) %>_<%- featureName %>.setUpperBound(<%- getUpperBound(feature) %>);
+    <%- uncapitalize(className) %>Class.getEStructuralFeatures().push(<%- uncapitalize(className) %>_<%- featureName %>);
+    <%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> = <%- uncapitalize(className) %>_<%- featureName %>;
+
+<% featureIndex++;
+   } -%>
+<% } -%>
+<%# TODO: Enum package metadata initialization - requires BasicEEnum implementation in emfts -%>
+
+    // ============================================
+    // Set ESuperTypes (must be done after all classes are created)
+    // ============================================
+<% for (const genClass of genClasses) {
+     const eClass = genClass.ecoreClass;
+     const className = getName(eClass);
+     const upperName = className.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+     const superTypes = getESuperTypes(eClass);
+     for (const superType of superTypes) {
+       const superTypeName = getName(superType);
+       if (superTypeName) {
+         const superTypeUpperName = superTypeName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+-%>
+    (<%- packageName %>Package.Literals.<%- upperName %> as BasicEClass).getESuperTypes().push(<%- packageName %>Package.Literals.<%- superTypeUpperName %>);
+<%       }
+     }
+   } -%>
+
+    // ============================================
+    // Set ETypes for EReferences (must be done after all classes are created)
+    // ============================================
+<% for (const genClass of genClasses) {
+     const eClass = genClass.ecoreClass;
+     const className = getName(eClass);
+     const upperName = className.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+     for (const genFeature of genClass.genFeatures) {
+       const feature = genFeature.ecoreFeature;
+       const featureName = getName(feature);
+       const featureUpperName = featureName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+       const isRef = typeMapper.isReference(feature);
+       if (isRef) {
+         const eType = getEType(feature);
+         if (eType) {
+           const typeName = getName(eType);
+           const typeUpperName = typeName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+-%>
+    (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as BasicEReference).setEType(<%- packageName %>Package.Literals.<%- typeUpperName %>);
+<%       }
+       }
+     }
+   } -%>
+
+    // ============================================
+    // Register XML name mappings from ExtendedMetaData annotations
+    // ============================================
+<% for (const genClass of genClasses) {
+     const eClass = genClass.ecoreClass;
+     const className = getName(eClass);
+     const upperName = className.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+     for (const genFeature of genClass.genFeatures) {
+       const feature = genFeature.ecoreFeature;
+       const featureName = getName(feature);
+       const xmlName = getExtendedMetaDataName(feature);
+       if (xmlName && xmlName !== featureName) {
+         const featureUpperName = featureName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+-%>
+    (<%- packageName %>Package.Literals.<%- upperName %> as BasicEClass).registerXmlName('<%- xmlName %>', <%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %>);
+<%       }
+     }
+   } -%>
+  }
+}

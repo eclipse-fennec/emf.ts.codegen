@@ -1,0 +1,54 @@
+<%- header %>
+
+import { BasicEFactory } from 'emfts';
+import type { EClass, EObject } from 'emfts';
+import { <%- packageName %>Package } from './<%- packageName %>Package';
+<% for (const genClass of concreteClasses) {
+  const className = genClass.ecoreClass.getName();
+  const implName = genClass.implClassName || (className + 'Impl');
+-%>
+import type { <%- className %> } from './<%- className %>';
+import { <%- implName %> } from './<%- implName %>';
+<% } -%>
+
+/**
+ * Factory for creating <%- packageName %> model objects
+ * @generated
+ */
+export class <%- packageName %>Factory extends BasicEFactory {
+  // Singleton instance
+  static readonly eINSTANCE = new <%- packageName %>Factory();
+
+  private constructor() {
+    super();
+    this.setEPackage(<%- packageName %>Package.eINSTANCE);
+  }
+
+<% for (const genClass of concreteClasses) {
+  const className = genClass.ecoreClass.getName();
+  const implName = genClass.implClassName || (className + 'Impl');
+-%>
+  /**
+   * Create a new <%- className %> instance
+   */
+  create<%- className %>(): <%- className %> {
+    return new <%- implName %>();
+  }
+
+<% } -%>
+  /**
+   * Create an instance of the given class
+   */
+  override create(eClass: EClass): EObject {
+    switch (eClass.getName()) {
+<% for (const genClass of concreteClasses) {
+  const className = genClass.ecoreClass.getName();
+-%>
+      case '<%- className %>':
+        return this.create<%- className %>();
+<% } -%>
+      default:
+        throw new Error(`Unknown class: ${eClass.getName()}`);
+    }
+  }
+}

@@ -1,0 +1,91 @@
+<%- header %>
+
+import 'reflect-metadata';
+
+// Metadata keys
+const MODEL_CLASS_KEY = Symbol('modelClass');
+const ATTRIBUTE_KEY = Symbol('attribute');
+const REFERENCE_KEY = Symbol('reference');
+const ENUM_KEY = Symbol('enum');
+const DOCUMENTATION_KEY = Symbol('documentation');
+
+/**
+ * Decorator for model classes
+ */
+export function ModelClass(options: { type: string }) {
+  return function (target: Function) {
+    Reflect.defineMetadata(MODEL_CLASS_KEY, options, target);
+  };
+}
+
+/**
+ * Decorator for attributes (primitive properties)
+ */
+export function Attribute() {
+  return function (target: any, propertyKey: string) {
+    const existing = Reflect.getMetadata(ATTRIBUTE_KEY, target) || [];
+    existing.push(propertyKey);
+    Reflect.defineMetadata(ATTRIBUTE_KEY, existing, target);
+  };
+}
+
+/**
+ * Decorator for references (object properties)
+ */
+export function Reference(typeName: string) {
+  return function (target: any, propertyKey: string) {
+    const existing = Reflect.getMetadata(REFERENCE_KEY, target) || {};
+    existing[propertyKey] = typeName;
+    Reflect.defineMetadata(REFERENCE_KEY, existing, target);
+  };
+}
+
+/**
+ * Decorator for enum properties
+ */
+export function Enum(typeName: string) {
+  return function (target: any, propertyKey: string) {
+    const existing = Reflect.getMetadata(ENUM_KEY, target) || {};
+    existing[propertyKey] = typeName;
+    Reflect.defineMetadata(ENUM_KEY, existing, target);
+  };
+}
+
+/**
+ * Decorator for documentation
+ */
+export function Documentation(text: string) {
+  return function (target: any, propertyKey?: string) {
+    if (propertyKey) {
+      Reflect.defineMetadata(DOCUMENTATION_KEY, text, target, propertyKey);
+    } else {
+      Reflect.defineMetadata(DOCUMENTATION_KEY, text, target);
+    }
+  };
+}
+
+// Utility functions to read metadata
+
+export function getModelClassType(target: Function): string | undefined {
+  const meta = Reflect.getMetadata(MODEL_CLASS_KEY, target);
+  return meta?.type;
+}
+
+export function getAttributes(target: any): string[] {
+  return Reflect.getMetadata(ATTRIBUTE_KEY, target) || [];
+}
+
+export function getReferences(target: any): Record<string, string> {
+  return Reflect.getMetadata(REFERENCE_KEY, target) || {};
+}
+
+export function getEnums(target: any): Record<string, string> {
+  return Reflect.getMetadata(ENUM_KEY, target) || {};
+}
+
+export function getDocumentation(target: any, propertyKey?: string): string | undefined {
+  if (propertyKey) {
+    return Reflect.getMetadata(DOCUMENTATION_KEY, target, propertyKey);
+  }
+  return Reflect.getMetadata(DOCUMENTATION_KEY, target);
+}
