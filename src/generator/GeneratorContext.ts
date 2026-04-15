@@ -6,6 +6,8 @@ import { TypeMapper } from './TypeMapper.js';
 import { ImportResolver } from './ImportResolver.js';
 import * as EObjectHelper from '../util/EObjectHelper.js';
 
+const ECORE_NS_URI = 'http://www.eclipse.org/emf/2002/Ecore';
+
 /**
  * Diagnostic message from generation
  */
@@ -34,6 +36,7 @@ export class GeneratorContext {
     this.options = options;
     this.typeMapper = new TypeMapper();
     this.importResolver = new ImportResolver();
+    this.importResolver.registerPackage(ECORE_NS_URI, '@emfts/core');
   }
 
   /**
