@@ -1,18 +1,24 @@
 <%- header %>
 
-import type { EObject } from '@emfts/core';
-<%# Generate imports for referenced types -%>
 <%
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
-// Skip emfts types and self-references
+const coreTypeImports = ['EObject'];
+const otherTypeImports = [];
 for (const imp of imports) {
-  if (imp.typeName !== interfaceName && imp.importPath !== '@emfts/core') {
--%>
-import type { <%- imp.typeName %> } from '<%- imp.importPath %>';
-<%
+  if (imp.typeName === interfaceName) continue;
+  if (imp.importPath === '@emfts/core') {
+    if (!coreTypeImports.includes(imp.typeName)) {
+      coreTypeImports.push(imp.typeName);
+    }
+  } else {
+    otherTypeImports.push(imp);
   }
 }
 -%>
+import type { <%- coreTypeImports.join(', ') %> } from '@emfts/core';
+<% for (const imp of otherTypeImports) { -%>
+import type { <%- imp.typeName %> } from '<%- imp.importPath %>';
+<% } -%>
 
 /**
  * <%- genClass.documentation || interfaceName %>
