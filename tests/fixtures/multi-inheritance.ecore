@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ddsr" nsURI="http://example.org/ddsr" nsPrefix="ddsr">
+
+  <!-- Bug 2: Abstract root EClass with interface="true" that directly extends EObject -->
+  <eClassifiers xsi:type="ecore:EClass" name="NamedElement" abstract="true" interface="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+  <!-- Abstract class that extends the interface root -->
+  <eClassifiers xsi:type="ecore:EClass" name="VersionedElement" abstract="true" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+  <!-- Enum for Bug 1 (used as operation return/param type) -->
+  <eClassifiers xsi:type="ecore:EEnum" name="Severity">
+    <eLiterals name="INFO" value="0"/>
+    <eLiterals name="WARNING" value="1"/>
+    <eLiterals name="ERROR" value="2"/>
+  </eClassifiers>
+
+  <!-- Class with operation types (Bug 1) -->
+  <eClassifiers xsi:type="ecore:EClass" name="Diagnostic">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="message" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="severity" eType="#//Severity"/>
+  </eClassifiers>
+
+  <!-- Class used as EOperation parameter type -->
+  <eClassifiers xsi:type="ecore:EClass" name="Capability">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interfaceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+  <!-- Bug 1: EOperations with typed parameters and return types that need imports -->
+  <eClassifiers xsi:type="ecore:EClass" name="DiscoveryHook" abstract="true" interface="true">
+    <eOperations name="onLookup" eType="#//Diagnostic">
+      <eParameters name="interfaceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="filter" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="capability" eType="#//Capability"/>
+    </eOperations>
+    <eOperations name="validate" eType="#//Diagnostic">
+      <eParameters name="capability" eType="#//Capability"/>
+    </eOperations>
+  </eClassifiers>
+
+  <!-- Simple abstract class for second supertype in multiple inheritance -->
+  <eClassifiers xsi:type="ecore:EClass" name="ParameterConstraint" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="constraintType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+  <!-- Bug 3: Multiple inheritance - extends both ParameterConstraint and NamedElement -->
+  <eClassifiers xsi:type="ecore:EClass" name="ExpressionConstraint" eSuperTypes="#//ParameterConstraint #//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+
+  <!-- Concrete class that extends abstract VersionedElement (Bug 2: needs VersionedElementImpl to exist) -->
+  <eClassifiers xsi:type="ecore:EClass" name="ServiceComponent" eSuperTypes="#//VersionedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="enabled" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+  </eClassifiers>
+
+</ecore:EPackage>

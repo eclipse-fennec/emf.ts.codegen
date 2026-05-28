@@ -6,6 +6,7 @@ const hardcodedCoreTypes = ['BasicEObject', 'EClass', 'EStructuralFeature'];
 const coreTypeImports = ['EClass', 'EStructuralFeature'];
 const typeOnlyImports = [];
 const valueImports = [];
+const importedNames = new Set();
 for (const imp of imports) {
   if (imp.typeName === className || imp.typeName === interfaceName || imp.typeName === extendsClass) continue;
   if (hardcodedCoreTypes.includes(imp.typeName)) continue;
@@ -25,6 +26,21 @@ for (const imp of imports) {
   } else {
     typeOnlyImports.push(imp);
   }
+  importedNames.add(imp.typeName);
+}
+// Add mixin feature type imports (if not already imported)
+for (const imp of (mixinImports || [])) {
+  if (imp.typeName === className || imp.typeName === interfaceName || imp.typeName === extendsClass) continue;
+  if (hardcodedCoreTypes.includes(imp.typeName)) continue;
+  if (importedNames.has(imp.typeName)) continue;
+  if (imp.importPath === '@emfts/core') {
+    if (!coreTypeImports.includes(imp.typeName)) {
+      coreTypeImports.push(imp.typeName);
+    }
+    continue;
+  }
+  typeOnlyImports.push(imp);
+  importedNames.add(imp.typeName);
 }
 -%>
 <% if (!extendsImport) { -%>
@@ -52,6 +68,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 <% for (const fid of featureIds) { -%>
   static readonly <%- fid.name %>: number = <%- fid.id %>;
 <% } -%>
+<% for (const mf of (mixinFeatures || [])) { -%>
+  static readonly <%- mf.upperName %>: number = <%- mf.id %>;
+<% } -%>
 
   // Private fields
 <% for (const genFeature of features) {
@@ -62,6 +81,13 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureIsMany = isMany(feature);
 -%>
   private _<%- featureName %><% if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
+<% } -%>
+<% for (const mf of (mixinFeatures || [])) {
+  const featureType = typeMapper.mapFeature(mf.feature);
+  const defaultValue = typeMapper.getDefaultValue(mf.feature);
+  const featureIsMany = isMany(mf.feature);
+-%>
+  private _<%- mf.name %><% if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
 <% } -%>
 
   /**
@@ -110,6 +136,19 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 
 <% } -%>
 <% } -%>
+<% for (const mf of (mixinFeatures || [])) {
+  const featureType = typeMapper.mapFeature(mf.feature);
+  const featureIsMany = isMany(mf.feature);
+-%>
+  get <%- mf.name %>(): <%- featureType %> {
+    return this._<%- mf.name %><% if (!featureIsMany) { %>!<% } %>;
+  }
+
+  set <%- mf.name %>(value: <%- featureType %>) {
+    this._<%- mf.name %> = value;
+  }
+
+<% } -%>
   // Reflective API
 
   /**
@@ -121,6 +160,10 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 <% for (const fid of featureIds) { -%>
       case <%- className %>.<%- fid.name %>:
         return this.<%- getName(fid.feature.ecoreFeature) %>;
+<% } -%>
+<% for (const mf of (mixinFeatures || [])) { -%>
+      case <%- className %>.<%- mf.upperName %>:
+        return this.<%- mf.name %>;
 <% } -%>
       default:
         return super.eGet(feature);
@@ -138,6 +181,14 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 -%>
       case <%- className %>.<%- fid.name %>:
         this.<%- getName(fid.feature.ecoreFeature) %> = newValue as <%- featureType %>;
+        super.eSet(feature, newValue);
+        break;
+<% } -%>
+<% for (const mf of (mixinFeatures || [])) {
+  const featureType = typeMapper.mapFeature(mf.feature);
+-%>
+      case <%- className %>.<%- mf.upperName %>:
+        this.<%- mf.name %> = newValue as <%- featureType %>;
         super.eSet(feature, newValue);
         break;
 <% } -%>
@@ -167,6 +218,19 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
         return this._<%- featureName %> !== undefined;
 <% } -%>
 <% } -%>
+<% for (const mf of (mixinFeatures || [])) {
+  const featureIsMany = isMany(mf.feature);
+  const defaultValue = typeMapper.getDefaultValue(mf.feature);
+-%>
+      case <%- className %>.<%- mf.upperName %>:
+<% if (featureIsMany) { -%>
+        return this._<%- mf.name %> !== undefined && this._<%- mf.name %>.length > 0;
+<% } else if (defaultValue !== null) { -%>
+        return this._<%- mf.name %> !== <%- defaultValue %>;
+<% } else { -%>
+        return this._<%- mf.name %> !== undefined;
+<% } -%>
+<% } -%>
       default:
         return super.eIsSet(feature);
     }
@@ -191,6 +255,20 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
         this._<%- featureName %> = <%- defaultValue %>;
 <% } else { -%>
         this._<%- featureName %> = undefined;
+<% } -%>
+        return;
+<% } -%>
+<% for (const mf of (mixinFeatures || [])) {
+  const featureIsMany = isMany(mf.feature);
+  const defaultValue = typeMapper.getDefaultValue(mf.feature);
+-%>
+      case <%- className %>.<%- mf.upperName %>:
+<% if (featureIsMany) { -%>
+        this._<%- mf.name %> = [];
+<% } else if (defaultValue !== null) { -%>
+        this._<%- mf.name %> = <%- defaultValue %>;
+<% } else { -%>
+        this._<%- mf.name %> = undefined;
 <% } -%>
         return;
 <% } -%>

@@ -31,15 +31,20 @@ export class EmfGenerator extends BaseGenerator {
     const isAbstractValue = EObjectHelper.isAbstract(eClass);
     const superTypes = EObjectHelper.getESuperTypes(eClass);
 
-    // Determine the extends class - use first supertype's impl or rootExtendsClass
+    // Determine the extends class - use first non-interface supertype's impl or rootExtendsClass
     let extendsClass = this.context.genModel.rootExtendsClass;
     let extendsImport: string | null = null;
-    if (superTypes.length > 0) {
-      const superType = superTypes[0];
-      const superTypeName = EObjectHelper.getName(superType);
-      if (superTypeName) {
-        extendsClass = `${superTypeName}Impl`;
-        extendsImport = `./${extendsClass}`;
+    let primarySuperType: any = null;
+
+    for (const st of superTypes) {
+      if (!EObjectHelper.isInterface(st)) {
+        primarySuperType = st;
+        const superTypeName = EObjectHelper.getName(st);
+        if (superTypeName) {
+          extendsClass = `${superTypeName}Impl`;
+          extendsImport = `./${extendsClass}`;
+        }
+        break;
       }
     }
 
@@ -66,6 +71,16 @@ export class EmfGenerator extends BaseGenerator {
       });
     }
 
+    // Collect mixin features from non-primary supertypes (Bug 3: multiple inheritance)
+    const mixinFeatures = this.collectMixinFeatures(eClass, primarySuperType);
+
+    // Resolve additional imports for mixin feature types
+    const mixinImports = this.context.importResolver.resolveImportsForFeatures(
+      mixinFeatures.map(mf => mf.feature),
+      eClass,
+      genPackage
+    );
+
     const content = await this.render('class-file', {
       genClass,
       genPackage,
@@ -80,6 +95,8 @@ export class EmfGenerator extends BaseGenerator {
       extendsImport,
       features: genClass.genFeatures,
       featureIds,
+      mixinFeatures,
+      mixinImports,
       operations: genClass.genOperations,
       typeParameters: EObjectHelper.getETypeParameters(eClass),
       rootExtendsClass: this.context.genModel.rootExtendsClass
@@ -215,9 +232,9 @@ export class EmfGenerator extends BaseGenerator {
       }
     }
 
-    // Export implementations
+    // Export implementations (including abstract classes, as they're extended by subclasses)
     for (const genClass of genPackage.genClasses) {
-      if (!EObjectHelper.isAbstract(genClass.ecoreClass) && !EObjectHelper.isInterface(genClass.ecoreClass)) {
+      if (!EObjectHelper.isInterface(genClass.ecoreClass)) {
         const implName = genClass.implClassName ?? `${EObjectHelper.getName(genClass.ecoreClass)}Impl`;
         exports.push(implName);
       }
@@ -241,6 +258,65 @@ export class EmfGenerator extends BaseGenerator {
 
     const packagePath = this.getPackagePath(genPackage);
     return this.createFile(join(packagePath, 'index.ts'), content);
+  }
+
+  /**
+   * Collect features from non-primary supertypes that need to be generated as mixins.
+   * These are features inherited from interface supertypes or non-first supertypes
+   * that aren't covered by the primary extends chain.
+   */
+  private collectMixinFeatures(eClass: any, primarySuperType: any): Array<{ name: string; upperName: string; id: number; feature: any }> {
+    // Collect all feature names from the primary extends chain
+    const primaryChainFeatureNames = new Set<string>();
+    if (primarySuperType) {
+      this.collectAllFeatureNames(primarySuperType, primaryChainFeatureNames);
+    }
+
+    // Collect all inherited features in order (matching countInheritedFeatures traversal)
+    const allInherited = this.collectAllInheritedFeaturesOrdered(eClass);
+
+    // Mixin features = inherited features not covered by primary chain
+    const mixinFeatures: Array<{ name: string; upperName: string; id: number; feature: any }> = [];
+    const seen = new Set<string>();
+    for (let i = 0; i < allInherited.length; i++) {
+      const featureName = EObjectHelper.getName(allInherited[i]);
+      if (featureName && !primaryChainFeatureNames.has(featureName) && !seen.has(featureName)) {
+        seen.add(featureName);
+        mixinFeatures.push({
+          name: featureName,
+          upperName: this.toUpperSnake(featureName),
+          id: i,
+          feature: allInherited[i]
+        });
+      }
+    }
+
+    return mixinFeatures;
+  }
+
+  /**
+   * Recursively collect all feature names from a class and its supertypes
+   */
+  private collectAllFeatureNames(cls: any, names: Set<string>): void {
+    for (const f of EObjectHelper.getEStructuralFeatures(cls)) {
+      const name = EObjectHelper.getName(f);
+      if (name) names.add(name);
+    }
+    for (const st of EObjectHelper.getESuperTypes(cls)) {
+      this.collectAllFeatureNames(st, names);
+    }
+  }
+
+  /**
+   * Collect all inherited features in order (matching the traversal used by countInheritedFeatures)
+   */
+  private collectAllInheritedFeaturesOrdered(cls: any): any[] {
+    const features: any[] = [];
+    for (const st of EObjectHelper.getESuperTypes(cls)) {
+      features.push(...this.collectAllInheritedFeaturesOrdered(st));
+      features.push(...EObjectHelper.getEStructuralFeatures(st));
+    }
+    return features;
   }
 
   private toUpperSnake(str: string): string {
