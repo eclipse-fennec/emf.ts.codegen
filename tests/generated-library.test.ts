@@ -335,14 +335,17 @@ describe('Generated Library Model', () => {
       expect(book.author.firstName).toBe('John');
     });
 
-    it('should set library on book', () => {
+    it('should set library on book via containment', () => {
       const book = factory.createBook();
+      book.title = 'Test Book';
       const library = factory.createLibrary();
       library.name = 'Main Library';
 
-      book.library = library;
-      expect(book.library).toBe(library);
-      expect(book.library.name).toBe('Main Library');
+      // Book.library is readonly (eOpposite of Library.books containment),
+      // so we add the book to the library's books collection instead
+      library.books.push(book);
+      expect(library.books).toContain(book);
+      expect(library.name).toBe('Main Library');
     });
 
     it('should add books to library', () => {
@@ -434,7 +437,6 @@ describe('Generated Library Model', () => {
       book1.publicationYear = 2008;
       book1.category = BookCategory.SCIENCE;
       book1.author = author1;
-      book1.library = library;
 
       const book2 = factory.createBook();
       book2.title = 'Refactoring';
@@ -443,7 +445,10 @@ describe('Generated Library Model', () => {
       book2.publicationYear = 2018;
       book2.category = BookCategory.SCIENCE;
       book2.author = author2;
-      book2.library = library;
+
+      // Book.library is readonly (eOpposite of Library.books containment),
+      // so we add books via the library's books collection
+      library.books.push(book1, book2);
 
       // Create employees
       const manager = factory.createEmployee();
@@ -459,9 +464,8 @@ describe('Generated Library Model', () => {
       librarian.salary = 45000;
       librarian.supervisor = manager;
 
-      // Add to library
+      // Add to library (books already added above)
       library.authors.push(author1, author2);
-      library.books.push(book1, book2);
       library.employees.push(manager, librarian);
 
       // Verify

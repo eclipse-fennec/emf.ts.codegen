@@ -11,9 +11,9 @@ export { <%- packageName %>Factory } from './<%- packageName %>Factory';
 export type { <%- name %> } from './<%- name %>';
 <% } -%>
 
-// Implementations
+// Implementations (including abstract classes, as they're extended by subclasses)
 <% for (const genClass of genClasses) {
-  if (!checkIsAbstract(genClass.ecoreClass) && !checkIsInterface(genClass.ecoreClass)) {
+  if (!checkIsInterface(genClass.ecoreClass)) {
     const implName = genClass.implClassName || (getName(genClass.ecoreClass) + 'Impl');
 -%>
 export { <%- implName %> } from './<%- implName %>';

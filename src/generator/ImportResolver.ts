@@ -69,6 +69,12 @@ export class ImportResolver {
       this.addImportsForFeature(imports, feature, eClass, genPackage);
     }
 
+    // Get operations and resolve imports for parameter/return types
+    const operations = this.getOperations(eClass);
+    for (const operation of operations) {
+      this.addImportsForOperation(imports, operation, eClass, genPackage);
+    }
+
     // Add mode-specific imports
     this.addModeImports(imports, mode, genPackage);
 
@@ -187,6 +193,112 @@ export class ImportResolver {
       importPath,
       isTypeOnly: false
     });
+  }
+
+  /**
+   * Get operations from EClass (handles both static and dynamic)
+   */
+  private getOperations(eClass: any): any[] {
+    if (typeof eClass.getEOperations === 'function') {
+      return eClass.getEOperations() || [];
+    }
+    if (typeof eClass.eGet === 'function' && typeof eClass.eClass === 'function') {
+      const metaClass = eClass.eClass();
+      if (metaClass) {
+        const feature = metaClass.getEStructuralFeature?.('eOperations');
+        if (feature) {
+          const result = eClass.eGet(feature);
+          if (Array.isArray(result)) return result;
+          if (result && typeof result[Symbol.iterator] === 'function') {
+            return Array.from(result);
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Add imports for an operation's return type and parameter types
+   */
+  private addImportsForOperation(
+    imports: Map<string, ImportInfo>,
+    operation: any,
+    currentClass: EClass,
+    genPackage: GenPackage
+  ): void {
+    // Return type
+    const returnType = this.getEType(operation);
+    if (returnType) {
+      this.addImportForClassifier(imports, returnType, currentClass, genPackage);
+    }
+
+    // Parameter types
+    const params = this.getEParameters(operation);
+    for (const param of params) {
+      const paramType = this.getEType(param);
+      if (paramType) {
+        this.addImportForClassifier(imports, paramType, currentClass, genPackage);
+      }
+    }
+  }
+
+  /**
+   * Get the eType from an element (handles both static and dynamic)
+   */
+  private getEType(obj: any): any {
+    if (!obj) return null;
+    if (typeof obj.getEType === 'function') {
+      return obj.getEType();
+    }
+    if (typeof obj.eGet === 'function' && typeof obj.eClass === 'function') {
+      const eClass = obj.eClass();
+      if (eClass) {
+        const typeFeature = eClass.getEStructuralFeature?.('eType');
+        if (typeFeature) {
+          return obj.eGet(typeFeature);
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get parameters from an EOperation (handles both static and dynamic)
+   */
+  private getEParameters(operation: any): any[] {
+    if (typeof operation.getEParameters === 'function') {
+      return operation.getEParameters() || [];
+    }
+    if (typeof operation.eGet === 'function' && typeof operation.eClass === 'function') {
+      const eClass = operation.eClass();
+      if (eClass) {
+        const feature = eClass.getEStructuralFeature?.('eParameters');
+        if (feature) {
+          const result = operation.eGet(feature);
+          if (Array.isArray(result)) return result;
+          if (result && typeof result[Symbol.iterator] === 'function') {
+            return Array.from(result);
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Resolve imports for additional features (e.g., mixin features from non-primary supertypes)
+   */
+  resolveImportsForFeatures(
+    features: any[],
+    currentClass: EClass,
+    genPackage: GenPackage
+  ): ImportInfo[] {
+    const imports = new Map<string, ImportInfo>();
+    for (const feature of features) {
+      this.addImportsForFeature(imports, feature, currentClass, genPackage);
+    }
+    return Array.from(imports.values());
   }
 
   /**
