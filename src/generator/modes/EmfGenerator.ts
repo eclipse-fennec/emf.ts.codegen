@@ -36,13 +36,23 @@ export class EmfGenerator extends BaseGenerator {
     let extendsImport: string | null = null;
     let primarySuperType: any = null;
 
+    const currentNsURI = genPackage.ecorePackage.getNsURI();
     for (const st of superTypes) {
       if (!EObjectHelper.isInterface(st)) {
         primarySuperType = st;
         const superTypeName = EObjectHelper.getName(st);
         if (superTypeName) {
           extendsClass = `${superTypeName}Impl`;
-          extendsImport = `./${extendsClass}`;
+          // Check if supertype is from a different package
+          const stPackage = EObjectHelper.getEPackage(st);
+          const stNsURI = stPackage?.getNsURI?.();
+          if (stNsURI && stNsURI !== currentNsURI) {
+            // Cross-package: use registered import path or fall back to relative
+            const registeredPath = this.context.importResolver.getRegisteredPath(stNsURI);
+            extendsImport = registeredPath ?? `./${extendsClass}`;
+          } else {
+            extendsImport = `./${extendsClass}`;
+          }
         }
         break;
       }

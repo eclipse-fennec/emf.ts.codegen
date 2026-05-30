@@ -37,6 +37,13 @@ export class GeneratorContext {
     this.typeMapper = new TypeMapper();
     this.importResolver = new ImportResolver();
     this.importResolver.registerPackage(ECORE_NS_URI, '@emfts/core');
+
+    // Register referenced package import paths
+    if (options.referencedPackages) {
+      for (const [nsURI, importPath] of options.referencedPackages) {
+        this.importResolver.registerPackage(nsURI, importPath);
+      }
+    }
   }
 
   /**

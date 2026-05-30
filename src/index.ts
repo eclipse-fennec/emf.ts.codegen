@@ -47,6 +47,10 @@ export interface GenerateOptions {
   outputDir?: string;
   /** Whether to write files to disk (default: true) */
   writeFiles?: boolean;
+  /** Paths to dependent .ecore model files (loaded before main model) */
+  dependencies?: string[];
+  /** Import path mappings for referenced packages (nsURI → import path) */
+  referencedPackages?: Map<string, string>;
 }
 
 /**
@@ -68,13 +72,20 @@ export interface GenerateOptions {
 export async function generate(options: GenerateOptions): Promise<GenerationResult> {
   const { ecorePath, configPath, writeFiles = true } = options;
 
-  // Load ecore model
+  // Load ecore model (dependencies first)
   const ecoreLoader = new EcoreLoader();
+  if (options.dependencies) {
+    for (const dep of options.dependencies) {
+      await ecoreLoader.load(dep);
+    }
+  }
   const ePackage = await ecoreLoader.load(ecorePath);
 
   // Load genconfig
   const configLoader = new GenConfigLoader();
-  configLoader.registerPackage(ePackage);
+  for (const [, pkg] of ecoreLoader.getAllPackages()) {
+    configLoader.registerPackage(pkg);
+  }
   const genConfig = await configLoader.load(configPath);
 
   // Convert to internal GenModel
@@ -85,7 +96,10 @@ export async function generate(options: GenerateOptions): Promise<GenerationResu
   const outputDir = options.outputDir || genConfig.generation.outputDir;
 
   // Generate code
-  const generator = new CodeGenerator(genModel);
+  const generator = new CodeGenerator(genModel, {
+    outputDirectory: outputDir,
+    referencedPackages: options.referencedPackages,
+  });
   const result = await generator.generate();
 
   // Write files if requested
@@ -116,13 +130,20 @@ export async function generate(options: GenerateOptions): Promise<GenerationResu
 export async function generateInMemory(options: Omit<GenerateOptions, 'outputDir' | 'writeFiles'>): Promise<GenerationResult> {
   const { ecorePath, configPath } = options;
 
-  // Load ecore model
+  // Load ecore model (dependencies first)
   const ecoreLoader = new EcoreLoader();
+  if (options.dependencies) {
+    for (const dep of options.dependencies) {
+      await ecoreLoader.load(dep);
+    }
+  }
   const ePackage = await ecoreLoader.load(ecorePath);
 
   // Load genconfig
   const configLoader = new GenConfigLoader();
-  configLoader.registerPackage(ePackage);
+  for (const [, pkg] of ecoreLoader.getAllPackages()) {
+    configLoader.registerPackage(pkg);
+  }
   const genConfig = await configLoader.load(configPath);
 
   // Convert to internal GenModel
@@ -130,7 +151,10 @@ export async function generateInMemory(options: Omit<GenerateOptions, 'outputDir
   const genModel = converter.convert(genConfig);
 
   // Generate code
-  const generator = new CodeGenerator(genModel);
+  const generator = new CodeGenerator(genModel, {
+    outputDirectory: genConfig.generation.outputDir,
+    referencedPackages: options.referencedPackages,
+  });
   return generator.generate();
 }
 
