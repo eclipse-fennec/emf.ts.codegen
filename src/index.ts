@@ -81,11 +81,9 @@ export async function generate(options: GenerateOptions): Promise<GenerationResu
   }
   const ePackage = await ecoreLoader.load(ecorePath);
 
-  // Load genconfig
+  // Load genconfig (only register main package, not dependencies)
   const configLoader = new GenConfigLoader();
-  for (const [, pkg] of ecoreLoader.getAllPackages()) {
-    configLoader.registerPackage(pkg);
-  }
+  configLoader.registerPackage(ePackage);
   const genConfig = await configLoader.load(configPath);
 
   // Convert to internal GenModel
@@ -139,11 +137,9 @@ export async function generateInMemory(options: Omit<GenerateOptions, 'outputDir
   }
   const ePackage = await ecoreLoader.load(ecorePath);
 
-  // Load genconfig
+  // Load genconfig (only register main package, not dependencies)
   const configLoader = new GenConfigLoader();
-  for (const [, pkg] of ecoreLoader.getAllPackages()) {
-    configLoader.registerPackage(pkg);
-  }
+  configLoader.registerPackage(ePackage);
   const genConfig = await configLoader.load(configPath);
 
   // Convert to internal GenModel
