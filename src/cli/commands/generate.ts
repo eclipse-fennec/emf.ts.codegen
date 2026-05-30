@@ -51,10 +51,7 @@ export const generateCommand = new Command('generate')
         console.log('Loading GenConfig:', options.config);
       }
       const configLoader = new GenConfigLoader();
-      // Register all loaded packages (main + dependencies)
-      for (const [, pkg] of ecoreLoader.getAllPackages()) {
-        configLoader.registerPackage(pkg);
-      }
+      configLoader.registerPackage(ePackage);
       const genConfig = await configLoader.load(options.config);
 
       // Convert to internal GenModel
