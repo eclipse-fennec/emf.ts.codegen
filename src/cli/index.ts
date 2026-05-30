@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { generateCommand } from './commands/generate.js';
 import { initCommand } from './commands/init.js';
 import { generateRestClientCommand } from './commands/generate-rest-client.js';
+import { generateServiceInterfacesCommand } from './commands/generate-service-interfaces.js';
 
 const program = new Command();
 
@@ -15,5 +16,6 @@ program
 program.addCommand(generateCommand);
 program.addCommand(initCommand);
 program.addCommand(generateRestClientCommand);
+program.addCommand(generateServiceInterfacesCommand);
 
 program.parse();

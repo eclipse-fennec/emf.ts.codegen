@@ -25,6 +25,9 @@ export interface GeneratorOptions {
 
   /** Indentation size (for spaces) */
   indentSize: number;
+
+  /** Import path mappings for referenced packages (nsURI → import path) */
+  referencedPackages?: Map<string, string>;
 }
 
 /**

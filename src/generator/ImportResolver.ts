@@ -383,7 +383,7 @@ export class ImportResolver {
       };
     }
 
-    const importPath = this.getPackageImportPath(packageURI) ?? this.uriToImportPath(packageURI);
+    const importPath = this.getRegisteredPath(packageURI) ?? this.uriToImportPath(packageURI);
 
     return {
       typeName,
@@ -420,9 +420,10 @@ export class ImportResolver {
   /**
    * Get registered import path for a package URI
    */
-  private getPackageImportPath(nsURI: string): string | undefined {
+  getRegisteredPath(nsURI: string): string | undefined {
     return this.packagePathMap.get(nsURI);
   }
+
 
   /**
    * Convert a URI to an import path
