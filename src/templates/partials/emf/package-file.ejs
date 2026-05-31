@@ -48,21 +48,23 @@ function getClassifierNsURI(classifier) {
 }
 
 // Helper: generate the right expression for a type reference
-function typeRefExpr(classifier) {
+// castTo: optional cast suffix (e.g., ' as EClass' for supertype assignments)
+function typeRefExpr(classifier, castTo) {
   const typeName = getName(classifier);
+  const cast = castTo || '';
   if (isLocalClassifier(classifier)) {
     const typeUpperName = typeName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
     return packageName + 'Package.Literals.' + typeUpperName;
   }
   if (isEcoreClassifier(classifier)) {
-    return "getEcorePackage().getEClassifier('" + typeName + "')!";
+    return "getEcorePackage().getEClassifier('" + typeName + "')!" + cast;
   }
   // External dependency package — resolve via EPackageRegistry
   const depNsURI = getClassifierNsURI(classifier);
   if (depNsURI) {
-    return "EPackageRegistry.INSTANCE.getEPackage('" + depNsURI + "')!.getEClassifier('" + typeName + "')!";
+    return "EPackageRegistry.INSTANCE.getEPackage('" + depNsURI + "')!.getEClassifier('" + typeName + "')!" + cast;
   }
-  return "getEcorePackage().getEClassifier('" + typeName + "')!";
+  return "getEcorePackage().getEClassifier('" + typeName + "')!" + cast;
 }
 
 // Pre-scan: check if any cross-package references exist
@@ -187,7 +189,7 @@ export class <%- packageName %>Package extends BasicEPackage {
        const superTypeName = getName(superType);
        if (superTypeName) {
 -%>
-    (<%- packageName %>Package.Literals.<%- upperName %> as BasicEClass).getESuperTypes().push(<%- typeRefExpr(superType) %>);
+    (<%- packageName %>Package.Literals.<%- upperName %> as BasicEClass).getESuperTypes().push(<%- typeRefExpr(superType, ' as EClass') %>);
 <%       }
      }
    } -%>
