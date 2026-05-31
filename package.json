@@ -15,7 +15,7 @@
     }
   },
   "scripts": {
-    "build": "tsc && cp -r src/templates dist/templates",
+    "build": "tsc && rm -rf dist/templates && cp -r src/templates dist/templates",
     "watch": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest run",
