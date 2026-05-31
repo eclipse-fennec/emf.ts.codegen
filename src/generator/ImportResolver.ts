@@ -181,7 +181,17 @@ export class ImportResolver {
       }
     }
 
+    // Fallback for Ecore metaclass types (EStructuralFeature, EClass, etc.)
+    // Their getEPackage() may return null but they should import from @emfts/core
     if (!classifierPackage) {
+      const ecoreImportPath = this.packagePathMap.get('http://www.eclipse.org/emf/2002/Ecore');
+      if (ecoreImportPath) {
+        imports.set(name, {
+          typeName: name,
+          importPath: ecoreImportPath,
+          isTypeOnly: false
+        });
+      }
       return;
     }
 

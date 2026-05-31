@@ -47,9 +47,13 @@ export class EmfGenerator extends BaseGenerator {
           const stPackage = EObjectHelper.getEPackage(st);
           const stNsURI = stPackage?.getNsURI?.();
           if (stNsURI && stNsURI !== currentNsURI) {
-            // Cross-package: use registered import path or fall back to relative
+            // Cross-package: import Impl directly from its file, not via index
             const registeredPath = this.context.importResolver.getRegisteredPath(stNsURI);
-            extendsImport = registeredPath ?? `./${extendsClass}`;
+            if (registeredPath) {
+              extendsImport = `${registeredPath}/${extendsClass}`;
+            } else {
+              extendsImport = `./${extendsClass}`;
+            }
           } else {
             extendsImport = `./${extendsClass}`;
           }

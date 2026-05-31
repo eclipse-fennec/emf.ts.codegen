@@ -64,16 +64,29 @@ describe('Issue #9: Cross-package references', () => {
     expect(content).toContain('Expression');
   });
 
-  it('ChartViewImpl should extend ComponentImpl from external package', () => {
+  it('ChartViewImpl should extend ComponentImpl imported from external package file', () => {
     const content = getFile('ChartViewImpl.ts');
     // Component is abstract (not interface), so its Impl is imported from the external package
     expect(content).toContain('extends ComponentImpl');
-    expect(content).toContain("import { ComponentImpl } from '@base/model'");
+    // Should import directly from the Impl file, not from index
+    expect(content).toContain("import { ComponentImpl } from '@base/model/ComponentImpl'");
   });
 
   it('ChartViewImpl should NOT have mixin name property (inherited via ComponentImpl)', () => {
     const content = getFile('ChartViewImpl.ts');
     // 'name' is inherited through ComponentImpl, no mixin needed
     expect(content).not.toMatch(/private _name/);
+  });
+
+  it('should import EStructuralFeature from @emfts/core when used as feature type', () => {
+    const content = getFile('ChartView.ts');
+    // dataFeature has eType EStructuralFeature — must be imported
+    expect(content).toContain('EStructuralFeature');
+    expect(content).toMatch(/import\s+type\s*\{[^}]*EStructuralFeature[^}]*\}\s*from\s*'@emfts\/core'/);
+  });
+
+  it('should have dataFeature property with EStructuralFeature type in interface', () => {
+    const content = getFile('ChartView.ts');
+    expect(content).toMatch(/dataFeature.*:\s*EStructuralFeature/);
   });
 });
