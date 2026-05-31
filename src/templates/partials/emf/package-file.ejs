@@ -33,6 +33,20 @@ function isEcoreClassifier(classifier) {
   return false;
 }
 
+// Helper: get the nsURI of a classifier's package
+function getClassifierNsURI(classifier) {
+  const pkg = getEPackage(classifier);
+  if (pkg) {
+    return pkg.getNsURI?.() ?? null;
+  }
+  if (typeof classifier.eIsProxy === 'function' && classifier.eIsProxy() && typeof classifier.eProxyURI === 'function') {
+    const proxyURI = classifier.eProxyURI()?.toString() ?? '';
+    const hashIdx = proxyURI.indexOf('#//');
+    if (hashIdx > 0) return proxyURI.substring(0, hashIdx);
+  }
+  return null;
+}
+
 // Helper: generate the right expression for a type reference
 function typeRefExpr(classifier) {
   const typeName = getName(classifier);
@@ -43,32 +57,40 @@ function typeRefExpr(classifier) {
   if (isEcoreClassifier(classifier)) {
     return "getEcorePackage().getEClassifier('" + typeName + "')!";
   }
-  // Fallback for other external packages
+  // External dependency package — resolve via EPackageRegistry
+  const depNsURI = getClassifierNsURI(classifier);
+  if (depNsURI) {
+    return "EPackageRegistry.INSTANCE.getEPackage('" + depNsURI + "')!.getEClassifier('" + typeName + "')!";
+  }
   return "getEcorePackage().getEClassifier('" + typeName + "')!";
 }
 
-// Pre-scan: check if any cross-package Ecore references exist
+// Pre-scan: check if any cross-package references exist
 let needsEcoreImport = false;
+let needsRegistryImport = false;
 for (const genClass of genClasses) {
   const eClass = genClass.ecoreClass;
   for (const superType of getESuperTypes(eClass)) {
-    if (!isLocalClassifier(superType)) { needsEcoreImport = true; break; }
+    if (!isLocalClassifier(superType)) {
+      if (isEcoreClassifier(superType)) { needsEcoreImport = true; }
+      else { needsRegistryImport = true; }
+    }
   }
-  if (needsEcoreImport) break;
   for (const genFeature of genClass.genFeatures) {
     const eType = getEType(genFeature.ecoreFeature);
     if (eType && typeMapper.isReference(genFeature.ecoreFeature) && !isLocalClassifier(eType)) {
-      needsEcoreImport = true; break;
+      if (isEcoreClassifier(eType)) { needsEcoreImport = true; }
+      else { needsRegistryImport = true; }
     }
   }
-  if (needsEcoreImport) break;
 }
 -%>
-<% if (needsEcoreImport) { -%>
-import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, getEcorePackage } from '@emfts/core';
-<% } else { -%>
-import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference } from '@emfts/core';
-<% } -%>
+<%
+const coreImports = ['BasicEPackage', 'BasicEClass', 'BasicEAttribute', 'BasicEReference'];
+if (needsEcoreImport) coreImports.push('getEcorePackage');
+if (needsRegistryImport) coreImports.push('EPackageRegistry');
+-%>
+import { <%- coreImports.join(', ') %> } from '@emfts/core';
 import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
 
 /**
