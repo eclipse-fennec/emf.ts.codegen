@@ -62,7 +62,19 @@ export class TypeMapper {
       return 'unknown';
     }
 
-    const name = EObjectHelper.getName(classifier);
+    let name = EObjectHelper.getName(classifier);
+
+    // Fallback: extract name from proxy URI if getName returns null
+    if (!name && typeof (classifier as any).eIsProxy === 'function' && (classifier as any).eIsProxy()) {
+      const proxyURI = (classifier as any).eProxyURI?.()?.toString?.();
+      if (proxyURI) {
+        const hashIdx = proxyURI.indexOf('#//');
+        if (hashIdx >= 0) {
+          name = proxyURI.substring(hashIdx + 3).split('/').pop() ?? null;
+        }
+      }
+    }
+
     if (!name) {
       return 'unknown';
     }

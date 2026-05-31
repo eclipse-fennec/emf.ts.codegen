@@ -22,8 +22,15 @@ import { EmployeeImpl } from './EmployeeImpl';
  * @generated
  */
 export class LibraryFactory extends BasicEFactory {
-  // Singleton instance
-  static readonly eINSTANCE = new LibraryFactory();
+  // Lazy singleton instance
+  private static _instance: LibraryFactory;
+
+  static get eINSTANCE(): LibraryFactory {
+    if (!this._instance) {
+      this._instance = new LibraryFactory();
+    }
+    return this._instance;
+  }
 
   private constructor() {
     super();

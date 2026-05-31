@@ -16,8 +16,15 @@ import { <%- implName %> } from './<%- implName %>';
  * @generated
  */
 export class <%- packageName %>Factory extends BasicEFactory {
-  // Singleton instance
-  static readonly eINSTANCE = new <%- packageName %>Factory();
+  // Lazy singleton instance
+  private static _instance: <%- packageName %>Factory;
+
+  static get eINSTANCE(): <%- packageName %>Factory {
+    if (!this._instance) {
+      this._instance = new <%- packageName %>Factory();
+    }
+    return this._instance;
+  }
 
   private constructor() {
     super();

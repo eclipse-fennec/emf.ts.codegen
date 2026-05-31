@@ -189,10 +189,15 @@ export function getEType(feature: any): any {
   if (!feature) return null;
 
   if (typeof feature.getEType === 'function') {
-    return feature.getEType();
+    try {
+      return feature.getEType();
+    } catch {
+      // getEType may throw on unresolved proxies (e.g., EBooleanObject)
+    }
   }
 
-  return getFeatureValue(feature, 'eType');
+  // Fallback for dynamic objects or when getEType throws
+  return getFeatureValue(feature, 'eType') ?? null;
 }
 
 /**
