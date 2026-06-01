@@ -2,6 +2,8 @@
 
 TypeScript code generator for [Ecore](https://eclipse.dev/modeling/emf/) models using [emf.ts](https://github.com/eclipse-fennec/emf.ts).
 
+Ecore aligns with the OMG [MOF/EMOF](https://www.omg.org/spec/MOF/) specification; `.genconfig.xmi` configuration files use OMG [XMI](https://www.omg.org/spec/XMI/).
+
 ## Features
 
 - Generate TypeScript interfaces and classes from `.ecore` models
@@ -13,8 +15,10 @@ TypeScript code generator for [Ecore](https://eclipse.dev/modeling/emf/) models 
 ## Installation
 
 ```bash
-npm install emfts-codegen
+npm install @emfts/codegen
 ```
+
+This installs the `emfts-codegen` CLI binary.
 
 ## Usage
 
@@ -31,9 +35,22 @@ emfts-codegen init
 ### Programmatic
 
 ```typescript
-import { CodeGenerator } from 'emfts-codegen';
+import { CodeGenerator } from '@emfts/codegen';
 ```
+
+## Deployment & Artifacts
+
+| | |
+|---|---|
+| Registry | [npmjs.com](https://www.npmjs.com/package/@emfts/codegen) |
+| Package | [`@emfts/codegen`](https://www.npmjs.com/package/@emfts/codegen) (public) |
+| CLI binary | `emfts-codegen` |
+| Build output | `dist/` (ESM, `tsc`) — only `dist` is published (see `files` in `package.json`) |
+| Source | <https://github.com/eclipse-fennec/emf.ts.codegen> (default branch `main`) |
+| Project | [Eclipse Fennec](https://projects.eclipse.org/projects/modeling.fennec) |
+
+Releases are published to the npm registry under the `@emfts` scope.
 
 ## License
 
-[EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
+[EPL-2.0](https://www.eclipse.org/legal/epl-2.0/) — see [`LICENSE`](./LICENSE).
