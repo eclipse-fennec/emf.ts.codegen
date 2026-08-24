@@ -10,7 +10,8 @@ import type {
   ClassOverride,
   FeatureOverride,
   GenConfigMode,
-  GenConfigPropertyMode
+  GenConfigPropertyMode,
+  ReferencedPackage
 } from './GenConfig.js';
 import {
   createDefaultGenerationSettings,
@@ -148,14 +149,40 @@ export class GenConfigLoader {
     const classOverridesObj = this.getFeatureValue(obj, 'classOverrides') || [];
     const classOverrides = this.convertClassOverrides(classOverridesObj, ecorePackage);
 
+    // Get referenced packages (optional)
+    const referencedPackagesObj = this.getFeatureValue(obj, 'referencedPackages') || [];
+    const referencedPackages = this.convertReferencedPackages(referencedPackagesObj);
+
     return {
       ecorePackage,
       generation,
       package: packageSettings,
       classDefaults,
       featureDefaults,
-      classOverrides
+      classOverrides,
+      referencedPackages
     };
+  }
+
+  /**
+   * Convert ReferencedPackages array
+   */
+  private convertReferencedPackages(objs: any[]): ReferencedPackage[] {
+    const referencedPackages: ReferencedPackage[] = [];
+
+    for (const obj of objs) {
+      const nsURI = this.getFeatureValue(obj, 'nsURI');
+      const importPath = this.getFeatureValue(obj, 'importPath');
+
+      if (!nsURI || !importPath) {
+        console.warn(`Ignoring referencedPackage with missing nsURI or importPath (nsURI: ${nsURI}, importPath: ${importPath})`);
+        continue;
+      }
+
+      referencedPackages.push({ nsURI, importPath });
+    }
+
+    return referencedPackages;
   }
 
   /**

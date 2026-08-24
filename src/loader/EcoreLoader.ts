@@ -65,6 +65,12 @@ export class EcoreLoader {
     }
 
     const ePackage = root as EPackage;
+
+    // Registering a package with unresolved eSubpackages proxies would crash
+    // deep inside the registry (subPkg.getNsURI is not a function) — fail with
+    // a message that names the missing package instead
+    this.assertSubpackagesResolved(ePackage, ecorePath);
+
     const nsURI = ePackage.getNsURI();
     if (nsURI) {
       this.loadedPackages.set(nsURI, ePackage);
@@ -74,6 +80,25 @@ export class EcoreLoader {
     }
 
     return ePackage;
+  }
+
+  /**
+   * Verify that all (transitive) eSubpackages references are resolved
+   */
+  private assertSubpackagesResolved(ePackage: EPackage, ecorePath: string): void {
+    const subPackages = (ePackage as any).getESubpackages?.() ?? [];
+    for (const subPkg of subPackages) {
+      if (typeof subPkg?.getNsURI !== 'function' || subPkg.eIsProxy?.()) {
+        const href = typeof subPkg?.eProxyURI === 'function'
+          ? subPkg.eProxyURI()?.toString?.()
+          : undefined;
+        throw new Error(
+          `Unresolved eSubpackages reference${href ? ` '${href}'` : ''} in ${ecorePath}. ` +
+          `The referenced package is not loaded — pass its .ecore file via -d/--dependency.`
+        );
+      }
+      this.assertSubpackagesResolved(subPkg as EPackage, ecorePath);
+    }
   }
 
   /**
