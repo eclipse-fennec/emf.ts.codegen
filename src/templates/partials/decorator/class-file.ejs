@@ -2,6 +2,12 @@
 
 <%# Generate imports for referenced types -%>
 <%
+// GenModel documentation of a model element (class, feature, ...)
+function getDocumentation(element) {
+  const ann = element?.getEAnnotation?.('http://www.eclipse.org/emf/2002/GenModel');
+  const doc = ann?.getDetails?.()?.getByKey?.('documentation');
+  return typeof doc === 'string' && doc.length > 0 ? doc : null;
+}
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'decorator');
 for (const imp of imports) {
   if (imp.typeName !== className && !imp.typeName.includes(',')) {
@@ -13,6 +19,9 @@ import { <%- imp.typeName %> } from '<%- imp.importPath %>';
 -%>
 import { Documentation, Attribute, ModelClass, Reference, Enum } from '<%- annotationsImport %>';
 
+<% const classDoc = getDocumentation(eClass); if (classDoc) { -%>
+@Documentation(<%- JSON.stringify(classDoc) %>)
+<% } -%>
 @ModelClass({ type: '<%- nsURI %>#//<%- className %>' })
 export <% if (isAbstract) { %>abstract <% } %>class <%- className %><%
 if (typeParameters && typeParameters.length > 0) {
@@ -44,22 +53,12 @@ if (superTypes && superTypes.length > 0) {
   const isRef = typeMapper.isReference(feature);
   const isEnum = feature.getEType() && typeMapper.isEEnum(feature.getEType());
 
-  // Check for documentation annotation
-  let doc = null;
-  if (feature.getEAnnotations) {
-    for (const ann of feature.getEAnnotations()) {
-      const annSource = typeof ann.getSource === 'function' ? ann.getSource() : ann.source;
-      if (annSource === 'http://www.eclipse.org/emf/2002/GenModel') {
-        const details = typeof ann.getDetails === 'function' ? ann.getDetails() : ann.details;
-        if (details && details.get) {
-          doc = details.get('documentation');
-        }
-      }
-    }
-  }
+  // GenModel documentation as @Documentation decorator; JSON.stringify keeps
+  // multiline values and quotes a valid string literal
+  const doc = getDocumentation(feature);
   if (doc) {
 -%>
-  @Documentation("<%- doc %>")
+  @Documentation(<%- JSON.stringify(doc) %>)
 <%
   }
   if (isEnum) {
