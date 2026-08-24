@@ -73,15 +73,29 @@ describe('Issues #28/#29: decorator mode value semantics', () => {
     });
   });
 
-  describe('#29.3: attribute defaults from defaultValueLiteral', () => {
-    it('should default an enum-typed attribute to the enum member', () => {
+  describe('#29.3: attribute defaults', () => {
+    it('should default an enum-typed attribute without explicit default to the first literal (EMF semantics)', () => {
       const content = getFile('Condition.ts', '@ModelClass');
       expect(content).toContain('comparator: Comparator = Comparator.eq;');
+    });
+
+    it('should resolve a defaultValueLiteral given as literal to the member name', () => {
+      const content = getFile('Condition.ts', '@ModelClass');
+      // defaultValueLiteral="!=" resolves to the member named neq
+      expect(content).toContain('fallback: Comparator = Comparator.neq;');
     });
 
     it('should default a numeric attribute to its literal', () => {
       const content = getFile('Condition.ts', '@ModelClass');
       expect(content).toContain('threshold: number = 5;');
+    });
+  });
+
+  describe('#29 regression: decorator argument stays a plain runtime type name', () => {
+    it('should not leak generic type arguments into @Reference', () => {
+      const content = getFile('TextSettings.ts', '@ModelClass');
+      expect(content).toContain("@Reference('VariableWrapper')");
+      expect(content).not.toContain("@Reference('VariableWrapper<");
     });
   });
 
