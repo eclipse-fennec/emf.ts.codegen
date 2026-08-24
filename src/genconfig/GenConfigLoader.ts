@@ -1,5 +1,4 @@
 import { readFile } from 'fs/promises';
-import { dirname, resolve } from 'path';
 import type { EPackage, EClass, EStructuralFeature, ResourceSet } from '@emfts/core';
 import type {
   GenConfig,
@@ -32,7 +31,8 @@ export class GenConfigLoader {
    * Initialize the loader
    */
   async init(): Promise<void> {
-    const { BasicResourceSet, getEcorePackage, ECORE_NS_URI, XMIResource, URI } = await import('@emfts/core');
+    const { BasicResourceSet, getEcorePackage, ECORE_NS_URI } = await import('@emfts/core');
+    const { GenConfigPackage } = await import('./model/GenConfigPackage.js');
 
     // Initialize Ecore
     getEcorePackage();
@@ -41,31 +41,11 @@ export class GenConfigLoader {
     this.resourceSet = new BasicResourceSet();
     this.resourceSet.getPackageRegistry().set(ECORE_NS_URI, getEcorePackage());
 
-    // Load genconfig.ecore metamodel
-    const genconfigEcorePath = resolve(dirname(import.meta.url.replace('file://', '')), '../../model/genconfig.ecore');
-    await this.loadGenConfigMetamodel(genconfigEcorePath);
-  }
-
-  /**
-   * Load the genconfig.ecore metamodel
-   */
-  private async loadGenConfigMetamodel(path: string): Promise<void> {
-    const { XMIResource, URI } = await import('@emfts/core');
-
-    const content = await readFile(path, 'utf-8');
-    const uri = URI.createURI(path);
-    const resource = new XMIResource(uri);
-    resource.setResourceSet(this.resourceSet!);
-    resource.loadFromString(content);
-
-    const contents = resource.getContents();
-    if (contents.length > 0) {
-      this.genconfigPackage = contents[0] as EPackage;
-      const nsURI = this.genconfigPackage.getNsURI();
-      if (nsURI) {
-        this.resourceSet!.getPackageRegistry().set(nsURI, this.genconfigPackage);
-      }
-    }
+    // Register the generated genconfig package (dogfooding: generated from
+    // model/genconfig.ecore via `npm run generate:genconfig`), so loaded
+    // GenConfig XMI files materialize as typed Impl instances
+    this.genconfigPackage = GenConfigPackage.eINSTANCE;
+    this.resourceSet.getPackageRegistry().set(GenConfigPackage.eNS_URI, GenConfigPackage.eINSTANCE);
   }
 
   /**

@@ -1,7 +1,13 @@
 import { Command } from 'commander';
 import { writeFile } from 'fs/promises';
+import { XMIResource, URI, EProxyImpl } from '@emfts/core';
+import type { EPackage } from '@emfts/core';
 import { EcoreLoader } from '../../loader/EcoreLoader.js';
 import { parseImportMappings } from '../import-mappings.js';
+import { GenConfigPackage } from '../../genconfig/model/GenConfigPackage.js';
+import { GenerationMode, getGenerationModeByLiteral } from '../../genconfig/model/GenerationMode.js';
+import { PropertyMode } from '../../genconfig/model/PropertyMode.js';
+import type { GenConfigFactory } from '../../genconfig/model/GenConfigFactory.js';
 
 export const initCommand = new Command('init')
   .description('Initialize a GenConfig file from an Ecore model')
@@ -65,6 +71,11 @@ export const initCommand = new Command('init')
     }
   });
 
+/**
+ * Build the GenConfig model via the generated factory (dogfooding: the
+ * genconfig model classes are generated from model/genconfig.ecore by this
+ * codegen itself) and serialize it with the XMI resource
+ */
 export function generateGenConfigXMI(
   nsURI: string,
   mode: string,
@@ -73,29 +84,47 @@ export function generateGenConfigXMI(
   basePackage: string,
   referencedPackages?: Map<string, string>
 ): string {
-  let referencedPackagesXML = '';
+  const factory = GenConfigPackage.eINSTANCE.getEFactoryInstance() as GenConfigFactory;
+
+  const genConfig = factory.createGenConfig();
+
+  // Reference the Ecore package by nsURI, not by file path
+  const ecorePackageProxy = new EProxyImpl(URI.createURI(`${nsURI}#/`));
+  genConfig.ecorePackage = ecorePackageProxy as unknown as EPackage;
+
+  const generation = factory.createGenerationSettings();
+  generation.mode = getGenerationModeByLiteral(mode) ?? GenerationMode.emf;
+  generation.outputDir = outputDir;
+  genConfig.generation = generation;
+
+  const packageSettings = factory.createPackageSettings();
+  packageSettings.prefix = prefix;
+  packageSettings.basePackage = basePackage;
+  packageSettings.generateFactory = true;
+  packageSettings.generatePackage = true;
+  packageSettings.generateIndex = true;
+  genConfig.package = packageSettings;
+
+  const classDefaults = factory.createClassDefaults();
+  classDefaults.generateInterface = true;
+  classDefaults.generateImpl = true;
+  classDefaults.rootExtendsClass = 'BasicEObject';
+  classDefaults.rootExtendsInterface = 'EObject';
+  genConfig.classDefaults = classDefaults;
+
+  const featureDefaults = factory.createFeatureDefaults();
+  featureDefaults.notify = true;
+  featureDefaults.property = PropertyMode.editable;
+  genConfig.featureDefaults = featureDefaults;
+
   for (const [refNsURI, importPath] of referencedPackages ?? []) {
-    referencedPackagesXML += `  <referencedPackages nsURI="${escapeXML(refNsURI)}" importPath="${escapeXML(importPath)}"/>\n`;
+    const referencedPackage = factory.createReferencedPackage();
+    referencedPackage.nsURI = refNsURI;
+    referencedPackage.importPath = importPath;
+    genConfig.referencedPackages.add(referencedPackage);
   }
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<genconfig:GenConfig
-    xmi:version="2.0"
-    xmlns:xmi="http://www.omg.org/XMI"
-    xmlns:genconfig="http://www.emfts.org/genconfig/1.0"
-    ecorePackage="${nsURI}#/">
-  <generation mode="${mode}" outputDir="${outputDir}"/>
-  <package prefix="${prefix}" basePackage="${basePackage}" generateFactory="true" generatePackage="true" generateIndex="true"/>
-  <classDefaults generateInterface="true" generateImpl="true" rootExtendsClass="BasicEObject" rootExtendsInterface="EObject"/>
-  <featureDefaults notify="true" property="editable"/>
-${referencedPackagesXML}</genconfig:GenConfig>
-`;
-}
-
-function escapeXML(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  const resource = new XMIResource(URI.createURI('genconfig.xmi'));
+  resource.getContents().add(genConfig);
+  return resource.saveToString();
 }
