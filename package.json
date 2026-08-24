@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "tsc && rm -rf dist/templates && cp -r src/templates dist/templates",
+    "generate:genconfig": "npm run build && node dist/cli/index.js generate -m model/genconfig.ecore -c model/genconfig.genconfig.xmi && npm run build",
     "watch": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest run",

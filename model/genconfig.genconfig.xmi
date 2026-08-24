@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genconfig:GenConfig
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:genconfig="http://www.emfts.org/genconfig/1.0"
+    ecorePackage="http://www.emfts.org/genconfig/1.0#/">
+  <generation mode="emf" outputDir="./src/genconfig"/>
+  <package prefix="GenConfig" basePackage="model" generateFactory="true" generatePackage="true" generateIndex="true"/>
+  <classDefaults generateInterface="true" generateImpl="true" rootExtendsClass="BasicEObject" rootExtendsInterface="EObject"/>
+  <featureDefaults notify="true" property="editable"/>
+</genconfig:GenConfig>
