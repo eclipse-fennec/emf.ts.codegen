@@ -104,6 +104,14 @@ describe('Issues #28/#29: decorator mode value semantics', () => {
       expect(content).toContain('remote?: RemoteWrapper<string>');
       expect(content).not.toContain("@Reference('RemoteWrapper<");
     });
+
+    it('should emit a bare nsURI href literally, never resolved against the model directory', () => {
+      const content = getFile('TextSettings.ts', '@ModelClass');
+      // the loader absolutizes the relative href against the model location -
+      // the emitted import must be the bare specifier from the model
+      expect(content).toContain("import { BareWrapper } from 'org.example.bare.composables';");
+      expect(content).not.toMatch(/from '[^']*\/org\.example\.bare\.composables'/);
+    });
   });
 
   describe('#29.4: many-valued features initialize to []', () => {

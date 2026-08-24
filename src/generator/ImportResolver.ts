@@ -393,7 +393,20 @@ export class ImportResolver {
       };
     }
 
-    const importPath = this.getRegisteredPath(packageURI) ?? this.uriToImportPath(packageURI);
+    let importPath = this.getRegisteredPath(packageURI);
+    if (!importPath && !packageURI.startsWith('http://') && !packageURI.startsWith('https://')) {
+      // The resource loader absolutizes relative hrefs (bare nsURIs or .ecore
+      // file references) against the model location - match mappings on the
+      // trailing segment and emit bare specifiers literally, never as paths
+      const lastSegment = packageURI.substring(packageURI.lastIndexOf('/') + 1);
+      if (lastSegment.endsWith('.ecore')) {
+        return { typeName, importPath: `./${typeName}.js`, isTypeOnly: false };
+      }
+      importPath = this.getRegisteredPath(lastSegment) ?? lastSegment;
+    }
+    if (!importPath) {
+      importPath = this.uriToImportPath(packageURI);
+    }
 
     return {
       typeName,
