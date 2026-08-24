@@ -6,6 +6,8 @@ import * as EObjectHelper from '../util/EObjectHelper.js';
  */
 export class TypeMapper {
   private customMappings: Map<string, string> = new Map();
+  /** When true, many-valued features use EList<T> instead of T[]. */
+  useEList: boolean = false;
 
   constructor() {
     this.initDefaultMappings();
@@ -96,7 +98,7 @@ export class TypeMapper {
     const many = EObjectHelper.isMany(feature);
 
     if (many) {
-      return `${baseType}[]`;
+      return this.useEList ? `EList<${baseType}>` : `${baseType}[]`;
     }
     return baseType;
   }
@@ -146,7 +148,7 @@ export class TypeMapper {
     }
 
     if (EObjectHelper.isMany(feature)) {
-      return '[]';
+      return this.useEList ? null : '[]';
     }
 
     // Check if required

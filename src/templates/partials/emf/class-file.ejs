@@ -4,9 +4,27 @@
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
 const hardcodedCoreTypes = ['BasicEObject', 'EClass', 'EStructuralFeature'];
 const coreTypeImports = ['EClass', 'EStructuralFeature'];
+const coreValueImports = [];
 const typeOnlyImports = [];
 const valueImports = [];
 const importedNames = new Set();
+// Check if any feature is many-valued (needs EList imports)
+const useEList = typeMapper.useEList;
+const hasManyFeature = features.some(gf => isMany(gf.ecoreFeature));
+const hasManyMixin = (mixinFeatures || []).some(mf => isMany(mf.feature));
+if (useEList && (hasManyFeature || hasManyMixin)) {
+  coreTypeImports.push('EList', 'EReference');
+  // Determine which factory functions are needed
+  const needsContainment = features.some(gf => isMany(gf.ecoreFeature) && isContainment(gf.ecoreFeature))
+    || (mixinFeatures || []).some(mf => isMany(mf.feature) && isContainment(mf.feature));
+  const needsEObjectList = features.some(gf => isMany(gf.ecoreFeature) && !isContainment(gf.ecoreFeature) && typeMapper.isReference(gf.ecoreFeature))
+    || (mixinFeatures || []).some(mf => isMany(mf.feature) && !isContainment(mf.feature) && typeMapper.isReference(mf.feature));
+  const needsBasicList = features.some(gf => isMany(gf.ecoreFeature) && typeMapper.isAttribute(gf.ecoreFeature))
+    || (mixinFeatures || []).some(mf => isMany(mf.feature) && typeMapper.isAttribute(mf.feature));
+  if (needsContainment) coreValueImports.push('createContainmentEList');
+  if (needsEObjectList) coreValueImports.push('createEObjectEList');
+  if (needsBasicList) coreValueImports.push('createBasicEList');
+}
 for (const imp of imports) {
   if (imp.typeName === className || imp.typeName === interfaceName || imp.typeName === extendsClass) continue;
   if (hardcodedCoreTypes.includes(imp.typeName)) continue;
@@ -46,6 +64,9 @@ for (const imp of (mixinImports || [])) {
 <% if (!extendsImport) { -%>
 import { BasicEObject } from '@emfts/core';
 <% } -%>
+<% if (coreValueImports.length > 0) { -%>
+import { <%- coreValueImports.join(', ') %> } from '@emfts/core';
+<% } -%>
 import type { <%- coreTypeImports.join(', ') %> } from '@emfts/core';
 <% for (const imp of typeOnlyImports) { -%>
 import type { <%- imp.typeName %> } from '<%- imp.importPath %>';
@@ -80,14 +101,14 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const defaultValue = typeMapper.getDefaultValue(feature);
   const featureIsMany = isMany(feature);
 -%>
-  private _<%- featureName %><% if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
+  private _<%- featureName %><% if (useEList && featureIsMany) { %>!<% } else if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
 <% } -%>
 <% for (const mf of (mixinFeatures || [])) {
   const featureType = typeMapper.mapFeature(mf.feature);
   const defaultValue = typeMapper.getDefaultValue(mf.feature);
   const featureIsMany = isMany(mf.feature);
 -%>
-  private _<%- mf.name %><% if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
+  private _<%- mf.name %><% if (useEList && featureIsMany) { %>!<% } else if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
 <% } -%>
 
   /**
@@ -105,6 +126,27 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureIsMany = isMany(feature);
   const upperName = toUpperSnake(featureName);
 -%>
+<% if (useEList && featureIsMany) {
+  // EList lazy-init getter: creates the right EList on first access
+  const isRef = typeMapper.isReference(feature);
+  const isCont = isRef && isContainment(feature);
+  let factoryCall;
+  if (isCont) {
+    factoryCall = `createContainmentEList<any>(this, this.eClass().getEStructuralFeature('${featureName}') as EReference)`;
+  } else if (isRef) {
+    factoryCall = `createEObjectEList(this, this.eClass().getEStructuralFeature('${featureName}') as EReference) as unknown as ${featureType}`;
+  } else {
+    factoryCall = `createBasicEList<any>(this, this.eClass().getEStructuralFeature('${featureName}')!)`;
+  }
+-%>
+  get <%- featureName %>(): <%- featureType %> {
+    if (!this._<%- featureName %>) {
+      this._<%- featureName %> = <%- factoryCall %>;
+    }
+    return this._<%- featureName %>;
+  }
+
+<% } else { -%>
   get <%- featureName %>(): <%- featureType %> {
     return this._<%- featureName %><% if (!featureIsMany) { %>!<% } %>;
   }
@@ -134,6 +176,7 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 <% } -%>
   }
 
+<% } -%>
 <% } -%>
 <% } -%>
 <% for (const mf of (mixinFeatures || [])) {
@@ -177,18 +220,32 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
 <% for (const fid of featureIds) {
-  const featureType = typeMapper.mapFeature(fid.feature.ecoreFeature);
+  const feat = fid.feature.ecoreFeature;
+  const featureType = typeMapper.mapFeature(feat);
+  const featureName = getName(feat);
+  const featureIsMany = isMany(feat);
 -%>
       case <%- className %>.<%- fid.name %>:
-        this.<%- getName(fid.feature.ecoreFeature) %> = newValue as <%- featureType %>;
+<% if (useEList && featureIsMany) { -%>
+        this.<%- featureName %>.clear();
+        this.<%- featureName %>.addAll(newValue as any[]);
+<% } else { -%>
+        this.<%- featureName %> = newValue as <%- featureType %>;
+<% } -%>
         super.eSet(feature, newValue);
         break;
 <% } -%>
 <% for (const mf of (mixinFeatures || [])) {
   const featureType = typeMapper.mapFeature(mf.feature);
+  const featureIsMany = isMany(mf.feature);
 -%>
       case <%- className %>.<%- mf.upperName %>:
+<% if (useEList && featureIsMany) { -%>
+        this.<%- mf.name %>.clear();
+        this.<%- mf.name %>.addAll(newValue as any[]);
+<% } else { -%>
         this.<%- mf.name %> = newValue as <%- featureType %>;
+<% } -%>
         super.eSet(feature, newValue);
         break;
 <% } -%>
@@ -210,7 +267,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureName = getName(feature);
 -%>
       case <%- className %>.<%- fid.name %>:
-<% if (featureIsMany) { -%>
+<% if (useEList && featureIsMany) { -%>
+        return this._<%- featureName %> !== undefined && !this._<%- featureName %>.isEmpty();
+<% } else if (featureIsMany) { -%>
         return this._<%- featureName %> !== undefined && this._<%- featureName %>.length > 0;
 <% } else if (defaultValue !== null) { -%>
         return this._<%- featureName %> !== <%- defaultValue %>;
@@ -223,7 +282,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const defaultValue = typeMapper.getDefaultValue(mf.feature);
 -%>
       case <%- className %>.<%- mf.upperName %>:
-<% if (featureIsMany) { -%>
+<% if (useEList && featureIsMany) { -%>
+        return this._<%- mf.name %> !== undefined && !this._<%- mf.name %>.isEmpty();
+<% } else if (featureIsMany) { -%>
         return this._<%- mf.name %> !== undefined && this._<%- mf.name %>.length > 0;
 <% } else if (defaultValue !== null) { -%>
         return this._<%- mf.name %> !== <%- defaultValue %>;
@@ -249,7 +310,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureName = getName(feature);
 -%>
       case <%- className %>.<%- fid.name %>:
-<% if (featureIsMany) { -%>
+<% if (useEList && featureIsMany) { -%>
+        if (this._<%- featureName %>) this._<%- featureName %>.clear();
+<% } else if (featureIsMany) { -%>
         this._<%- featureName %> = [];
 <% } else if (defaultValue !== null) { -%>
         this._<%- featureName %> = <%- defaultValue %>;
@@ -263,7 +326,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const defaultValue = typeMapper.getDefaultValue(mf.feature);
 -%>
       case <%- className %>.<%- mf.upperName %>:
-<% if (featureIsMany) { -%>
+<% if (useEList && featureIsMany) { -%>
+        if (this._<%- mf.name %>) this._<%- mf.name %>.clear();
+<% } else if (featureIsMany) { -%>
         this._<%- mf.name %> = [];
 <% } else if (defaultValue !== null) { -%>
         this._<%- mf.name %> = <%- defaultValue %>;

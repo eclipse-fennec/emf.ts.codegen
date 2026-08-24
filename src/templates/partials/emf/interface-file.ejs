@@ -4,6 +4,11 @@
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
 const coreTypeImports = ['EObject'];
 const otherTypeImports = [];
+// Add EList import if any feature is many-valued and useEList is on
+const useEList = typeMapper.useEList;
+if (useEList && features.some(gf => isMany(gf.ecoreFeature))) {
+  coreTypeImports.push('EList');
+}
 for (const imp of imports) {
   if (imp.typeName === interfaceName) continue;
   if (imp.importPath === '@emfts/core') {
