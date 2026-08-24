@@ -25,9 +25,13 @@
     </eStructuralFeatures>
   </eClassifiers>
 
-  <!-- Issue #29 (3): attribute default from defaultValueLiteral, enum-typed -->
+  <!-- Issue #29 (3): attribute defaults - EMF semantics: an EEnum attribute
+       without explicit default defaults to the first literal (matches the
+       real MappingModel.ecore, which carries no defaultValueLiteral) -->
   <eClassifiers xsi:type="ecore:EClass" name="Condition">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="comparator" eType="#//Comparator" defaultValueLiteral="eq"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="comparator" eType="#//Comparator"/>
+    <!-- explicit default given as the LITERAL (not the name) must resolve to the member name -->
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fallback" eType="#//Comparator" defaultValueLiteral="!="/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="threshold"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="5"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value"

@@ -7,7 +7,7 @@
 
 import { BasicEObject } from '@emfts/core';
 import type { EClass, EStructuralFeature } from '@emfts/core';
-import type { PropertyMode } from './PropertyMode.js';
+import { PropertyMode } from './PropertyMode.js';
 import type { FeatureOverride } from './FeatureOverride.js';
 import { GenConfigPackage } from './GenConfigPackage.js';
 
@@ -26,7 +26,7 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
   // Private fields
   private _ecoreFeature?: EStructuralFeature;
   private _notify?: boolean;
-  private _property?: PropertyMode;
+  private _property: PropertyMode = PropertyMode.editable;
   private _customGetter?: string;
   private _customSetter?: string;
 
@@ -223,7 +223,7 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
       case FeatureOverrideImpl.NOTIFY:
         return this._notify !== undefined;
       case FeatureOverrideImpl.PROPERTY:
-        return this._property !== undefined;
+        return this._property !== PropertyMode.editable;
       case FeatureOverrideImpl.CUSTOM_GETTER:
         return this._customGetter !== undefined;
       case FeatureOverrideImpl.CUSTOM_SETTER:
@@ -246,7 +246,7 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
         this._notify = undefined;
         return;
       case FeatureOverrideImpl.PROPERTY:
-        this._property = undefined;
+        this._property = PropertyMode.editable;
         return;
       case FeatureOverrideImpl.CUSTOM_GETTER:
         this._customGetter = undefined;

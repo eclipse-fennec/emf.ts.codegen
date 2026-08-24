@@ -161,6 +161,18 @@ export class TypeMapper {
       return this.useEList ? null : '[]';
     }
 
+    // EMF semantics: an EEnum attribute without explicit default defaults
+    // to the first enum literal
+    const eType = EObjectHelper.getEType(feature);
+    if (eType && this.isEEnum(eType)) {
+      const literals = EObjectHelper.getELiterals(eType);
+      const first = literals?.[0];
+      const firstName = first ? EObjectHelper.getName(first) : null;
+      if (firstName) {
+        return `${EObjectHelper.getName(eType)}.${firstName}`;
+      }
+    }
+
     // Check if required
     const lowerBound = EObjectHelper.getLowerBound(feature);
     if (lowerBound === 0) {
@@ -201,7 +213,14 @@ export class TypeMapper {
         const eType = EObjectHelper.getEType(feature);
         if (eType && this.isEEnum(eType)) {
           const enumName = EObjectHelper.getName(eType) ?? typeName;
-          return `${enumName}.${literal}`;
+          // The defaultValueLiteral holds the EEnumLiteral literal (or name);
+          // the generated member is always named after the literal's name
+          const literals = EObjectHelper.getELiterals(eType) ?? [];
+          const match = literals.find((l: any) =>
+            EObjectHelper.getLiteral(l) === literal || EObjectHelper.getName(l) === literal
+          );
+          const memberName = match ? EObjectHelper.getName(match) : literal;
+          return `${enumName}.${memberName}`;
         }
         // A reference default needs an instance - emitting the raw literal
         // would assign e.g. a number to a class-typed feature (#29)
