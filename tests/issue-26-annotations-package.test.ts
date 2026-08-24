@@ -56,8 +56,9 @@ describe('Issue #26: shared annotations package in decorator mode', () => {
       const files = await generateWithConfig(SHARED_PKG);
       const component = findClassFile(files, 'Component.ts');
       expect(component).toBeDefined();
+      // only the annotation decorators the class actually uses are imported (#32)
       expect(component!.content).toContain(
-        `import { Documentation, Attribute, ModelClass, Reference, Enum } from '${SHARED_PKG}';`
+        `import { Documentation, Attribute, ModelClass } from '${SHARED_PKG}';`
       );
       expect(component!.content).not.toContain('./ModelAnnotations');
     });

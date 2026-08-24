@@ -60,14 +60,8 @@ if (superTypes && superTypes.length > 0) {
   const op = genOp.ecoreOperation;
   const opName = op.getName();
   const returnType = op.getEType() ? typeMapper.mapClassifier(op.getEType()) : 'void';
-  const params = [];
-  for (const param of op.getEParameters()) {
-    const paramName = param.getName();
-    const paramType = typeMapper.mapClassifier(param.getEType());
-    params.push(`${paramName}: ${paramType}`);
-  }
 -%>
-  <%- opName %>(<%- params.join(', ') %>): <%- returnType %> {
+  <%- opName %>(<%- mapParams(op) %>): <%- returnType %> {
     throw new Error('<%- opName %> not implemented');
   }
 

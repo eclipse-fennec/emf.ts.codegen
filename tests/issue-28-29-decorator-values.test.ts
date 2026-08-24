@@ -101,7 +101,8 @@ describe('Issues #28/#29: decorator mode value semantics', () => {
     it('should keep the plain name even when the eType is an unresolved cross-package proxy', () => {
       const content = getFile('TextSettings.ts', '@ModelClass');
       expect(content).toContain("@Reference('RemoteWrapper')");
-      expect(content).toContain('remote?: RemoteWrapper<string>');
+      // since #33 a single-valued reference to a (presumed) concrete class is instantiated
+      expect(content).toContain('remote: RemoteWrapper<string> = new RemoteWrapper<string>();');
       expect(content).not.toContain("@Reference('RemoteWrapper<");
     });
 

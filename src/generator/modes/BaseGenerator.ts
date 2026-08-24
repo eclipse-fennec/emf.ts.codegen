@@ -120,10 +120,30 @@ export abstract class BaseGenerator {
       getUpperBound: EObjectHelper.getUpperBound,
       isContainment: EObjectHelper.isContainment,
       getEOpposite: EObjectHelper.getEOpposite,
-      getExtendedMetaDataName: EObjectHelper.getExtendedMetaDataName
+      getExtendedMetaDataName: EObjectHelper.getExtendedMetaDataName,
+      mapParams: (op: any) => this.mapOperationParams(op)
     };
 
     return template(fullData);
+  }
+
+  /**
+   * Render an operation's parameter list. A lowerBound-0 parameter is
+   * optional, except when a required parameter follows (TS forbids
+   * required after optional)
+   */
+  protected mapOperationParams(op: any): string {
+    const rawParams: any[] = [...(op.getEParameters?.() ?? [])];
+    let allowOptional = true;
+    const optionalFlags: boolean[] = [];
+    for (let i = rawParams.length - 1; i >= 0; i--) {
+      const isOptional = allowOptional && (rawParams[i].getLowerBound?.() ?? 0) === 0;
+      if (!isOptional) allowOptional = false;
+      optionalFlags[i] = isOptional;
+    }
+    return rawParams
+      .map((param, i) => `${param.getName()}${optionalFlags[i] ? '?' : ''}: ${this.context.typeMapper.mapClassifier(param.getEType())}`)
+      .join(', ');
   }
 
   /**
