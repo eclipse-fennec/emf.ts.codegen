@@ -8,6 +8,38 @@ function getDocumentation(element) {
   const doc = ann?.getDetails?.()?.getByKey?.('documentation');
   return typeof doc === 'string' && doc.length > 0 ? doc : null;
 }
+// Custom decorator annotations (#31): an eAnnotation source of the form
+// '<importable-specifier>/<DecoratorName>' (not an EMF source URI) becomes an
+// import plus a decorator application with the details as options object
+function getCustomDecorators(element) {
+  const decorators = [];
+  for (const ann of element?.getEAnnotations?.() ?? []) {
+    const source = ann.getSource?.();
+    if (!source || source.startsWith('http://') || source.startsWith('https://')) continue;
+    const slashIdx = source.lastIndexOf('/');
+    if (slashIdx <= 0) continue;
+    const name = source.substring(slashIdx + 1);
+    if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name)) continue;
+    const options = [];
+    for (const entry of ann.getDetails?.() ?? []) {
+      const key = entry.eGet?.(entry.eClass().getEStructuralFeature('key'));
+      const value = entry.eGet?.(entry.eClass().getEStructuralFeature('value'));
+      if (key == null) continue;
+      const keyOut = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+      options.push(`${keyOut}: ${JSON.stringify(value ?? '')}`);
+    }
+    decorators.push({ name, specifier: source.substring(0, slashIdx), options: `{${options.join(', ')}}` });
+  }
+  return decorators;
+}
+// Collect the custom decorator imports of all operations, grouped by specifier
+const customDecoratorImports = new Map();
+for (const genOp of operations) {
+  for (const dec of getCustomDecorators(genOp.ecoreOperation)) {
+    if (!customDecoratorImports.has(dec.specifier)) customDecoratorImports.set(dec.specifier, new Set());
+    customDecoratorImports.get(dec.specifier).add(dec.name);
+  }
+}
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'decorator');
 for (const imp of imports) {
   if (imp.typeName !== className && !imp.typeName.includes(',')) {
@@ -18,6 +50,9 @@ import { <%- imp.typeName %> } from '<%- imp.importPath %>';
 }
 -%>
 import { Documentation, Attribute, ModelClass, Reference, Enum } from '<%- annotationsImport %>';
+<% for (const [specifier, names] of customDecoratorImports) { -%>
+import { <%- [...names].join(', ') %> } from '<%- specifier %>';
+<% } -%>
 
 <% const classDoc = getDocumentation(eClass); if (classDoc) { -%>
 @Documentation(<%- JSON.stringify(classDoc) %>)
@@ -34,8 +69,11 @@ if (typeParameters && typeParameters.length > 0) {
 if (superTypes && superTypes.length > 0) {
   const superNames = [];
   for (const st of superTypes) {
-    if (st.getName) {
-      superNames.push(st.getName());
+    // getName helper also resolves the name of an unresolved proxy from its
+    // URI fragment - a cross-package supertype must not lose its extends (#30)
+    const stName = getName(st);
+    if (stName) {
+      superNames.push(stName);
     }
   }
   if (superNames.length > 0) {
@@ -86,11 +124,29 @@ if (superTypes && superTypes.length > 0) {
   const op = genOp.ecoreOperation;
   const opName = op.getName();
   const returnType = op.getEType() ? typeMapper.mapClassifier(op.getEType()) : 'void';
-  const params = [];
-  for (const param of op.getEParameters()) {
-    const paramName = param.getName();
-    const paramType = typeMapper.mapClassifier(param.getEType());
-    params.push(`${paramName}: ${paramType}`);
+  // An optional parameter (lowerBound 0) gets '?', but only while no required
+  // parameter follows - TS forbids required after optional
+  const rawParams = [...op.getEParameters()];
+  let allowOptional = true;
+  const optionalFlags = [];
+  for (let i = rawParams.length - 1; i >= 0; i--) {
+    const isOptional = allowOptional && (rawParams[i].getLowerBound?.() ?? 0) === 0;
+    if (!isOptional) allowOptional = false;
+    optionalFlags[i] = isOptional;
+  }
+  const params = rawParams.map((param, i) =>
+    `${param.getName()}${optionalFlags[i] ? '?' : ''}: ${typeMapper.mapClassifier(param.getEType())}`
+  );
+  const opDoc = getDocumentation(op);
+  if (opDoc) {
+-%>
+  @Documentation(<%- JSON.stringify(opDoc) %>)
+<%
+  }
+  for (const dec of getCustomDecorators(op)) {
+-%>
+  @<%- dec.name %>(<%- dec.options %>)
+<%
   }
 -%>
   <%- opName %>(<%- params.join(', ') %>): <%- returnType %> {

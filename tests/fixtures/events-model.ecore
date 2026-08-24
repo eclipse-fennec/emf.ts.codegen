@@ -58,4 +58,21 @@
         eType="#//Condition" containment="true"/>
   </eClassifiers>
 
+  <!-- Issue #30: supertype stays an unresolved cross-package proxy - the
+       extends clause must survive. Issue #31: custom decorator eAnnotations
+       (source '<specifier>/<Decorator>') and optional operation parameters -->
+  <eClassifiers xsi:type="ecore:EClass" name="ActionSet" eSuperTypes="http://example.org/actions#//ActionBase">
+    <eOperations name="changePage">
+      <eAnnotations source="org.example.actions/WidgetAction">
+        <details key="eventType" value="system.changePage"/>
+      </eAnnotations>
+      <eParameters name="pageId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="mixedParams">
+      <!-- lowerBound 0 followed by a required parameter: no '?' allowed on the first -->
+      <eParameters name="first" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="second" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+
 </ecore:EPackage>
