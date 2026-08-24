@@ -49,6 +49,7 @@ export class GenConfigPackage extends BasicEPackage {
     GENERATION_SETTINGS__OUTPUT_DIR: null as unknown as EAttribute | EReference,
     GENERATION_SETTINGS__FILE_EXTENSION: null as unknown as EAttribute | EReference,
     GENERATION_SETTINGS__HEADER_COMMENT: null as unknown as EAttribute | EReference,
+    GENERATION_SETTINGS__ANNOTATIONS_PACKAGE: null as unknown as EAttribute | EReference,
     PACKAGE_SETTINGS: null as unknown as EClass,
     PACKAGE_SETTINGS__PREFIX: null as unknown as EAttribute | EReference,
     PACKAGE_SETTINGS__BASE_PACKAGE: null as unknown as EAttribute | EReference,
@@ -231,6 +232,14 @@ export class GenConfigPackage extends BasicEPackage {
     generationSettings_headerComment.setUpperBound(1);
     generationSettingsClass.getEStructuralFeatures().push(generationSettings_headerComment);
     GenConfigPackage.Literals.GENERATION_SETTINGS__HEADER_COMMENT = generationSettings_headerComment;
+
+    // Create annotationsPackage feature
+    const generationSettings_annotationsPackage = new BasicEAttribute();
+    generationSettings_annotationsPackage.setName('annotationsPackage');
+    generationSettings_annotationsPackage.setLowerBound(0);
+    generationSettings_annotationsPackage.setUpperBound(1);
+    generationSettingsClass.getEStructuralFeatures().push(generationSettings_annotationsPackage);
+    GenConfigPackage.Literals.GENERATION_SETTINGS__ANNOTATIONS_PACKAGE = generationSettings_annotationsPackage;
 
     // Create PackageSettings class
     const packageSettingsClass = new BasicEClass();

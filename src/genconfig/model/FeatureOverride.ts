@@ -6,6 +6,7 @@
  */
 
 import type { EObject, EStructuralFeature, BasicEObject, EClass } from '@emfts/core';
+import type { PropertyMode } from './PropertyMode.js';
 
 /**
  * FeatureOverride
@@ -13,9 +14,9 @@ import type { EObject, EStructuralFeature, BasicEObject, EClass } from '@emfts/c
  */
 export interface FeatureOverride extends EObject {
   ecoreFeature: EStructuralFeature;
-  notify?: unknown;
-  property?: unknown;
-  customGetter?: unknown;
-  customSetter?: unknown;
+  notify?: boolean;
+  property?: PropertyMode;
+  customGetter?: string;
+  customSetter?: string;
 
 }

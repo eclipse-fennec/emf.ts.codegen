@@ -6,15 +6,17 @@
  */
 
 import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/core';
+import type { GenerationMode } from './GenerationMode.js';
 
 /**
  * GenerationSettings
  * @generated
  */
 export interface GenerationSettings extends EObject {
-  mode: unknown;
-  outputDir: unknown;
-  fileExtension?: unknown;
-  headerComment?: unknown;
+  mode: GenerationMode;
+  outputDir: string;
+  fileExtension?: string;
+  headerComment?: string;
+  annotationsPackage?: string;
 
 }

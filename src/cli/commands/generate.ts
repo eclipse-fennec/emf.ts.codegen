@@ -12,6 +12,7 @@ export const generateCommand = new Command('generate')
   .option('-o, --output <path>', 'Output directory override')
   .option('-d, --dependency <paths...>', 'Dependent .ecore model files (loaded before main model)')
   .option('--import-mapping <mappings...>', 'Import path mappings for referenced packages (format: nsURI=importPath)')
+  .option('-a, --annotations <package>', 'Decorator mode: import annotations from this package instead of generating ModelAnnotations (overrides GenConfig)')
   .option('-v, --verbose', 'Verbose output')
   .action(async (options) => {
     const verbose = options.verbose;
@@ -58,6 +59,11 @@ export const generateCommand = new Command('generate')
       // Convert to internal GenModel
       const converter = new GenConfigConverter();
       const genModel = converter.convert(genConfig);
+
+      // CLI annotations package overrides the GenConfig value
+      if (options.annotations) {
+        genModel.annotationsPackage = options.annotations;
+      }
 
       // Override output directory if specified on command line
       const outputDir = options.output || genConfig.generation.outputDir;

@@ -137,7 +137,8 @@ export class CodeGenerator {
     }
 
     // Generate mode-specific additional files
-    if (this.generator instanceof DecoratorGenerator) {
+    if (this.generator instanceof DecoratorGenerator && !this.genModel.annotationsPackage) {
+      // With annotationsPackage the decorators come from a shared package (#26)
       const annotationsFile = await this.generator.generateModelAnnotations(genPackage);
       files.push(annotationsFile);
     }

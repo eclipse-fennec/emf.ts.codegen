@@ -27,10 +27,10 @@ export class ClassOverrideImpl extends BasicEObject implements ClassOverride {
 
   // Private fields
   private _ecoreClass?: EClass;
-  private _generateInterface?: unknown;
-  private _generateImpl?: unknown;
-  private _extendsClass?: unknown;
-  private _implementsInterfaces!: EList<unknown>;
+  private _generateInterface?: boolean;
+  private _generateImpl?: boolean;
+  private _extendsClass?: string;
+  private _implementsInterfaces!: EList<string>;
   private _featureOverrides!: EList<FeatureOverride>;
 
   /**
@@ -65,11 +65,11 @@ export class ClassOverrideImpl extends BasicEObject implements ClassOverride {
     }
   }
 
-  get generateInterface(): unknown {
+  get generateInterface(): boolean {
     return this._generateInterface!;
   }
 
-  set generateInterface(value: unknown) {
+  set generateInterface(value: boolean) {
     const oldValue = this._generateInterface;
     this._generateInterface = value;
     if (this.eDeliver()) {
@@ -89,11 +89,11 @@ export class ClassOverrideImpl extends BasicEObject implements ClassOverride {
     }
   }
 
-  get generateImpl(): unknown {
+  get generateImpl(): boolean {
     return this._generateImpl!;
   }
 
-  set generateImpl(value: unknown) {
+  set generateImpl(value: boolean) {
     const oldValue = this._generateImpl;
     this._generateImpl = value;
     if (this.eDeliver()) {
@@ -113,11 +113,11 @@ export class ClassOverrideImpl extends BasicEObject implements ClassOverride {
     }
   }
 
-  get extendsClass(): unknown {
+  get extendsClass(): string {
     return this._extendsClass!;
   }
 
-  set extendsClass(value: unknown) {
+  set extendsClass(value: string) {
     const oldValue = this._extendsClass;
     this._extendsClass = value;
     if (this.eDeliver()) {
@@ -137,7 +137,7 @@ export class ClassOverrideImpl extends BasicEObject implements ClassOverride {
     }
   }
 
-  get implementsInterfaces(): EList<unknown> {
+  get implementsInterfaces(): EList<string> {
     if (!this._implementsInterfaces) {
       this._implementsInterfaces = createBasicEList<any>(this, this.eClass().getEStructuralFeature('implementsInterfaces')!);
     }
@@ -187,15 +187,15 @@ export class ClassOverrideImpl extends BasicEObject implements ClassOverride {
         super.eSet(feature, newValue);
         break;
       case ClassOverrideImpl.GENERATE_INTERFACE:
-        this.generateInterface = newValue as unknown;
+        this.generateInterface = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case ClassOverrideImpl.GENERATE_IMPL:
-        this.generateImpl = newValue as unknown;
+        this.generateImpl = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case ClassOverrideImpl.EXTENDS_CLASS:
-        this.extendsClass = newValue as unknown;
+        this.extendsClass = newValue as string;
         super.eSet(feature, newValue);
         break;
       case ClassOverrideImpl.IMPLEMENTS_INTERFACES:

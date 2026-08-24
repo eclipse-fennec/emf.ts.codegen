@@ -6,13 +6,14 @@
  */
 
 import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/core';
+import type { PropertyMode } from './PropertyMode.js';
 
 /**
  * FeatureDefaults
  * @generated
  */
 export interface FeatureDefaults extends EObject {
-  notify?: unknown;
-  property?: unknown;
+  notify?: boolean;
+  property?: PropertyMode;
 
 }

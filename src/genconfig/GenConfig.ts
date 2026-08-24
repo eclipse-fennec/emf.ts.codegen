@@ -63,6 +63,9 @@ export interface GenerationSettings {
 
   /** Custom header comment */
   headerComment?: string;
+
+  /** Decorator mode: import annotations from this package instead of generating ModelAnnotations */
+  annotationsPackage?: string;
 }
 
 /**

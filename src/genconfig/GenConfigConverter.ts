@@ -24,6 +24,7 @@ export class GenConfigConverter {
       // Generation settings
       generationMode: this.convertMode(config.generation.mode),
       modelDirectory: config.generation.outputDir,
+      annotationsPackage: config.generation.annotationsPackage,
 
       // Class defaults
       rootExtendsClass: config.classDefaults?.rootExtendsClass || 'BasicEObject',

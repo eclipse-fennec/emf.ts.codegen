@@ -11,7 +11,7 @@ import { <%- imp.typeName %> } from '<%- imp.importPath %>';
   }
 }
 -%>
-import { Documentation, Attribute, ModelClass, Reference, Enum } from './ModelAnnotations.js';
+import { Documentation, Attribute, ModelClass, Reference, Enum } from '<%- annotationsImport %>';
 
 @ModelClass({ type: '<%- nsURI %>#//<%- className %>' })
 export <% if (isAbstract) { %>abstract <% } %>class <%- className %><%

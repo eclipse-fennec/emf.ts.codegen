@@ -4,4 +4,6 @@
 <% for (const exp of exports) { -%>
 export * from './<%- exp %>.js';
 <% } -%>
+<% if (!annotationsPackage) { -%>
 export * from './ModelAnnotations.js';
+<% } -%>

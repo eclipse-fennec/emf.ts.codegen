@@ -7,6 +7,7 @@
 
 import { BasicEObject } from '@emfts/core';
 import type { EClass, EStructuralFeature } from '@emfts/core';
+import { PropertyMode } from './PropertyMode.js';
 import type { FeatureDefaults } from './FeatureDefaults.js';
 import { GenConfigPackage } from './GenConfigPackage.js';
 
@@ -20,8 +21,8 @@ export class FeatureDefaultsImpl extends BasicEObject implements FeatureDefaults
   static readonly PROPERTY: number = 1;
 
   // Private fields
-  private _notify?: unknown;
-  private _property?: unknown;
+  private _notify: boolean = true;
+  private _property: PropertyMode = PropertyMode.editable;
 
   /**
    * Returns the EClass of this object
@@ -31,11 +32,11 @@ export class FeatureDefaultsImpl extends BasicEObject implements FeatureDefaults
   }
 
   // Getters and Setters
-  get notify(): unknown {
+  get notify(): boolean {
     return this._notify!;
   }
 
-  set notify(value: unknown) {
+  set notify(value: boolean) {
     const oldValue = this._notify;
     this._notify = value;
     if (this.eDeliver()) {
@@ -55,11 +56,11 @@ export class FeatureDefaultsImpl extends BasicEObject implements FeatureDefaults
     }
   }
 
-  get property(): unknown {
+  get property(): PropertyMode {
     return this._property!;
   }
 
-  set property(value: unknown) {
+  set property(value: PropertyMode) {
     const oldValue = this._property;
     this._property = value;
     if (this.eDeliver()) {
@@ -103,11 +104,11 @@ export class FeatureDefaultsImpl extends BasicEObject implements FeatureDefaults
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case FeatureDefaultsImpl.NOTIFY:
-        this.notify = newValue as unknown;
+        this.notify = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case FeatureDefaultsImpl.PROPERTY:
-        this.property = newValue as unknown;
+        this.property = newValue as PropertyMode;
         super.eSet(feature, newValue);
         break;
       default:
@@ -122,9 +123,9 @@ export class FeatureDefaultsImpl extends BasicEObject implements FeatureDefaults
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case FeatureDefaultsImpl.NOTIFY:
-        return this._notify !== undefined;
+        return this._notify !== true;
       case FeatureDefaultsImpl.PROPERTY:
-        return this._property !== undefined;
+        return this._property !== PropertyMode.editable;
       default:
         return super.eIsSet(feature);
     }
@@ -137,10 +138,10 @@ export class FeatureDefaultsImpl extends BasicEObject implements FeatureDefaults
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case FeatureDefaultsImpl.NOTIFY:
-        this._notify = undefined;
+        this._notify = true;
         return;
       case FeatureDefaultsImpl.PROPERTY:
-        this._property = undefined;
+        this._property = PropertyMode.editable;
         return;
       default:
         super.eUnset(feature);

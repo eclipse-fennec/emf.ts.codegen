@@ -12,9 +12,9 @@ import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/c
  * @generated
  */
 export interface ClassDefaults extends EObject {
-  generateInterface?: unknown;
-  generateImpl?: unknown;
-  rootExtendsClass?: unknown;
-  rootExtendsInterface?: unknown;
+  generateInterface?: boolean;
+  generateImpl?: boolean;
+  rootExtendsClass?: string;
+  rootExtendsInterface?: string;
 
 }

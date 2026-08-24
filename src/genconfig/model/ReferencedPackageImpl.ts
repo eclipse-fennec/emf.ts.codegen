@@ -20,8 +20,8 @@ export class ReferencedPackageImpl extends BasicEObject implements ReferencedPac
   static readonly IMPORT_PATH: number = 1;
 
   // Private fields
-  private _nsURI?: unknown;
-  private _importPath?: unknown;
+  private _nsURI: string = "";
+  private _importPath: string = "";
 
   /**
    * Returns the EClass of this object
@@ -31,11 +31,11 @@ export class ReferencedPackageImpl extends BasicEObject implements ReferencedPac
   }
 
   // Getters and Setters
-  get nsURI(): unknown {
+  get nsURI(): string {
     return this._nsURI!;
   }
 
-  set nsURI(value: unknown) {
+  set nsURI(value: string) {
     const oldValue = this._nsURI;
     this._nsURI = value;
     if (this.eDeliver()) {
@@ -55,11 +55,11 @@ export class ReferencedPackageImpl extends BasicEObject implements ReferencedPac
     }
   }
 
-  get importPath(): unknown {
+  get importPath(): string {
     return this._importPath!;
   }
 
-  set importPath(value: unknown) {
+  set importPath(value: string) {
     const oldValue = this._importPath;
     this._importPath = value;
     if (this.eDeliver()) {
@@ -103,11 +103,11 @@ export class ReferencedPackageImpl extends BasicEObject implements ReferencedPac
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case ReferencedPackageImpl.NS_U_R_I:
-        this.nsURI = newValue as unknown;
+        this.nsURI = newValue as string;
         super.eSet(feature, newValue);
         break;
       case ReferencedPackageImpl.IMPORT_PATH:
-        this.importPath = newValue as unknown;
+        this.importPath = newValue as string;
         super.eSet(feature, newValue);
         break;
       default:
@@ -122,9 +122,9 @@ export class ReferencedPackageImpl extends BasicEObject implements ReferencedPac
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case ReferencedPackageImpl.NS_U_R_I:
-        return this._nsURI !== undefined;
+        return this._nsURI !== "";
       case ReferencedPackageImpl.IMPORT_PATH:
-        return this._importPath !== undefined;
+        return this._importPath !== "";
       default:
         return super.eIsSet(feature);
     }
@@ -137,10 +137,10 @@ export class ReferencedPackageImpl extends BasicEObject implements ReferencedPac
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case ReferencedPackageImpl.NS_U_R_I:
-        this._nsURI = undefined;
+        this._nsURI = "";
         return;
       case ReferencedPackageImpl.IMPORT_PATH:
-        this._importPath = undefined;
+        this._importPath = "";
         return;
       default:
         super.eUnset(feature);

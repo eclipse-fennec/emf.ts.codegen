@@ -22,10 +22,10 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
   static readonly ROOT_EXTENDS_INTERFACE: number = 3;
 
   // Private fields
-  private _generateInterface?: unknown;
-  private _generateImpl?: unknown;
-  private _rootExtendsClass?: unknown;
-  private _rootExtendsInterface?: unknown;
+  private _generateInterface: boolean = true;
+  private _generateImpl: boolean = true;
+  private _rootExtendsClass: string = "BasicEObject";
+  private _rootExtendsInterface: string = "EObject";
 
   /**
    * Returns the EClass of this object
@@ -35,11 +35,11 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
   }
 
   // Getters and Setters
-  get generateInterface(): unknown {
+  get generateInterface(): boolean {
     return this._generateInterface!;
   }
 
-  set generateInterface(value: unknown) {
+  set generateInterface(value: boolean) {
     const oldValue = this._generateInterface;
     this._generateInterface = value;
     if (this.eDeliver()) {
@@ -59,11 +59,11 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
     }
   }
 
-  get generateImpl(): unknown {
+  get generateImpl(): boolean {
     return this._generateImpl!;
   }
 
-  set generateImpl(value: unknown) {
+  set generateImpl(value: boolean) {
     const oldValue = this._generateImpl;
     this._generateImpl = value;
     if (this.eDeliver()) {
@@ -83,11 +83,11 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
     }
   }
 
-  get rootExtendsClass(): unknown {
+  get rootExtendsClass(): string {
     return this._rootExtendsClass!;
   }
 
-  set rootExtendsClass(value: unknown) {
+  set rootExtendsClass(value: string) {
     const oldValue = this._rootExtendsClass;
     this._rootExtendsClass = value;
     if (this.eDeliver()) {
@@ -107,11 +107,11 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
     }
   }
 
-  get rootExtendsInterface(): unknown {
+  get rootExtendsInterface(): string {
     return this._rootExtendsInterface!;
   }
 
-  set rootExtendsInterface(value: unknown) {
+  set rootExtendsInterface(value: string) {
     const oldValue = this._rootExtendsInterface;
     this._rootExtendsInterface = value;
     if (this.eDeliver()) {
@@ -159,19 +159,19 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case ClassDefaultsImpl.GENERATE_INTERFACE:
-        this.generateInterface = newValue as unknown;
+        this.generateInterface = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case ClassDefaultsImpl.GENERATE_IMPL:
-        this.generateImpl = newValue as unknown;
+        this.generateImpl = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case ClassDefaultsImpl.ROOT_EXTENDS_CLASS:
-        this.rootExtendsClass = newValue as unknown;
+        this.rootExtendsClass = newValue as string;
         super.eSet(feature, newValue);
         break;
       case ClassDefaultsImpl.ROOT_EXTENDS_INTERFACE:
-        this.rootExtendsInterface = newValue as unknown;
+        this.rootExtendsInterface = newValue as string;
         super.eSet(feature, newValue);
         break;
       default:
@@ -186,13 +186,13 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case ClassDefaultsImpl.GENERATE_INTERFACE:
-        return this._generateInterface !== undefined;
+        return this._generateInterface !== true;
       case ClassDefaultsImpl.GENERATE_IMPL:
-        return this._generateImpl !== undefined;
+        return this._generateImpl !== true;
       case ClassDefaultsImpl.ROOT_EXTENDS_CLASS:
-        return this._rootExtendsClass !== undefined;
+        return this._rootExtendsClass !== "BasicEObject";
       case ClassDefaultsImpl.ROOT_EXTENDS_INTERFACE:
-        return this._rootExtendsInterface !== undefined;
+        return this._rootExtendsInterface !== "EObject";
       default:
         return super.eIsSet(feature);
     }
@@ -205,16 +205,16 @@ export class ClassDefaultsImpl extends BasicEObject implements ClassDefaults {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case ClassDefaultsImpl.GENERATE_INTERFACE:
-        this._generateInterface = undefined;
+        this._generateInterface = true;
         return;
       case ClassDefaultsImpl.GENERATE_IMPL:
-        this._generateImpl = undefined;
+        this._generateImpl = true;
         return;
       case ClassDefaultsImpl.ROOT_EXTENDS_CLASS:
-        this._rootExtendsClass = undefined;
+        this._rootExtendsClass = "BasicEObject";
         return;
       case ClassDefaultsImpl.ROOT_EXTENDS_INTERFACE:
-        this._rootExtendsInterface = undefined;
+        this._rootExtendsInterface = "EObject";
         return;
       default:
         super.eUnset(feature);

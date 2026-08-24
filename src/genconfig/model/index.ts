@@ -30,3 +30,5 @@ export { ClassOverrideImpl } from './ClassOverrideImpl.js';
 export { FeatureOverrideImpl } from './FeatureOverrideImpl.js';
 
 // Enums
+export { GenerationMode, getGenerationMode, getGenerationModeByLiteral } from './GenerationMode.js';
+export { PropertyMode, getPropertyMode, getPropertyModeByLiteral } from './PropertyMode.js';
