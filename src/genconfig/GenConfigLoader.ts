@@ -340,7 +340,14 @@ export class GenConfigLoader {
     if (!ref) return null;
 
     // If it's already an EPackage
-    if (typeof ref === 'object' && 'getNsURI' in ref) {
+    if (typeof ref === 'object' && 'getNsURI' in ref && typeof ref.getNsURI === 'function') {
+      // Prefer the explicitly registered package (the model passed via -m):
+      // when generating the genconfig model itself, the XMI reference resolves
+      // to the built-in generated GenConfigPackage instead of the loaded .ecore
+      const nsURI = (ref as EPackage).getNsURI();
+      if (nsURI && this.ecorePackages.has(nsURI)) {
+        return this.ecorePackages.get(nsURI)!;
+      }
       return ref as EPackage;
     }
 
