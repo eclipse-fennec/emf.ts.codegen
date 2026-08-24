@@ -96,7 +96,7 @@ export async function generate(options: GenerateOptions): Promise<GenerationResu
   // Generate code
   const generator = new CodeGenerator(genModel, {
     outputDirectory: outputDir,
-    referencedPackages: options.referencedPackages,
+    referencedPackages: mergeReferencedPackages(genConfig, options.referencedPackages),
   });
   const result = await generator.generate();
 
@@ -149,9 +149,26 @@ export async function generateInMemory(options: Omit<GenerateOptions, 'outputDir
   // Generate code
   const generator = new CodeGenerator(genModel, {
     outputDirectory: genConfig.generation.outputDir,
-    referencedPackages: options.referencedPackages,
+    referencedPackages: mergeReferencedPackages(genConfig, options.referencedPackages),
   });
   return generator.generate();
+}
+
+/**
+ * Merge referenced packages: GenConfig entries are the defaults, explicit options override
+ */
+function mergeReferencedPackages(
+  genConfig: import('./genconfig/GenConfig.js').GenConfig,
+  override?: Map<string, string>
+): Map<string, string> | undefined {
+  const merged = new Map<string, string>();
+  for (const ref of genConfig.referencedPackages ?? []) {
+    merged.set(ref.nsURI, ref.importPath);
+  }
+  for (const [nsURI, importPath] of override ?? []) {
+    merged.set(nsURI, importPath);
+  }
+  return merged.size > 0 ? merged : undefined;
 }
 
 /**

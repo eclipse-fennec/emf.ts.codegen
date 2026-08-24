@@ -31,6 +31,21 @@ export interface GenConfig {
 
   /** Per-class overrides */
   classOverrides?: ClassOverride[];
+
+  /** Import path mappings for cross-package references */
+  referencedPackages?: ReferencedPackage[];
+}
+
+/**
+ * Maps the nsURI of an external EPackage to the TypeScript import path
+ * of its generated code (equivalent of usedGenPackages in EMF Java genmodels)
+ */
+export interface ReferencedPackage {
+  /** nsURI of the external EPackage */
+  nsURI: string;
+
+  /** TypeScript import path (e.g. '@uimodel/core') */
+  importPath: string;
 }
 
 /**

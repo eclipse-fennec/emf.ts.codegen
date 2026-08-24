@@ -3,6 +3,7 @@ import { EcoreLoader } from '../../loader/EcoreLoader.js';
 import { GenConfigLoader } from '../../genconfig/GenConfigLoader.js';
 import { GenConfigConverter } from '../../genconfig/GenConfigConverter.js';
 import { CodeGenerator } from '../../generator/CodeGenerator.js';
+import { parseImportMappings } from '../import-mappings.js';
 
 export const generateCommand = new Command('generate')
   .description('Generate TypeScript code from Ecore model')
@@ -61,19 +62,13 @@ export const generateCommand = new Command('generate')
       // Override output directory if specified on command line
       const outputDir = options.output || genConfig.generation.outputDir;
 
-      // Parse import mappings (nsURI=importPath)
+      // Referenced packages: GenConfig entries are the defaults, CLI mappings override
       const referencedPackages = new Map<string, string>();
-      if (options.importMapping) {
-        for (const mapping of options.importMapping) {
-          const eqIdx = mapping.indexOf('=');
-          if (eqIdx === -1) {
-            console.warn(`[WARN] Invalid import mapping (expected nsURI=importPath): ${mapping}`);
-            continue;
-          }
-          const nsURI = mapping.substring(0, eqIdx);
-          const importPath = mapping.substring(eqIdx + 1);
-          referencedPackages.set(nsURI, importPath);
-        }
+      for (const ref of genConfig.referencedPackages ?? []) {
+        referencedPackages.set(ref.nsURI, ref.importPath);
+      }
+      for (const [nsURI, importPath] of parseImportMappings(options.importMapping)) {
+        referencedPackages.set(nsURI, importPath);
       }
 
       if (verbose) {
