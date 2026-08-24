@@ -94,6 +94,7 @@ if (needsRegistryImport) coreImports.push('EPackageRegistry');
 -%>
 import { <%- coreImports.join(', ') %> } from '@emfts/core';
 import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
+import { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
 
 /**
  * <%- packageName %> Package
@@ -138,6 +139,11 @@ export class <%- packageName %>Package extends BasicEPackage {
    * Initialize package contents
    */
   private init(): void {
+    // Wire the generated factory so loaded/created instances are typed Impls.
+    // eINSTANCE is already assigned at this point, so the factory's back
+    // reference to the package resolves without re-entering init()
+    this.setEFactoryInstance(<%- packageName %>Factory.eINSTANCE);
+
 <% for (const genClass of genClasses) {
   const eClass = genClass.ecoreClass;
   const className = getName(eClass);
