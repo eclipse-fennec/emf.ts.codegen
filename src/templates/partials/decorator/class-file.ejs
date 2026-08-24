@@ -48,8 +48,9 @@ if (superTypes && superTypes.length > 0) {
   const featureName = feature.getName();
   const featureType = typeMapper.mapFeatureBaseType(feature);
   // Decorator argument is a runtime type NAME for metadata lookups -
-  // generic type arguments must not leak into it (#29)
-  const decoratorTypeName = feature.getEType?.()?.getName?.() ?? featureType;
+  // generic type arguments must not leak into it (#29). Derived from the
+  // mapped type, because an unresolved cross-package eType proxy has no getName
+  const decoratorTypeName = featureType.split('<')[0];
   const fullType = typeMapper.mapFeature(feature);
   const defaultValue = typeMapper.getDefaultValue(feature);
   const isMany = feature.isMany();
