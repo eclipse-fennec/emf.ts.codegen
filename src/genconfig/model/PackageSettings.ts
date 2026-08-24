@@ -12,10 +12,10 @@ import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/c
  * @generated
  */
 export interface PackageSettings extends EObject {
-  prefix: unknown;
-  basePackage?: unknown;
-  generateFactory?: unknown;
-  generatePackage?: unknown;
-  generateIndex?: unknown;
+  prefix: string;
+  basePackage?: string;
+  generateFactory?: boolean;
+  generatePackage?: boolean;
+  generateIndex?: boolean;
 
 }

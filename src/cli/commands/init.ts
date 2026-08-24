@@ -19,6 +19,7 @@ export const initCommand = new Command('init')
   .option('--output-dir <dir>', 'Output directory for generated code', './generated')
   .option('-d, --dependency <paths...>', 'Dependent .ecore model files (loaded before main model)')
   .option('--import-mapping <mappings...>', 'Import path mappings for referenced packages, written to the GenConfig (format: nsURI=importPath)')
+  .option('-a, --annotations <package>', 'Decorator mode: import annotations from this package instead of generating ModelAnnotations')
   .action(async (options) => {
     try {
       const ecoreLoader = new EcoreLoader();
@@ -49,7 +50,7 @@ export const initCommand = new Command('init')
       const referencedPackages = parseImportMappings(options.importMapping);
 
       // Generate GenConfig XMI content
-      const xmiContent = generateGenConfigXMI(nsURI, mode, outputDir, prefix, basePackage, referencedPackages);
+      const xmiContent = generateGenConfigXMI(nsURI, mode, outputDir, prefix, basePackage, referencedPackages, options.annotations);
 
       // Determine output path
       const outputPath = options.output ?? options.model.replace(/\.ecore$/, '.genconfig.xmi');
@@ -62,6 +63,9 @@ export const initCommand = new Command('init')
       console.log('Prefix:', prefix);
       console.log('Base package:', basePackage);
       console.log('Output directory:', outputDir);
+      if (options.annotations) {
+        console.log('Annotations package:', options.annotations);
+      }
       for (const [refNsURI, importPath] of referencedPackages) {
         console.log(`Referenced package: ${refNsURI} → ${importPath}`);
       }
@@ -82,7 +86,8 @@ export function generateGenConfigXMI(
   outputDir: string,
   prefix: string,
   basePackage: string,
-  referencedPackages?: Map<string, string>
+  referencedPackages?: Map<string, string>,
+  annotationsPackage?: string
 ): string {
   const factory = GenConfigPackage.eINSTANCE.getEFactoryInstance() as GenConfigFactory;
 
@@ -95,6 +100,9 @@ export function generateGenConfigXMI(
   const generation = factory.createGenerationSettings();
   generation.mode = getGenerationModeByLiteral(mode) ?? GenerationMode.emf;
   generation.outputDir = outputDir;
+  if (annotationsPackage) {
+    generation.annotationsPackage = annotationsPackage;
+  }
   genConfig.generation = generation;
 
   const packageSettings = factory.createPackageSettings();

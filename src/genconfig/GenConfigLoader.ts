@@ -180,7 +180,8 @@ export class GenConfigLoader {
       mode,
       outputDir: this.getFeatureValue(obj, 'outputDir') || './generated',
       fileExtension: this.getFeatureValue(obj, 'fileExtension') || '.ts',
-      headerComment: this.getFeatureValue(obj, 'headerComment')
+      headerComment: this.getFeatureValue(obj, 'headerComment'),
+      annotationsPackage: this.getFeatureValue(obj, 'annotationsPackage')
     };
   }
 

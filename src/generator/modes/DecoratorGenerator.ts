@@ -35,7 +35,8 @@ export class DecoratorGenerator extends BaseGenerator {
       superTypes: eClass.getESuperTypes(),
       features: genClass.genFeatures,
       operations: genClass.genOperations,
-      typeParameters: eClass.getETypeParameters()
+      typeParameters: eClass.getETypeParameters(),
+      annotationsImport: this.getAnnotationsImport()
     });
 
     const path = this.getClassPath(genClass, genPackage);
@@ -154,11 +155,20 @@ export class DecoratorGenerator extends BaseGenerator {
       genPackage,
       ePackage,
       packageName,
-      exports
+      exports,
+      annotationsPackage: this.context.genModel.annotationsPackage
     });
 
     const packagePath = this.getPackagePath(genPackage);
     return this.createFile(join(packagePath, 'index.ts'), content);
+  }
+
+  /**
+   * Import source for the decorator annotations: the configured shared
+   * package (#26), or the generated per-model ModelAnnotations file
+   */
+  private getAnnotationsImport(): string {
+    return this.context.genModel.annotationsPackage ?? './ModelAnnotations.js';
   }
 
   /**

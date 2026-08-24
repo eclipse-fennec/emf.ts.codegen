@@ -7,6 +7,7 @@
 
 import { BasicEObject } from '@emfts/core';
 import type { EClass, EStructuralFeature } from '@emfts/core';
+import type { PropertyMode } from './PropertyMode.js';
 import type { FeatureOverride } from './FeatureOverride.js';
 import { GenConfigPackage } from './GenConfigPackage.js';
 
@@ -24,10 +25,10 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
 
   // Private fields
   private _ecoreFeature?: EStructuralFeature;
-  private _notify?: unknown;
-  private _property?: unknown;
-  private _customGetter?: unknown;
-  private _customSetter?: unknown;
+  private _notify?: boolean;
+  private _property?: PropertyMode;
+  private _customGetter?: string;
+  private _customSetter?: string;
 
   /**
    * Returns the EClass of this object
@@ -61,11 +62,11 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
     }
   }
 
-  get notify(): unknown {
+  get notify(): boolean {
     return this._notify!;
   }
 
-  set notify(value: unknown) {
+  set notify(value: boolean) {
     const oldValue = this._notify;
     this._notify = value;
     if (this.eDeliver()) {
@@ -85,11 +86,11 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
     }
   }
 
-  get property(): unknown {
+  get property(): PropertyMode {
     return this._property!;
   }
 
-  set property(value: unknown) {
+  set property(value: PropertyMode) {
     const oldValue = this._property;
     this._property = value;
     if (this.eDeliver()) {
@@ -109,11 +110,11 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
     }
   }
 
-  get customGetter(): unknown {
+  get customGetter(): string {
     return this._customGetter!;
   }
 
-  set customGetter(value: unknown) {
+  set customGetter(value: string) {
     const oldValue = this._customGetter;
     this._customGetter = value;
     if (this.eDeliver()) {
@@ -133,11 +134,11 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
     }
   }
 
-  get customSetter(): unknown {
+  get customSetter(): string {
     return this._customSetter!;
   }
 
-  set customSetter(value: unknown) {
+  set customSetter(value: string) {
     const oldValue = this._customSetter;
     this._customSetter = value;
     if (this.eDeliver()) {
@@ -191,19 +192,19 @@ export class FeatureOverrideImpl extends BasicEObject implements FeatureOverride
         super.eSet(feature, newValue);
         break;
       case FeatureOverrideImpl.NOTIFY:
-        this.notify = newValue as unknown;
+        this.notify = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case FeatureOverrideImpl.PROPERTY:
-        this.property = newValue as unknown;
+        this.property = newValue as PropertyMode;
         super.eSet(feature, newValue);
         break;
       case FeatureOverrideImpl.CUSTOM_GETTER:
-        this.customGetter = newValue as unknown;
+        this.customGetter = newValue as string;
         super.eSet(feature, newValue);
         break;
       case FeatureOverrideImpl.CUSTOM_SETTER:
-        this.customSetter = newValue as unknown;
+        this.customSetter = newValue as string;
         super.eSet(feature, newValue);
         break;
       default:

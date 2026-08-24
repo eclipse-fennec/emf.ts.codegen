@@ -2,12 +2,13 @@
 
 import 'reflect-metadata';
 
-// Metadata keys
-const MODEL_CLASS_KEY = Symbol('modelClass');
-const ATTRIBUTE_KEY = Symbol('attribute');
-const REFERENCE_KEY = Symbol('reference');
-const ENUM_KEY = Symbol('enum');
-const DOCUMENTATION_KEY = Symbol('documentation');
+// Metadata keys: Symbol.for() so every generated copy of this file shares
+// the same identities and cross-package metadata readers see all models (#26)
+const MODEL_CLASS_KEY = Symbol.for('emfts.modelClass');
+const ATTRIBUTE_KEY = Symbol.for('emfts.attribute');
+const REFERENCE_KEY = Symbol.for('emfts.reference');
+const ENUM_KEY = Symbol.for('emfts.enum');
+const DOCUMENTATION_KEY = Symbol.for('emfts.documentation');
 
 /**
  * Decorator for model classes

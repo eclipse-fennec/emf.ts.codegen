@@ -14,10 +14,10 @@ import type { FeatureOverride } from './FeatureOverride.js';
  */
 export interface ClassOverride extends EObject {
   ecoreClass: EClass;
-  generateInterface?: unknown;
-  generateImpl?: unknown;
-  extendsClass?: unknown;
-  implementsInterfaces: EList<unknown>;
+  generateInterface?: boolean;
+  generateImpl?: boolean;
+  extendsClass?: string;
+  implementsInterfaces: EList<string>;
   featureOverrides: EList<FeatureOverride>;
 
 }

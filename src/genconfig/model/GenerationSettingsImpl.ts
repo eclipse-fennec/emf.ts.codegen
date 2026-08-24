@@ -7,6 +7,7 @@
 
 import { BasicEObject } from '@emfts/core';
 import type { EClass, EStructuralFeature } from '@emfts/core';
+import { GenerationMode } from './GenerationMode.js';
 import type { GenerationSettings } from './GenerationSettings.js';
 import { GenConfigPackage } from './GenConfigPackage.js';
 
@@ -20,12 +21,14 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
   static readonly OUTPUT_DIR: number = 1;
   static readonly FILE_EXTENSION: number = 2;
   static readonly HEADER_COMMENT: number = 3;
+  static readonly ANNOTATIONS_PACKAGE: number = 4;
 
   // Private fields
-  private _mode?: unknown;
-  private _outputDir?: unknown;
-  private _fileExtension?: unknown;
-  private _headerComment?: unknown;
+  private _mode: GenerationMode = GenerationMode.emf;
+  private _outputDir: string = "./generated";
+  private _fileExtension: string = ".ts";
+  private _headerComment?: string;
+  private _annotationsPackage?: string;
 
   /**
    * Returns the EClass of this object
@@ -35,11 +38,11 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
   }
 
   // Getters and Setters
-  get mode(): unknown {
+  get mode(): GenerationMode {
     return this._mode!;
   }
 
-  set mode(value: unknown) {
+  set mode(value: GenerationMode) {
     const oldValue = this._mode;
     this._mode = value;
     if (this.eDeliver()) {
@@ -59,11 +62,11 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
     }
   }
 
-  get outputDir(): unknown {
+  get outputDir(): string {
     return this._outputDir!;
   }
 
-  set outputDir(value: unknown) {
+  set outputDir(value: string) {
     const oldValue = this._outputDir;
     this._outputDir = value;
     if (this.eDeliver()) {
@@ -83,11 +86,11 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
     }
   }
 
-  get fileExtension(): unknown {
+  get fileExtension(): string {
     return this._fileExtension!;
   }
 
-  set fileExtension(value: unknown) {
+  set fileExtension(value: string) {
     const oldValue = this._fileExtension;
     this._fileExtension = value;
     if (this.eDeliver()) {
@@ -107,11 +110,11 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
     }
   }
 
-  get headerComment(): unknown {
+  get headerComment(): string {
     return this._headerComment!;
   }
 
-  set headerComment(value: unknown) {
+  set headerComment(value: string) {
     const oldValue = this._headerComment;
     this._headerComment = value;
     if (this.eDeliver()) {
@@ -126,6 +129,30 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
         isTouch: () => false,
         isReset: () => false,
         getFeatureID: () => GenerationSettingsImpl.HEADER_COMMENT,
+        merge: () => false
+      });
+    }
+  }
+
+  get annotationsPackage(): string {
+    return this._annotationsPackage!;
+  }
+
+  set annotationsPackage(value: string) {
+    const oldValue = this._annotationsPackage;
+    this._annotationsPackage = value;
+    if (this.eDeliver()) {
+      this.eNotify({
+        getNotifier: () => this,
+        getEventType: () => 1, // SET
+        getFeature: () => this.eClass().getEStructuralFeature(GenerationSettingsImpl.ANNOTATIONS_PACKAGE),
+        getOldValue: () => oldValue,
+        getNewValue: () => value,
+        getPosition: () => -1,
+        wasSet: () => true,
+        isTouch: () => false,
+        isReset: () => false,
+        getFeatureID: () => GenerationSettingsImpl.ANNOTATIONS_PACKAGE,
         merge: () => false
       });
     }
@@ -147,6 +174,8 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
         return this.fileExtension;
       case GenerationSettingsImpl.HEADER_COMMENT:
         return this.headerComment;
+      case GenerationSettingsImpl.ANNOTATIONS_PACKAGE:
+        return this.annotationsPackage;
       default:
         return super.eGet(feature);
     }
@@ -159,19 +188,23 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case GenerationSettingsImpl.MODE:
-        this.mode = newValue as unknown;
+        this.mode = newValue as GenerationMode;
         super.eSet(feature, newValue);
         break;
       case GenerationSettingsImpl.OUTPUT_DIR:
-        this.outputDir = newValue as unknown;
+        this.outputDir = newValue as string;
         super.eSet(feature, newValue);
         break;
       case GenerationSettingsImpl.FILE_EXTENSION:
-        this.fileExtension = newValue as unknown;
+        this.fileExtension = newValue as string;
         super.eSet(feature, newValue);
         break;
       case GenerationSettingsImpl.HEADER_COMMENT:
-        this.headerComment = newValue as unknown;
+        this.headerComment = newValue as string;
+        super.eSet(feature, newValue);
+        break;
+      case GenerationSettingsImpl.ANNOTATIONS_PACKAGE:
+        this.annotationsPackage = newValue as string;
         super.eSet(feature, newValue);
         break;
       default:
@@ -186,13 +219,15 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case GenerationSettingsImpl.MODE:
-        return this._mode !== undefined;
+        return this._mode !== GenerationMode.emf;
       case GenerationSettingsImpl.OUTPUT_DIR:
-        return this._outputDir !== undefined;
+        return this._outputDir !== "./generated";
       case GenerationSettingsImpl.FILE_EXTENSION:
-        return this._fileExtension !== undefined;
+        return this._fileExtension !== ".ts";
       case GenerationSettingsImpl.HEADER_COMMENT:
         return this._headerComment !== undefined;
+      case GenerationSettingsImpl.ANNOTATIONS_PACKAGE:
+        return this._annotationsPackage !== undefined;
       default:
         return super.eIsSet(feature);
     }
@@ -205,16 +240,19 @@ export class GenerationSettingsImpl extends BasicEObject implements GenerationSe
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case GenerationSettingsImpl.MODE:
-        this._mode = undefined;
+        this._mode = GenerationMode.emf;
         return;
       case GenerationSettingsImpl.OUTPUT_DIR:
-        this._outputDir = undefined;
+        this._outputDir = "./generated";
         return;
       case GenerationSettingsImpl.FILE_EXTENSION:
-        this._fileExtension = undefined;
+        this._fileExtension = ".ts";
         return;
       case GenerationSettingsImpl.HEADER_COMMENT:
         this._headerComment = undefined;
+        return;
+      case GenerationSettingsImpl.ANNOTATIONS_PACKAGE:
+        this._annotationsPackage = undefined;
         return;
       default:
         super.eUnset(feature);

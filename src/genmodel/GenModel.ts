@@ -41,6 +41,9 @@ export interface GenModel {
   /** File header comment */
   copyrightText?: string;
 
+  /** Decorator mode: import annotations from this package instead of generating ModelAnnotations */
+  annotationsPackage?: string;
+
   /** Packages to generate */
   genPackages: GenPackage[];
 

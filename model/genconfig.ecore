@@ -48,6 +48,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="outputDir" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="./generated"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="fileExtension" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral=".ts"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="headerComment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annotationsPackage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Decorator mode: import ModelClass/Attribute/... decorators from this package instead of generating ModelAnnotations per model"/>
+      </eAnnotations>
+    </eStructuralFeatures>
   </eClassifiers>
 
   <eClassifiers xsi:type="ecore:EEnum" name="GenerationMode">

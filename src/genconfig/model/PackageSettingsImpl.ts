@@ -23,11 +23,11 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
   static readonly GENERATE_INDEX: number = 4;
 
   // Private fields
-  private _prefix?: unknown;
-  private _basePackage?: unknown;
-  private _generateFactory?: unknown;
-  private _generatePackage?: unknown;
-  private _generateIndex?: unknown;
+  private _prefix: string = "";
+  private _basePackage?: string;
+  private _generateFactory: boolean = true;
+  private _generatePackage: boolean = true;
+  private _generateIndex: boolean = true;
 
   /**
    * Returns the EClass of this object
@@ -37,11 +37,11 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
   }
 
   // Getters and Setters
-  get prefix(): unknown {
+  get prefix(): string {
     return this._prefix!;
   }
 
-  set prefix(value: unknown) {
+  set prefix(value: string) {
     const oldValue = this._prefix;
     this._prefix = value;
     if (this.eDeliver()) {
@@ -61,11 +61,11 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     }
   }
 
-  get basePackage(): unknown {
+  get basePackage(): string {
     return this._basePackage!;
   }
 
-  set basePackage(value: unknown) {
+  set basePackage(value: string) {
     const oldValue = this._basePackage;
     this._basePackage = value;
     if (this.eDeliver()) {
@@ -85,11 +85,11 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     }
   }
 
-  get generateFactory(): unknown {
+  get generateFactory(): boolean {
     return this._generateFactory!;
   }
 
-  set generateFactory(value: unknown) {
+  set generateFactory(value: boolean) {
     const oldValue = this._generateFactory;
     this._generateFactory = value;
     if (this.eDeliver()) {
@@ -109,11 +109,11 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     }
   }
 
-  get generatePackage(): unknown {
+  get generatePackage(): boolean {
     return this._generatePackage!;
   }
 
-  set generatePackage(value: unknown) {
+  set generatePackage(value: boolean) {
     const oldValue = this._generatePackage;
     this._generatePackage = value;
     if (this.eDeliver()) {
@@ -133,11 +133,11 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     }
   }
 
-  get generateIndex(): unknown {
+  get generateIndex(): boolean {
     return this._generateIndex!;
   }
 
-  set generateIndex(value: unknown) {
+  set generateIndex(value: boolean) {
     const oldValue = this._generateIndex;
     this._generateIndex = value;
     if (this.eDeliver()) {
@@ -187,23 +187,23 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PackageSettingsImpl.PREFIX:
-        this.prefix = newValue as unknown;
+        this.prefix = newValue as string;
         super.eSet(feature, newValue);
         break;
       case PackageSettingsImpl.BASE_PACKAGE:
-        this.basePackage = newValue as unknown;
+        this.basePackage = newValue as string;
         super.eSet(feature, newValue);
         break;
       case PackageSettingsImpl.GENERATE_FACTORY:
-        this.generateFactory = newValue as unknown;
+        this.generateFactory = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case PackageSettingsImpl.GENERATE_PACKAGE:
-        this.generatePackage = newValue as unknown;
+        this.generatePackage = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       case PackageSettingsImpl.GENERATE_INDEX:
-        this.generateIndex = newValue as unknown;
+        this.generateIndex = newValue as boolean;
         super.eSet(feature, newValue);
         break;
       default:
@@ -218,15 +218,15 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PackageSettingsImpl.PREFIX:
-        return this._prefix !== undefined;
+        return this._prefix !== "";
       case PackageSettingsImpl.BASE_PACKAGE:
         return this._basePackage !== undefined;
       case PackageSettingsImpl.GENERATE_FACTORY:
-        return this._generateFactory !== undefined;
+        return this._generateFactory !== true;
       case PackageSettingsImpl.GENERATE_PACKAGE:
-        return this._generatePackage !== undefined;
+        return this._generatePackage !== true;
       case PackageSettingsImpl.GENERATE_INDEX:
-        return this._generateIndex !== undefined;
+        return this._generateIndex !== true;
       default:
         return super.eIsSet(feature);
     }
@@ -239,19 +239,19 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PackageSettingsImpl.PREFIX:
-        this._prefix = undefined;
+        this._prefix = "";
         return;
       case PackageSettingsImpl.BASE_PACKAGE:
         this._basePackage = undefined;
         return;
       case PackageSettingsImpl.GENERATE_FACTORY:
-        this._generateFactory = undefined;
+        this._generateFactory = true;
         return;
       case PackageSettingsImpl.GENERATE_PACKAGE:
-        this._generatePackage = undefined;
+        this._generatePackage = true;
         return;
       case PackageSettingsImpl.GENERATE_INDEX:
-        this._generateIndex = undefined;
+        this._generateIndex = true;
         return;
       default:
         super.eUnset(feature);

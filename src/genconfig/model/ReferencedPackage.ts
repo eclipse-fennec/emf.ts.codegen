@@ -12,7 +12,7 @@ import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/c
  * @generated
  */
 export interface ReferencedPackage extends EObject {
-  nsURI: unknown;
-  importPath: unknown;
+  nsURI: string;
+  importPath: string;
 
 }
