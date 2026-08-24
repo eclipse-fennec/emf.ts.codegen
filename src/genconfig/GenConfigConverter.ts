@@ -213,7 +213,9 @@ export class GenConfigConverter {
   private convertEnum(eEnum: EEnum): GenEnum {
     return {
       ecoreEnum: eEnum,
-      useStringValues: false,
+      // String enums carry the EEnumLiteral literal - persisted data compares
+      // against exactly those strings, numeric members would break it (#28)
+      useStringValues: true,
       generateAsConst: false
     };
   }
