@@ -107,6 +107,16 @@ export class TypeMapper {
    * Map the base type of a feature (without array wrapper)
    */
   mapFeatureBaseType(feature: EStructuralFeature): string {
+    // A generic type with type arguments carries more information than the
+    // plain eType (e.g. VariableWrapper<string> instead of VariableWrapper)
+    const genericType = (feature as any).getEGenericType?.();
+    if (genericType) {
+      const typeArguments = EObjectHelper.getFeatureValue(genericType, 'eTypeArguments') || [];
+      if (typeArguments.length > 0) {
+        return this.mapGenericType(genericType);
+      }
+    }
+
     // Use eType directly
     const eType = EObjectHelper.getEType(feature);
     return this.mapClassifier(eType);
@@ -192,6 +202,11 @@ export class TypeMapper {
         if (eType && this.isEEnum(eType)) {
           const enumName = EObjectHelper.getName(eType) ?? typeName;
           return `${enumName}.${literal}`;
+        }
+        // A reference default needs an instance - emitting the raw literal
+        // would assign e.g. a number to a class-typed feature (#29)
+        if (this.isReference(feature)) {
+          return `new ${typeName}()`;
         }
         return literal;
     }

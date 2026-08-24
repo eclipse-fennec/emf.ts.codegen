@@ -28,7 +28,7 @@ export enum <%- enumName %> {
   const literal = literals[i];
   const literalName = getLiteralProp(literal, 'literal') || getLiteralProp(literal, 'name');
   const literalValue = getLiteralProp(literal, 'value');
-  const value = useStringValues ? `'${literalName}'` : literalValue;
+  const value = useStringValues ? JSON.stringify(literalName) : literalValue;
 -%>
   <%- getLiteralProp(literal, 'name') %> = <%- value %><% if (i < literals.length - 1) { %>,<% } %>
 <% } -%>

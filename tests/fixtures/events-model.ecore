@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="events" nsURI="http://example.org/events" nsPrefix="events">
+
+  <!-- Issue #28: enum literals differ from names -->
+  <eClassifiers xsi:type="ecore:EEnum" name="Comparator">
+    <eLiterals name="eq" literal="=="/>
+    <eLiterals name="neq" value="1" literal="!="/>
+    <eLiterals name="lt" value="2" literal="&lt;"/>
+    <eLiterals name="gte" value="3" literal="&gt;="/>
+  </eClassifiers>
+
+  <!-- Issue #29 (1+2): generic type arguments and reference instantiation -->
+  <eClassifiers xsi:type="ecore:EClass" name="VariableWrapper">
+    <eTypeParameters name="T"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+  </eClassifiers>
+
+  <eClassifiers xsi:type="ecore:EClass" name="TextSettings">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fontSize" defaultValueLiteral="12">
+      <eGenericType eClassifier="#//VariableWrapper">
+        <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      </eGenericType>
+    </eStructuralFeatures>
+  </eClassifiers>
+
+  <!-- Issue #29 (3): attribute default from defaultValueLiteral, enum-typed -->
+  <eClassifiers xsi:type="ecore:EClass" name="Condition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="comparator" eType="#//Comparator" defaultValueLiteral="eq"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="threshold"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="5"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+  </eClassifiers>
+
+  <!-- Issue #29 (4): many-valued feature must initialize to [] -->
+  <eClassifiers xsi:type="ecore:EClass" name="Mapping">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conditions" upperBound="-1"
+        eType="#//Condition" containment="true"/>
+  </eClassifiers>
+
+</ecore:EPackage>
