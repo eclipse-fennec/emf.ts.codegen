@@ -173,6 +173,20 @@ export class TypeMapper {
       }
     }
 
+    // Decorator/plain mode: a single-valued reference to a concrete class is
+    // instantiated with its no-arg constructor (#33). Abstract classes,
+    // interfaces, direct self-references and Ecore metaclasses (type-only in
+    // @emfts/core) stay unset; an unresolved proxy is presumed concrete
+    if (!this.useEList && eType && this.isReference(feature)) {
+      const isAbstract = typeof (eType as any).isAbstract === 'function' && (eType as any).isAbstract();
+      const isInterface = typeof (eType as any).isInterface === 'function' && (eType as any).isInterface();
+      const isSelfReference = (feature as any).getEContainingClass?.() === eType;
+      const isEcoreType = EObjectHelper.getEPackage(eType)?.getNsURI?.() === 'http://www.eclipse.org/emf/2002/Ecore';
+      if (!isAbstract && !isInterface && !isSelfReference && !isEcoreType) {
+        return `new ${this.mapFeatureBaseType(feature)}()`;
+      }
+    }
+
     // Check if required
     const lowerBound = EObjectHelper.getLowerBound(feature);
     if (lowerBound === 0) {

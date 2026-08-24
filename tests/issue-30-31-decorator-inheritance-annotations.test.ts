@@ -48,7 +48,7 @@ describe('Issues #30/#31: decorator inheritance and custom annotations', () => {
     });
 
     it('should import the supertype via the import mapping', () => {
-      expect(content).toContain("import { ActionBase } from 'org.example.actions';");
+      expect(content).toMatch(/import \{ [^}]*\bActionBase\b[^}]* \} from 'org\.example\.actions';/);
     });
   });
 
@@ -58,7 +58,17 @@ describe('Issues #30/#31: decorator inheritance and custom annotations', () => {
     });
 
     it('should import the decorator from the annotation source specifier', () => {
-      expect(content).toContain("import { WidgetAction } from 'org.example.actions';");
+      expect(content).toMatch(/import \{ [^}]*\bWidgetAction\b[^}]* \} from 'org\.example\.actions';/);
+    });
+
+    it('should merge type and decorator imports from the same module into one statement (#32)', () => {
+      expect(content).toContain("import { ActionBase, WidgetAction } from 'org.example.actions';");
+    });
+
+    it('should import only the used annotation decorators (#32)', () => {
+      // ActionSet has no features and no documentation - only ModelClass is used
+      expect(content).toMatch(/import \{ ModelClass \} from/);
+      expect(content).not.toMatch(/import \{[^}]*\b(Attribute|Reference|Enum|Documentation)\b[^}]*\} from '\.\/ModelAnnotations/);
     });
 
     it('should not treat GenModel annotations as custom decorators', () => {
