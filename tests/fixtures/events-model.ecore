@@ -30,6 +30,13 @@
         <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
       </eGenericType>
     </eStructuralFeatures>
+    <!-- bare nsURI href: the loader absolutizes it against the model location,
+         but the emitted import must stay the literal bare specifier (#29) -->
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bare">
+      <eGenericType eClassifier="org.example.bare.composables#//BareWrapper">
+        <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      </eGenericType>
+    </eStructuralFeatures>
   </eClassifiers>
 
   <!-- Issue #29 (3): attribute defaults - EMF semantics: an EEnum attribute
