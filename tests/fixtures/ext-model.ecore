@@ -11,8 +11,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="filterExpression"
         eType="http://example.org/base#//Expression" containment="true"/>
     <!-- Ecore metaclass type as feature type (tests EStructuralFeature import) -->
+    <!-- Uses plain href format (matching real-world uimodel-vega.ecore) -->
     <eStructuralFeatures xsi:type="ecore:EReference" name="dataFeature"
-        eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EStructuralFeature"/>
+        eType="http://www.eclipse.org/emf/2002/Ecore#//EStructuralFeature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" upperBound="-1" name="groupBy"
+        eType="http://www.eclipse.org/emf/2002/Ecore#//EStructuralFeature"/>
   </eClassifiers>
 
 </ecore:EPackage>

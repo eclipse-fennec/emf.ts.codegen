@@ -14,6 +14,11 @@ const __dirname = dirname(__filename);
  * Generator for EMF-conformant TypeScript classes
  */
 export class EmfGenerator extends BaseGenerator {
+  constructor(context: import('../GeneratorContext.js').GeneratorContext) {
+    super(context);
+    context.typeMapper.useEList = true;
+  }
+
   protected getTemplateDir(): string {
     return join(__dirname, '../../templates/partials/emf');
   }
