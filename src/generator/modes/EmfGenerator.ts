@@ -57,10 +57,10 @@ export class EmfGenerator extends BaseGenerator {
             if (registeredPath) {
               extendsImport = `${registeredPath}/${extendsClass}`;
             } else {
-              extendsImport = `./${extendsClass}`;
+              extendsImport = `./${extendsClass}.js`;
             }
           } else {
-            extendsImport = `./${extendsClass}`;
+            extendsImport = `./${extendsClass}.js`;
           }
         }
         break;

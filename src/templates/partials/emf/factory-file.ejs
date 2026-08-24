@@ -2,13 +2,13 @@
 
 import { BasicEFactory } from '@emfts/core';
 import type { EClass, EObject } from '@emfts/core';
-import { <%- packageName %>Package } from './<%- packageName %>Package';
+import { <%- packageName %>Package } from './<%- packageName %>Package.js';
 <% for (const genClass of concreteClasses) {
   const className = genClass.ecoreClass.getName();
   const implName = genClass.implClassName || (className + 'Impl');
 -%>
-import type { <%- className %> } from './<%- className %>';
-import { <%- implName %> } from './<%- implName %>';
+import type { <%- className %> } from './<%- className %>.js';
+import { <%- implName %> } from './<%- implName %>.js';
 <% } -%>
 
 /**

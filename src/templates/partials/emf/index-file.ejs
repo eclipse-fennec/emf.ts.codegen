@@ -1,14 +1,14 @@
 <%- header %>
 
 // Package and Factory
-export { <%- packageName %>Package } from './<%- packageName %>Package';
-export { <%- packageName %>Factory } from './<%- packageName %>Factory';
+export { <%- packageName %>Package } from './<%- packageName %>Package.js';
+export { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
 
 // Interfaces
 <% for (const genClass of genClasses) {
   const name = getName(genClass.ecoreClass);
 -%>
-export type { <%- name %> } from './<%- name %>';
+export type { <%- name %> } from './<%- name %>.js';
 <% } -%>
 
 // Implementations (including abstract classes, as they're extended by subclasses)
@@ -16,7 +16,7 @@ export type { <%- name %> } from './<%- name %>';
   if (!checkIsInterface(genClass.ecoreClass)) {
     const implName = genClass.implClassName || (getName(genClass.ecoreClass) + 'Impl');
 -%>
-export { <%- implName %> } from './<%- implName %>';
+export { <%- implName %> } from './<%- implName %>.js';
 <%
   }
 } -%>
@@ -25,5 +25,5 @@ export { <%- implName %> } from './<%- implName %>';
 <% for (const genEnum of genEnums) {
   const name = getName(genEnum.ecoreEnum);
 -%>
-export { <%- name %>, get<%- name %>, get<%- name %>ByLiteral } from './<%- name %>';
+export { <%- name %>, get<%- name %>, get<%- name %>ByLiteral } from './<%- name %>.js';
 <% } -%>
