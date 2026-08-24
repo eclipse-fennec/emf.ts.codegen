@@ -77,8 +77,8 @@ import { <%- imp.typeName %> } from '<%- imp.importPath %>';
 <% if (extendsImport) { -%>
 import { <%- extendsClass %> } from '<%- extendsImport %>';
 <% } -%>
-import type { <%- interfaceName %> } from './<%- interfaceName %>';
-import { <%- packagePrefix %>Package } from './<%- packagePrefix %>Package';
+import type { <%- interfaceName %> } from './<%- interfaceName %>.js';
+import { <%- packagePrefix %>Package } from './<%- packagePrefix %>Package.js';
 
 /**
  * Implementation of <%- interfaceName %>

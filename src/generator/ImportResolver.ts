@@ -388,7 +388,7 @@ export class ImportResolver {
     if (isLocalFile) {
       return {
         typeName,
-        importPath: `./${typeName}`,
+        importPath: `./${typeName}.js`,
         isTypeOnly: false
       };
     }
@@ -413,9 +413,9 @@ export class ImportResolver {
     const sourceURI = sourcePackage.getNsURI();
     const currentURI = currentPackage.getNsURI();
 
-    // Same package - relative import
+    // Same package - relative import (with .js extension for Node ESM)
     if (sourceURI === currentURI) {
-      return `./${typeName}`;
+      return `./${typeName}.js`;
     }
 
     // Different package - check registered paths
@@ -463,7 +463,7 @@ export class ImportResolver {
       case 'decorator':
         imports.set('ModelAnnotations', {
           typeName: 'Documentation, Attribute, ModelClass, Reference, Enum',
-          importPath: './ModelAnnotations',
+          importPath: './ModelAnnotations.js',
           isTypeOnly: false
         });
         break;

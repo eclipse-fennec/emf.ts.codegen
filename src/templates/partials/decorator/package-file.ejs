@@ -2,6 +2,6 @@
 
 // Re-export all types from this package
 <% for (const exp of exports) { -%>
-export * from './<%- exp %>';
+export * from './<%- exp %>.js';
 <% } -%>
-export * from './ModelAnnotations';
+export * from './ModelAnnotations.js';
