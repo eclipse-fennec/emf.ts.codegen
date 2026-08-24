@@ -502,6 +502,16 @@ export class ImportResolver {
     if (typeof obj.getName === 'function') {
       return obj.getName();
     }
+    // Unresolved proxy: eGet would throw, extract the name from the proxy URI (…#//Name)
+    if (typeof obj.eIsProxy === 'function' && obj.eIsProxy()) {
+      const uri = obj.eProxyURI?.()?.toString?.() ?? '';
+      const hashIdx = uri.indexOf('#');
+      if (hashIdx >= 0) {
+        const segments = uri.substring(hashIdx + 1).split('/').filter(Boolean);
+        return segments[segments.length - 1] || null;
+      }
+      return null;
+    }
     // Try eGet for dynamic objects
     if (typeof obj.eGet === 'function' && typeof obj.eClass === 'function') {
       const eClass = obj.eClass();
