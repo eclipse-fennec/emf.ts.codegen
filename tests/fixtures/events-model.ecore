@@ -23,6 +23,13 @@
         <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
       </eGenericType>
     </eStructuralFeatures>
+    <!-- generic type whose classifier stays an UNRESOLVED cross-package proxy
+         (real-world trigger of the @Reference regression: EProxyImpl has no getName) -->
+    <eStructuralFeatures xsi:type="ecore:EReference" name="remote">
+      <eGenericType eClassifier="http://example.org/composables#//RemoteWrapper">
+        <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      </eGenericType>
+    </eStructuralFeatures>
   </eClassifiers>
 
   <!-- Issue #29 (3): attribute defaults - EMF semantics: an EEnum attribute

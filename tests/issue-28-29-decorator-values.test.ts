@@ -97,6 +97,13 @@ describe('Issues #28/#29: decorator mode value semantics', () => {
       expect(content).toContain("@Reference('VariableWrapper')");
       expect(content).not.toContain("@Reference('VariableWrapper<");
     });
+
+    it('should keep the plain name even when the eType is an unresolved cross-package proxy', () => {
+      const content = getFile('TextSettings.ts', '@ModelClass');
+      expect(content).toContain("@Reference('RemoteWrapper')");
+      expect(content).toContain('remote?: RemoteWrapper<string>');
+      expect(content).not.toContain("@Reference('RemoteWrapper<");
+    });
   });
 
   describe('#29.4: many-valued features initialize to []', () => {
