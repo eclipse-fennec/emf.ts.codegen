@@ -80,7 +80,7 @@ for (const genClass of genClasses) {
   }
   for (const genFeature of genClass.genFeatures) {
     const eType = getEType(genFeature.ecoreFeature);
-    if (eType && typeMapper.isReference(genFeature.ecoreFeature) && !isLocalClassifier(eType)) {
+    if (eType && !isLocalClassifier(eType)) {
       if (isEcoreClassifier(eType)) { needsEcoreImport = true; }
       else { needsRegistryImport = true; }
     }
@@ -201,7 +201,9 @@ export class <%- packageName %>Package extends BasicEPackage {
    } -%>
 
     // ============================================
-    // Set ETypes for EReferences (must be done after all classes are created)
+    // Set ETypes for all features (must be done after all classes are created).
+    // An EAttribute without eType leaves the XMI reader no EDataType to
+    // convert against - every value would arrive as a raw string (#37)
     // ============================================
 <% for (const genClass of genClasses) {
      const eClass = genClass.ecoreClass;
@@ -212,14 +214,15 @@ export class <%- packageName %>Package extends BasicEPackage {
        const featureName = getName(feature);
        const featureUpperName = featureName.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
        const isRef = typeMapper.isReference(feature);
-       if (isRef) {
-         const eType = getEType(feature);
-         if (eType) {
+       const eType = getEType(feature);
+       if (!eType) continue;
+       // Local enums and datatypes have no initialized Literals entry yet
+       // (see the enum TODO above) - only class literals exist locally
+       if (!isRef && isLocalClassifier(eType)) continue;
+       const castType = isRef ? 'BasicEReference' : 'BasicEAttribute';
 -%>
-    (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as BasicEReference).setEType(<%- typeRefExpr(eType) %>);
-<%       }
-       }
-     }
+    (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as <%- castType %>).setEType(<%- typeRefExpr(eType) %>);
+<%   }
    } -%>
 
     // ============================================
