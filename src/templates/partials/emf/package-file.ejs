@@ -62,7 +62,7 @@ function typeRefExpr(classifier, castTo) {
   // External dependency package — resolve via EPackageRegistry
   const depNsURI = getClassifierNsURI(classifier);
   if (depNsURI) {
-    return "EPackageRegistry.INSTANCE.getEPackage('" + depNsURI + "')!.getEClassifier('" + typeName + "')!" + cast;
+    return "requireEPackage('" + depNsURI + "').getEClassifier('" + typeName + "')!" + cast;
   }
   return "getEcorePackage().getEClassifier('" + typeName + "')!" + cast;
 }
@@ -88,13 +88,30 @@ for (const genClass of genClasses) {
 }
 -%>
 <%
-const coreImports = ['BasicEPackage', 'BasicEClass', 'BasicEAttribute', 'BasicEReference'];
+// EPackageRegistry is always needed: the package registers itself under its
+// nsURI so that other generated packages can resolve their references (#36)
+const coreImports = ['BasicEPackage', 'BasicEClass', 'BasicEAttribute', 'BasicEReference', 'EPackageRegistry'];
 if (needsEcoreImport) coreImports.push('getEcorePackage');
-if (needsRegistryImport) coreImports.push('EPackageRegistry');
 -%>
 import { <%- coreImports.join(', ') %> } from '@emfts/core';
 import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
+<% if (generateFactory) { -%>
 import { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
+<% } -%>
+<% if (needsRegistryImport) { -%>
+
+/**
+ * Resolve a dependency package from the registry, failing with an actionable
+ * message instead of a null dereference when it is not registered yet
+ */
+function requireEPackage(nsURI: string) {
+  const pkg = EPackageRegistry.INSTANCE.getEPackage(nsURI);
+  if (!pkg) {
+    throw new Error(`EPackage '${nsURI}' is not registered. Access the eINSTANCE of that model's generated package (or register it via EPackageRegistry.INSTANCE.registerPackage) before initializing <%- packageName %>Package.`);
+  }
+  return pkg;
+}
+<% } -%>
 
 /**
  * <%- packageName %> Package
@@ -139,10 +156,14 @@ export class <%- packageName %>Package extends BasicEPackage {
    * Initialize package contents
    */
   private init(): void {
+    // Register this package under its nsURI so other generated packages can
+    // resolve their cross-package references from the registry (#36).
+    // eINSTANCE is already assigned at this point
+    EPackageRegistry.INSTANCE.set(<%- packageName %>Package.eNS_URI, this);
+<% if (generateFactory) { -%>
     // Wire the generated factory so loaded/created instances are typed Impls.
-    // eINSTANCE is already assigned at this point, so the factory's back
-    // reference to the package resolves without re-entering init()
     this.setEFactoryInstance(<%- packageName %>Factory.eINSTANCE);
+<% } -%>
 
 <% for (const genClass of genClasses) {
   const eClass = genClass.ecoreClass;

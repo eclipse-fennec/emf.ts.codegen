@@ -5,7 +5,7 @@
  * @generated
  */
 
-import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, getEcorePackage } from '@emfts/core';
+import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, EPackageRegistry, getEcorePackage } from '@emfts/core';
 import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
 import { GenConfigFactory } from './GenConfigFactory.js';
 
@@ -90,9 +90,11 @@ export class GenConfigPackage extends BasicEPackage {
    * Initialize package contents
    */
   private init(): void {
+    // Register this package under its nsURI so other generated packages can
+    // resolve their cross-package references from the registry (#36).
+    // eINSTANCE is already assigned at this point
+    EPackageRegistry.INSTANCE.set(GenConfigPackage.eNS_URI, this);
     // Wire the generated factory so loaded/created instances are typed Impls.
-    // eINSTANCE is already assigned at this point, so the factory's back
-    // reference to the package resolves without re-entering init()
     this.setEFactoryInstance(GenConfigFactory.eINSTANCE);
 
     // Create GenConfig class

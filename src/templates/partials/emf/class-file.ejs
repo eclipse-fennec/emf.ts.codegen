@@ -25,6 +25,22 @@ if (useEList && (hasManyFeature || hasManyMixin)) {
   if (needsEObjectList) coreValueImports.push('createEObjectEList');
   if (needsBasicList) coreValueImports.push('createBasicEList');
 }
+// A type that appears in a value position of a field initializer needs a
+// value import - `import type` is erased and `new T()` would throw at
+// runtime (#35). Value positions: enum member access and instantiation
+const allFeatures = [
+  ...features.map(gf => gf.ecoreFeature),
+  ...(mixinFeatures || []).map(mf => mf.feature)
+];
+function isUsedAsValue(typeName) {
+  return allFeatures.some(f => {
+    const dv = typeMapper.getDefaultValue(f);
+    if (dv === null || typeof dv !== 'string') return false;
+    return dv.startsWith(typeName + '.')
+      || dv.startsWith('new ' + typeName + '(')
+      || dv.startsWith('new ' + typeName + '<');
+  });
+}
 for (const imp of imports) {
   if (imp.typeName === className || imp.typeName === interfaceName || imp.typeName === extendsClass) continue;
   if (hardcodedCoreTypes.includes(imp.typeName)) continue;
@@ -34,12 +50,7 @@ for (const imp of imports) {
     }
     continue;
   }
-  // Check if this type is used as a runtime value (e.g., enum default values)
-  const usedAsValue = features.some(gf => {
-    const dv = typeMapper.getDefaultValue(gf.ecoreFeature);
-    return dv !== null && typeof dv === 'string' && dv.startsWith(imp.typeName + '.');
-  });
-  if (usedAsValue) {
+  if (isUsedAsValue(imp.typeName)) {
     valueImports.push(imp);
   } else {
     typeOnlyImports.push(imp);
@@ -57,7 +68,11 @@ for (const imp of (mixinImports || [])) {
     }
     continue;
   }
-  typeOnlyImports.push(imp);
+  if (isUsedAsValue(imp.typeName)) {
+    valueImports.push(imp);
+  } else {
+    typeOnlyImports.push(imp);
+  }
   importedNames.add(imp.typeName);
 }
 -%>
