@@ -1,16 +1,21 @@
 <%- header %>
 
-// Package and Factory
+// Package<% if (generateFactory) { %> and Factory<% } %>
 export { <%- packageName %>Package } from './<%- packageName %>Package.js';
+<% if (generateFactory) { -%>
 export { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
+<% } -%>
 
+<% if (generateInterfaces) { -%>
 // Interfaces
 <% for (const genClass of genClasses) {
   const name = getName(genClass.ecoreClass);
 -%>
 export type { <%- name %> } from './<%- name %>.js';
 <% } -%>
+<% } -%>
 
+<% if (generateClasses) { -%>
 // Implementations (including abstract classes, as they're extended by subclasses)
 <% for (const genClass of genClasses) {
   if (!checkIsInterface(genClass.ecoreClass)) {
@@ -20,6 +25,7 @@ export { <%- implName %> } from './<%- implName %>.js';
 <%
   }
 } -%>
+<% } -%>
 
 // Enums
 <% for (const genEnum of genEnums) {

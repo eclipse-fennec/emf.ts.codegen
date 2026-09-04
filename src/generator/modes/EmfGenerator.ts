@@ -205,7 +205,8 @@ export class EmfGenerator extends BaseGenerator {
       nsPrefix,
       classLiterals,
       genClasses: genPackage.genClasses,
-      genEnums: genPackage.genEnums
+      genEnums: genPackage.genEnums,
+      generateFactory: this.context.genModel.generateFactory
     });
 
     const packagePath = this.getPackagePath(genPackage);
@@ -272,7 +273,10 @@ export class EmfGenerator extends BaseGenerator {
       packageName,
       exports,
       genClasses: genPackage.genClasses,
-      genEnums: genPackage.genEnums
+      genEnums: genPackage.genEnums,
+      generateFactory: this.context.genModel.generateFactory,
+      generateInterfaces: this.context.genModel.generateInterfaces,
+      generateClasses: this.context.genModel.generateClasses
     });
 
     const packagePath = this.getPackagePath(genPackage);
