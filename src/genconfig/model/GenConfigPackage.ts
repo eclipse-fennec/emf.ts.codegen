@@ -471,7 +471,9 @@ export class GenConfigPackage extends BasicEPackage {
     // ============================================
 
     // ============================================
-    // Set ETypes for EReferences (must be done after all classes are created)
+    // Set ETypes for all features (must be done after all classes are created).
+    // An EAttribute without eType leaves the XMI reader no EDataType to
+    // convert against - every value would arrive as a raw string (#37)
     // ============================================
     (GenConfigPackage.Literals.GEN_CONFIG__ECORE_PACKAGE as BasicEReference).setEType(getEcorePackage().getEClassifier('EPackage')!);
     (GenConfigPackage.Literals.GEN_CONFIG__GENERATION as BasicEReference).setEType(GenConfigPackage.Literals.GENERATION_SETTINGS);
@@ -480,9 +482,32 @@ export class GenConfigPackage extends BasicEPackage {
     (GenConfigPackage.Literals.GEN_CONFIG__FEATURE_DEFAULTS as BasicEReference).setEType(GenConfigPackage.Literals.FEATURE_DEFAULTS);
     (GenConfigPackage.Literals.GEN_CONFIG__CLASS_OVERRIDES as BasicEReference).setEType(GenConfigPackage.Literals.CLASS_OVERRIDE);
     (GenConfigPackage.Literals.GEN_CONFIG__REFERENCED_PACKAGES as BasicEReference).setEType(GenConfigPackage.Literals.REFERENCED_PACKAGE);
+    (GenConfigPackage.Literals.REFERENCED_PACKAGE__NS_U_R_I as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.REFERENCED_PACKAGE__IMPORT_PATH as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.GENERATION_SETTINGS__OUTPUT_DIR as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.GENERATION_SETTINGS__FILE_EXTENSION as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.GENERATION_SETTINGS__HEADER_COMMENT as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.GENERATION_SETTINGS__ANNOTATIONS_PACKAGE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.PACKAGE_SETTINGS__PREFIX as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.PACKAGE_SETTINGS__BASE_PACKAGE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.PACKAGE_SETTINGS__GENERATE_FACTORY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (GenConfigPackage.Literals.PACKAGE_SETTINGS__GENERATE_PACKAGE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (GenConfigPackage.Literals.PACKAGE_SETTINGS__GENERATE_INDEX as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (GenConfigPackage.Literals.CLASS_DEFAULTS__GENERATE_INTERFACE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (GenConfigPackage.Literals.CLASS_DEFAULTS__GENERATE_IMPL as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (GenConfigPackage.Literals.CLASS_DEFAULTS__ROOT_EXTENDS_CLASS as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.CLASS_DEFAULTS__ROOT_EXTENDS_INTERFACE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.FEATURE_DEFAULTS__NOTIFY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
     (GenConfigPackage.Literals.CLASS_OVERRIDE__ECORE_CLASS as BasicEReference).setEType(getEcorePackage().getEClassifier('EClass')!);
+    (GenConfigPackage.Literals.CLASS_OVERRIDE__GENERATE_INTERFACE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBooleanObject')!);
+    (GenConfigPackage.Literals.CLASS_OVERRIDE__GENERATE_IMPL as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBooleanObject')!);
+    (GenConfigPackage.Literals.CLASS_OVERRIDE__EXTENDS_CLASS as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.CLASS_OVERRIDE__IMPLEMENTS_INTERFACES as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.CLASS_OVERRIDE__FEATURE_OVERRIDES as BasicEReference).setEType(GenConfigPackage.Literals.FEATURE_OVERRIDE);
     (GenConfigPackage.Literals.FEATURE_OVERRIDE__ECORE_FEATURE as BasicEReference).setEType(getEcorePackage().getEClassifier('EStructuralFeature')!);
+    (GenConfigPackage.Literals.FEATURE_OVERRIDE__NOTIFY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBooleanObject')!);
+    (GenConfigPackage.Literals.FEATURE_OVERRIDE__CUSTOM_GETTER as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.FEATURE_OVERRIDE__CUSTOM_SETTER as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
 
     // ============================================
     // Register XML name mappings from ExtendedMetaData annotations
