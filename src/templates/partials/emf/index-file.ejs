@@ -9,6 +9,8 @@ export { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
 <% if (generateInterfaces) { -%>
 // Interfaces
 <% for (const genClass of genClasses) {
+  // A class suppressed via classOverrides has no file to re-export (#41)
+  if (!genClass.generateInterface) continue;
   const name = getName(genClass.ecoreClass);
 -%>
 export type { <%- name %> } from './<%- name %>.js';
@@ -18,7 +20,7 @@ export type { <%- name %> } from './<%- name %>.js';
 <% if (generateClasses) { -%>
 // Implementations (including abstract classes, as they're extended by subclasses)
 <% for (const genClass of genClasses) {
-  if (!checkIsInterface(genClass.ecoreClass)) {
+  if (genClass.generateImpl && !checkIsInterface(genClass.ecoreClass)) {
     const implName = genClass.implClassName || (getName(genClass.ecoreClass) + 'Impl');
 -%>
 export { <%- implName %> } from './<%- implName %>.js';

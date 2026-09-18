@@ -219,9 +219,11 @@ export class EmfGenerator extends BaseGenerator {
     const ePackage = genPackage.ecorePackage;
     const packageName = genPackage.prefix ?? EObjectHelper.getName(ePackage) ?? 'Model';
 
-    // Filter non-abstract classes
+    // Filter non-abstract classes; a class whose Impl is suppressed via
+    // classOverrides cannot be instantiated by create (#41)
     const concreteClasses = genPackage.genClasses.filter(
       gc => !EObjectHelper.isAbstract(gc.ecoreClass) && !EObjectHelper.isInterface(gc.ecoreClass)
+        && gc.generateImpl
     );
 
     const content = await this.render('factory-file', {
