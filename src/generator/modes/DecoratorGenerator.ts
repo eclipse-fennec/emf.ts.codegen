@@ -138,6 +138,8 @@ export class DecoratorGenerator extends BaseGenerator {
     const exports: string[] = [];
 
     for (const genClass of genPackage.genClasses) {
+      // A class suppressed via classOverrides has no file to re-export (#41)
+      if (!genClass.generateInterface && !genClass.generateImpl) continue;
       const name = genClass.ecoreClass.getName();
       if (name) {
         exports.push(name);
