@@ -244,36 +244,11 @@ export class EmfGenerator extends BaseGenerator {
     const ePackage = genPackage.ecorePackage;
     const packageName = genPackage.prefix ?? EObjectHelper.getName(ePackage) ?? 'Model';
 
-    const exports: string[] = [];
-
-    // Export interfaces
-    for (const genClass of genPackage.genClasses) {
-      const name = EObjectHelper.getName(genClass.ecoreClass);
-      if (name) {
-        exports.push(name);
-      }
-    }
-
-    // Export implementations (including abstract classes, as they're extended by subclasses)
-    for (const genClass of genPackage.genClasses) {
-      if (!EObjectHelper.isInterface(genClass.ecoreClass)) {
-        const implName = genClass.implClassName ?? `${EObjectHelper.getName(genClass.ecoreClass)}Impl`;
-        exports.push(implName);
-      }
-    }
-
-    // Export enums
-    for (const genEnum of genPackage.genEnums) {
-      const name = EObjectHelper.getName(genEnum.ecoreEnum);
-      if (name) {
-        exports.push(name);
-      }
-    }
-
+    // The index template iterates genClasses/genEnums itself and applies the
+    // per-class generateInterface/generateImpl flags there (#41)
     const content = await this.render('index-file', {
       genPackage,
       packageName,
-      exports,
       genClasses: genPackage.genClasses,
       genEnums: genPackage.genEnums,
       generateFactory: this.context.genModel.generateFactory,
