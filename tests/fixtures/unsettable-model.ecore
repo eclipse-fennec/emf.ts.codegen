@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mqtt" nsURI="http://example.org/mqtt" nsPrefix="mqtt">
+  <eClassifiers xsi:type="ecore:EEnum" name="MqttQos">
+    <eLiterals name="AT_MOST_ONCE" literal="AT_MOST_ONCE"/>
+    <eLiterals name="AT_LEAST_ONCE" value="1" literal="AT_LEAST_ONCE"/>
+    <eLiterals name="EXACTLY_ONCE" value="2" literal="EXACTLY_ONCE"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OperationFlavor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="qos" eType="#//MqttQos" unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="correlation" unsettable="true" defaultValueLiteral="true"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="requestTopic"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+</ecore:EPackage>
