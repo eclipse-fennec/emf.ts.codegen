@@ -109,7 +109,13 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 <% } -%>
 
   // Private fields
-<% for (const genFeature of features) {
+<%
+// unsettable="true" (#45): eIsSet must distinguish "never set" from "set to
+// the default", so the state lives in a separate flag - like Java EMF's ESet
+function isUnsettableFeature(f) {
+  return !isMany(f) && (f.isUnsettable?.() ?? false);
+}
+for (const genFeature of features) {
   const feature = genFeature.ecoreFeature;
   const featureName = getName(feature);
   const featureType = typeMapper.mapFeature(feature);
@@ -117,6 +123,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureIsMany = isMany(feature);
 -%>
   private _<%- featureName %><% if (useEList && featureIsMany) { %>!<% } else if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
+<% if (isUnsettableFeature(feature)) { -%>
+  private _<%- featureName %>IsSet = false;
+<% } -%>
 <% } -%>
 <% for (const mf of (mixinFeatures || [])) {
   const featureType = typeMapper.mapFeature(mf.feature);
@@ -124,6 +133,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureIsMany = isMany(mf.feature);
 -%>
   private _<%- mf.name %><% if (useEList && featureIsMany) { %>!<% } else if (!featureIsMany && defaultValue === null) { %>?<% } %>: <%- featureType %><% if (defaultValue !== null) { %> = <%- defaultValue %><% } %>;
+<% if (isUnsettableFeature(mf.feature)) { -%>
+  private _<%- mf.name %>IsSet = false;
+<% } -%>
 <% } -%>
 
   /**
@@ -172,6 +184,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
     const oldValue = this._<%- featureName %>;
 <% } -%>
     this._<%- featureName %> = value;
+<% if (isUnsettableFeature(feature)) { -%>
+    this._<%- featureName %>IsSet = true;
+<% } -%>
 <% if (genFeature.notify) { -%>
     if (this.eDeliver()) {
       this.eNotify({
@@ -204,6 +219,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 
   set <%- mf.name %>(value: <%- featureType %>) {
     this._<%- mf.name %> = value;
+<% if (isUnsettableFeature(mf.feature)) { -%>
+    this._<%- mf.name %>IsSet = true;
+<% } -%>
   }
 
 <% } -%>
@@ -282,7 +300,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const featureName = getName(feature);
 -%>
       case <%- className %>.<%- fid.name %>:
-<% if (useEList && featureIsMany) { -%>
+<% if (isUnsettableFeature(feature)) { -%>
+        return this._<%- featureName %>IsSet;
+<% } else if (useEList && featureIsMany) { -%>
         return this._<%- featureName %> !== undefined && !this._<%- featureName %>.isEmpty();
 <% } else if (featureIsMany) { -%>
         return this._<%- featureName %> !== undefined && this._<%- featureName %>.length > 0;
@@ -297,7 +317,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
   const defaultValue = typeMapper.getDefaultValue(mf.feature);
 -%>
       case <%- className %>.<%- mf.upperName %>:
-<% if (useEList && featureIsMany) { -%>
+<% if (isUnsettableFeature(mf.feature)) { -%>
+        return this._<%- mf.name %>IsSet;
+<% } else if (useEList && featureIsMany) { -%>
         return this._<%- mf.name %> !== undefined && !this._<%- mf.name %>.isEmpty();
 <% } else if (featureIsMany) { -%>
         return this._<%- mf.name %> !== undefined && this._<%- mf.name %>.length > 0;
@@ -334,6 +356,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
 <% } else { -%>
         this._<%- featureName %> = undefined;
 <% } -%>
+<% if (isUnsettableFeature(feature)) { -%>
+        this._<%- featureName %>IsSet = false;
+<% } -%>
         return;
 <% } -%>
 <% for (const mf of (mixinFeatures || [])) {
@@ -349,6 +374,9 @@ export <% if (isAbstract) { %>abstract <% } %>class <%- className %> extends <%-
         this._<%- mf.name %> = <%- defaultValue %>;
 <% } else { -%>
         this._<%- mf.name %> = undefined;
+<% } -%>
+<% if (isUnsettableFeature(mf.feature)) { -%>
+        this._<%- mf.name %>IsSet = false;
 <% } -%>
         return;
 <% } -%>
