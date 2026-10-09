@@ -146,6 +146,12 @@ export class ImportResolver {
       return;
     }
 
+    // Skip plain EDataTypes: no file is ever generated for them - the
+    // TypeMapper maps them along their instanceClassName instead (#120)
+    if (this.isPlainDataType(classifier)) {
+      return;
+    }
+
     // Check if same class
     if (name === this.getName(currentClass)) {
       return;
@@ -413,6 +419,18 @@ export class ImportResolver {
       importPath,
       isTypeOnly: false
     };
+  }
+
+  /**
+   * Check whether a classifier is a plain EDataType (not an EEnum, not an EClass)
+   */
+  private isPlainDataType(classifier: any): boolean {
+    if (!classifier) return false;
+    if ('getEStructuralFeatures' in classifier) return false; // EClass
+    if ('getELiterals' in classifier) return false;           // EEnum
+    const kind = classifier.eClass?.()?.getName?.();
+    if (kind) return kind === 'EDataType';
+    return 'getInstanceClassName' in classifier;
   }
 
   /**
