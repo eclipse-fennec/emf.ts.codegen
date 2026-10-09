@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="atlas" nsURI="http://example.org/atlas" nsPrefix="atlas">
+
+  <!-- Issue emf.ts#120: model-defined EDataTypes with instanceClassName must
+       map to TS types instead of producing imports of nonexistent files -->
+  <eClassifiers xsi:type="ecore:EDataType" name="Instant" instanceClassName="java.time.Instant"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Promise" instanceClassName="org.osgi.util.promise.Promise"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Void" instanceClassName="java.lang.Void"/>
+
+  <eClassifiers xsi:type="ecore:EClass" name="ObjectMetadata">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="uploadTime" lowerBound="1" eType="#//Instant"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reviewTime" eType="#//Instant"/>
+    <!-- reference to the Ecore metamodel EObject: always @emfts/core, never a path import -->
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectRef" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
+    <eOperations name="refresh" eType="#//Promise"/>
+  </eClassifiers>
+
+</ecore:EPackage>

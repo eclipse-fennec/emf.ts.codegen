@@ -86,8 +86,81 @@ export class TypeMapper {
       return this.customMappings.get(name)!;
     }
 
+    // A model-defined EDataType (not an EEnum) never yields a generated file -
+    // map it along its instanceClassName instead of emitting its name, which
+    // would turn into an import of a nonexistent module (#120)
+    if (this.isPlainDataType(classifier)) {
+      return this.mapInstanceClassName((classifier as any).getInstanceClassName?.() ?? null);
+    }
+
     // For EClass and EEnum, use the name directly
     return name;
+  }
+
+  /**
+   * Check whether a classifier is a plain EDataType (not an EEnum, not an EClass)
+   */
+  isPlainDataType(classifier: EClassifier): boolean {
+    if ('getEStructuralFeatures' in classifier) return false; // EClass
+    if ('getELiterals' in classifier) return false;           // EEnum
+    const kind = (classifier as any).eClass?.()?.getName?.();
+    if (kind) return kind === 'EDataType';
+    return 'getInstanceClassName' in classifier;
+  }
+
+  /**
+   * Map a Java instanceClassName to the TypeScript type of its serialized form
+   */
+  private mapInstanceClassName(instanceClassName: string | null): string {
+    switch (instanceClassName) {
+      case 'java.lang.String':
+      case 'char':
+      case 'java.lang.Character':
+      // java.time values serialize as ISO-8601 text
+      case 'java.time.Instant':
+      case 'java.time.LocalDate':
+      case 'java.time.LocalDateTime':
+      case 'java.time.LocalTime':
+      case 'java.time.ZonedDateTime':
+      case 'java.time.OffsetDateTime':
+      case 'java.time.Duration':
+      case 'java.time.Period':
+        return 'string';
+      case 'int':
+      case 'long':
+      case 'short':
+      case 'byte':
+      case 'double':
+      case 'float':
+      case 'java.lang.Integer':
+      case 'java.lang.Long':
+      case 'java.lang.Short':
+      case 'java.lang.Byte':
+      case 'java.lang.Double':
+      case 'java.lang.Float':
+      case 'java.math.BigDecimal':
+        return 'number';
+      case 'java.math.BigInteger':
+        return 'bigint';
+      case 'boolean':
+      case 'java.lang.Boolean':
+        return 'boolean';
+      case 'void':
+      case 'java.lang.Void':
+        return 'void';
+      case 'java.util.Date':
+      case 'java.util.Calendar':
+        return 'Date';
+      case 'java.util.List':
+      case 'java.util.Collection':
+      case 'java.util.Set':
+      case 'java.lang.Iterable':
+        return 'unknown[]';
+      case 'java.util.Map':
+        return 'Map<unknown, unknown>';
+      default:
+        return 'unknown';
+    }
   }
 
   /**
