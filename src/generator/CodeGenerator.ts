@@ -63,6 +63,24 @@ export class CodeGenerator {
     const files: GeneratedFile[] = [];
 
     try {
+      // An empty model must not pass as success: it would silently overwrite
+      // an existing generate output with empty files (#47). This typically
+      // means the ecorePackage reference of the GenConfig did not resolve
+      const hasClassifiers = this.genModel.genPackages.some(
+        p => p.genClasses.length > 0 || p.genEnums.length > 0
+      );
+      if (!hasClassifiers) {
+        this.context.error(
+          'The model contains no classifiers - nothing to generate. ' +
+          'Check that the ecorePackage reference of the GenConfig resolves to the loaded model.'
+        );
+        return {
+          files: [],
+          diagnostics: this.context.diagnostics,
+          success: false
+        };
+      }
+
       // Generate each package
       for (const genPackage of this.genModel.genPackages) {
         const packageFiles = await this.generatePackage(genPackage);

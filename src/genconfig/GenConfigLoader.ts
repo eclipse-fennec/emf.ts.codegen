@@ -340,6 +340,17 @@ export class GenConfigLoader {
   private resolvePackageReference(ref: any): EPackage | null {
     if (!ref) return null;
 
+    // An unresolved proxy first: since @emfts/core 0.3 it is a typed (empty)
+    // BasicEPackage whose getNsURI() is null, so the EPackage branch below
+    // would hand back a package without classifiers (#47)
+    if (typeof ref === 'object' && ref.eIsProxy?.()) {
+      const proxyURI = ref.eProxyURI?.()?.toString?.();
+      if (proxyURI) {
+        return this.resolvePackageFromURI(proxyURI);
+      }
+      return null;
+    }
+
     // If it's already an EPackage
     if (typeof ref === 'object' && 'getNsURI' in ref && typeof ref.getNsURI === 'function') {
       // Prefer the explicitly registered package (the model passed via -m):
@@ -350,14 +361,6 @@ export class GenConfigLoader {
         return this.ecorePackages.get(nsURI)!;
       }
       return ref as EPackage;
-    }
-
-    // If it's a proxy, get the URI
-    if (typeof ref === 'object' && ref.eIsProxy?.()) {
-      const proxyURI = ref.eProxyURI?.()?.toString?.();
-      if (proxyURI) {
-        return this.resolvePackageFromURI(proxyURI);
-      }
     }
 
     // If it's a string URI
@@ -385,8 +388,9 @@ export class GenConfigLoader {
   private resolveClassReference(ref: any, defaultPackage: EPackage): EClass | null {
     if (!ref) return null;
 
-    // If it's already an EClass
-    if (typeof ref === 'object' && 'getEStructuralFeatures' in ref) {
+    // If it's already an EClass - but not an unresolved proxy, which since
+    // @emfts/core 0.3 is a typed (empty) class instance as well (#47)
+    if (typeof ref === 'object' && 'getEStructuralFeatures' in ref && !ref.eIsProxy?.()) {
       return ref as EClass;
     }
 
@@ -425,8 +429,8 @@ export class GenConfigLoader {
   private resolveFeatureReference(ref: any, defaultClass: EClass): EStructuralFeature | null {
     if (!ref) return null;
 
-    // If it's already an EStructuralFeature
-    if (typeof ref === 'object' && 'getEContainingClass' in ref) {
+    // If it's already an EStructuralFeature - but not an unresolved proxy (#47)
+    if (typeof ref === 'object' && 'getEContainingClass' in ref && !ref.eIsProxy?.()) {
       return ref as EStructuralFeature;
     }
 
