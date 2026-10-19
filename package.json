@@ -1,6 +1,6 @@
 {
   "name": "@emfts/codegen",
-  "version": "0.0.2-next.4",
+  "version": "0.0.2-next.8",
   "description": "TypeScript code generator for Ecore models using emfts",
   "type": "module",
   "main": "dist/index.js",
