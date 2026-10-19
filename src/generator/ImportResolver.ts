@@ -529,11 +529,15 @@ export class ImportResolver {
    */
   private getName(obj: any): string | null {
     if (!obj) return null;
-    // Try direct method first
+    // Try direct method first - but a typed unresolved proxy (core >= 0.3)
+    // answers getName() with null, so fall through to the proxy URI then (#47)
     if (typeof obj.getName === 'function') {
-      return obj.getName();
+      const name = obj.getName();
+      if (name != null) {
+        return name;
+      }
     }
-    // Unresolved proxy: eGet would throw, extract the name from the proxy URI (…#//Name)
+    // Unresolved proxy: extract the name from the proxy URI (…#//Name)
     if (typeof obj.eIsProxy === 'function' && obj.eIsProxy()) {
       const uri = obj.eProxyURI?.()?.toString?.() ?? '';
       const hashIdx = uri.indexOf('#');

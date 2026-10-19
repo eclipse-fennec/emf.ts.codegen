@@ -46,7 +46,7 @@
   "dependencies": {
     "commander": "^12.0.0",
     "ejs": "^3.1.10",
-    "@emfts/core": "^0.3.0-next.1",
+    "@emfts/core": "^0.3.0-next.4",
     "sax": "^1.4.4"
   },
   "devDependencies": {
