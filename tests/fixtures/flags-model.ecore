@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="flags" nsURI="http://example.org/flags" nsPrefix="flags">
+  <eClassifiers xsi:type="ecore:EClass" name="Widget">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" iD="true"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="labels" unsettable="true"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cache" transient="true"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="area" derived="true" volatile="true" changeable="false"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="children" upperBound="-1" containment="true"
+        eType="#//Widget" eOpposite="#//Widget/parent"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//Widget"
+        eOpposite="#//Widget/children" resolveProxies="false"/>
+  </eClassifiers>
+</ecore:EPackage>
