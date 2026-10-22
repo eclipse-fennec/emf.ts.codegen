@@ -85,9 +85,10 @@ describe('Generated Library Model', () => {
     });
 
     it('should have default values for collections', () => {
-      expect(library.books).toEqual([]);
-      expect(library.authors).toEqual([]);
-      expect(library.employees).toEqual([]);
+      // many-valued features are ELists since the EList support
+      expect(library.books.isEmpty()).toBe(true);
+      expect(library.authors.isEmpty()).toBe(true);
+      expect(library.employees.isEmpty()).toBe(true);
     });
 
     it('should set and get name', () => {
@@ -156,11 +157,12 @@ describe('Generated Library Model', () => {
 
   describe('BookCategory Enum', () => {
     it('should have all enum values', () => {
-      expect(BookCategory.FICTION).toBe(0);
-      expect(BookCategory.NON_FICTION).toBe(1);
-      expect(BookCategory.SCIENCE).toBe(2);
-      expect(BookCategory.HISTORY).toBe(3);
-      expect(BookCategory.BIOGRAPHY).toBe(4);
+      // enum members carry string values, not ordinals
+      expect(BookCategory.FICTION).toBe('FICTION');
+      expect(BookCategory.NON_FICTION).toBe('NON_FICTION');
+      expect(BookCategory.SCIENCE).toBe('SCIENCE');
+      expect(BookCategory.HISTORY).toBe('HISTORY');
+      expect(BookCategory.BIOGRAPHY).toBe('BIOGRAPHY');
     });
   });
 
@@ -192,7 +194,7 @@ describe('Generated Library Model', () => {
     });
 
     it('should have books collection', () => {
-      expect(author.books).toEqual([]);
+      expect(author.books.isEmpty()).toBe(true);
     });
 
     it('should return correct eClass', () => {
@@ -397,16 +399,18 @@ describe('Generated Library Model', () => {
     });
 
     it('should have correct feature IDs on AuthorImpl', () => {
-      expect(AuthorImpl.BIOGRAPHY).toBe(0);
-      expect(AuthorImpl.WEBSITE).toBe(1);
-      expect(AuthorImpl.BOOKS).toBe(2);
+      // feature IDs are package-global and most-base-first (EMF semantics):
+      // the inherited Person features occupy 0-3
+      expect(AuthorImpl.BIOGRAPHY).toBe(4);
+      expect(AuthorImpl.WEBSITE).toBe(5);
+      expect(AuthorImpl.BOOKS).toBe(6);
     });
 
     it('should have correct feature IDs on EmployeeImpl', () => {
-      expect(EmployeeImpl.EMPLOYEE_ID).toBe(0);
-      expect(EmployeeImpl.SALARY).toBe(1);
-      expect(EmployeeImpl.HIRE_DATE).toBe(2);
-      expect(EmployeeImpl.SUPERVISOR).toBe(3);
+      expect(EmployeeImpl.EMPLOYEE_ID).toBe(4);
+      expect(EmployeeImpl.SALARY).toBe(5);
+      expect(EmployeeImpl.HIRE_DATE).toBe(6);
+      expect(EmployeeImpl.SUPERVISOR).toBe(7);
     });
   });
 

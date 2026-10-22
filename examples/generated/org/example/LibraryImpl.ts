@@ -6,12 +6,13 @@
  */
 
 import { BasicEObject } from '@emfts/core';
-import type { EClass, EStructuralFeature } from '@emfts/core';
-import { Book } from './Book';
-import { Author } from './Author';
-import { Employee } from './Employee';
-import type { Library } from './Library';
-import { LibraryPackage } from './LibraryPackage';
+import { createContainmentEList } from '@emfts/core';
+import type { EClass, EStructuralFeature, EList, EReference } from '@emfts/core';
+import type { Book } from './Book.js';
+import type { Author } from './Author.js';
+import type { Employee } from './Employee.js';
+import type { Library } from './Library.js';
+import { LibraryPackage } from './LibraryPackage.js';
 
 /**
  * Implementation of Library
@@ -28,9 +29,9 @@ export class LibraryImpl extends BasicEObject implements Library {
   // Private fields
   private _name?: string;
   private _address?: string;
-  private _books: Book[] = [];
-  private _authors: Author[] = [];
-  private _employees: Employee[] = [];
+  private _books!: EList<Book>;
+  private _authors!: EList<Author>;
+  private _employees!: EList<Employee>;
 
   /**
    * Returns the EClass of this object
@@ -88,76 +89,25 @@ export class LibraryImpl extends BasicEObject implements Library {
     }
   }
 
-  get books(): Book[] {
+  get books(): EList<Book> {
+    if (!this._books) {
+      this._books = createContainmentEList<any>(this, this.eClass().getEStructuralFeature('books') as EReference);
+    }
     return this._books;
   }
 
-  set books(value: Book[]) {
-    const oldValue = this._books;
-    this._books = value;
-    if (this.eDeliver()) {
-      this.eNotify({
-        getNotifier: () => this,
-        getEventType: () => 1, // SET
-        getFeature: () => this.eClass().getEStructuralFeature(LibraryImpl.BOOKS),
-        getOldValue: () => oldValue,
-        getNewValue: () => value,
-        getPosition: () => -1,
-        wasSet: () => true,
-        isTouch: () => false,
-        isReset: () => false,
-        getFeatureID: () => LibraryImpl.BOOKS,
-        merge: () => false
-      });
+  get authors(): EList<Author> {
+    if (!this._authors) {
+      this._authors = createContainmentEList<any>(this, this.eClass().getEStructuralFeature('authors') as EReference);
     }
-  }
-
-  get authors(): Author[] {
     return this._authors;
   }
 
-  set authors(value: Author[]) {
-    const oldValue = this._authors;
-    this._authors = value;
-    if (this.eDeliver()) {
-      this.eNotify({
-        getNotifier: () => this,
-        getEventType: () => 1, // SET
-        getFeature: () => this.eClass().getEStructuralFeature(LibraryImpl.AUTHORS),
-        getOldValue: () => oldValue,
-        getNewValue: () => value,
-        getPosition: () => -1,
-        wasSet: () => true,
-        isTouch: () => false,
-        isReset: () => false,
-        getFeatureID: () => LibraryImpl.AUTHORS,
-        merge: () => false
-      });
+  get employees(): EList<Employee> {
+    if (!this._employees) {
+      this._employees = createContainmentEList<any>(this, this.eClass().getEStructuralFeature('employees') as EReference);
     }
-  }
-
-  get employees(): Employee[] {
     return this._employees;
-  }
-
-  set employees(value: Employee[]) {
-    const oldValue = this._employees;
-    this._employees = value;
-    if (this.eDeliver()) {
-      this.eNotify({
-        getNotifier: () => this,
-        getEventType: () => 1, // SET
-        getFeature: () => this.eClass().getEStructuralFeature(LibraryImpl.EMPLOYEES),
-        getOldValue: () => oldValue,
-        getNewValue: () => value,
-        getPosition: () => -1,
-        wasSet: () => true,
-        isTouch: () => false,
-        isReset: () => false,
-        getFeatureID: () => LibraryImpl.EMPLOYEES,
-        merge: () => false
-      });
-    }
   }
 
   // Reflective API
@@ -191,19 +141,27 @@ export class LibraryImpl extends BasicEObject implements Library {
     switch (featureID) {
       case LibraryImpl.NAME:
         this.name = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case LibraryImpl.ADDRESS:
         this.address = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case LibraryImpl.BOOKS:
-        this.books = newValue as Book[];
-        return;
+        this.books.clear();
+        this.books.addAll(newValue as any[]);
+        super.eSet(feature, newValue);
+        break;
       case LibraryImpl.AUTHORS:
-        this.authors = newValue as Author[];
-        return;
+        this.authors.clear();
+        this.authors.addAll(newValue as any[]);
+        super.eSet(feature, newValue);
+        break;
       case LibraryImpl.EMPLOYEES:
-        this.employees = newValue as Employee[];
-        return;
+        this.employees.clear();
+        this.employees.addAll(newValue as any[]);
+        super.eSet(feature, newValue);
+        break;
       default:
         super.eSet(feature, newValue);
     }
@@ -220,11 +178,11 @@ export class LibraryImpl extends BasicEObject implements Library {
       case LibraryImpl.ADDRESS:
         return this._address !== undefined;
       case LibraryImpl.BOOKS:
-        return this._books !== undefined && this._books.length > 0;
+        return this._books !== undefined && !this._books.isEmpty();
       case LibraryImpl.AUTHORS:
-        return this._authors !== undefined && this._authors.length > 0;
+        return this._authors !== undefined && !this._authors.isEmpty();
       case LibraryImpl.EMPLOYEES:
-        return this._employees !== undefined && this._employees.length > 0;
+        return this._employees !== undefined && !this._employees.isEmpty();
       default:
         return super.eIsSet(feature);
     }
@@ -243,13 +201,13 @@ export class LibraryImpl extends BasicEObject implements Library {
         this._address = undefined;
         return;
       case LibraryImpl.BOOKS:
-        this._books = [];
+        if (this._books) this._books.clear();
         return;
       case LibraryImpl.AUTHORS:
-        this._authors = [];
+        if (this._authors) this._authors.clear();
         return;
       case LibraryImpl.EMPLOYEES:
-        this._employees = [];
+        if (this._employees) this._employees.clear();
         return;
       default:
         super.eUnset(feature);

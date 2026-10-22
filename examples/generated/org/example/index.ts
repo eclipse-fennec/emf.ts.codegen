@@ -6,21 +6,22 @@
  */
 
 // Package and Factory
-export { LibraryPackage } from './LibraryPackage';
-export { LibraryFactory } from './LibraryFactory';
+export { LibraryPackage } from './LibraryPackage.js';
+export { LibraryFactory } from './LibraryFactory.js';
 
 // Interfaces
-export type { Library } from './Library';
-export type { Book } from './Book';
-export type { Person } from './Person';
-export type { Author } from './Author';
-export type { Employee } from './Employee';
+export type { Library } from './Library.js';
+export type { Book } from './Book.js';
+export type { Person } from './Person.js';
+export type { Author } from './Author.js';
+export type { Employee } from './Employee.js';
 
-// Implementations
-export { LibraryImpl } from './LibraryImpl';
-export { BookImpl } from './BookImpl';
-export { AuthorImpl } from './AuthorImpl';
-export { EmployeeImpl } from './EmployeeImpl';
+// Implementations (including abstract classes, as they're extended by subclasses)
+export { LibraryImpl } from './LibraryImpl.js';
+export { BookImpl } from './BookImpl.js';
+export { PersonImpl } from './PersonImpl.js';
+export { AuthorImpl } from './AuthorImpl.js';
+export { EmployeeImpl } from './EmployeeImpl.js';
 
 // Enums
-export { BookCategory, getBookCategory, getBookCategoryByLiteral } from './BookCategory';
+export { BookCategory, getBookCategory, getBookCategoryByLiteral } from './BookCategory.js';

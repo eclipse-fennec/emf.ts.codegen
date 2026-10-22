@@ -5,9 +5,9 @@
  * @generated
  */
 
-import type { EObject } from '@emfts/core';
-import type { Person } from './Person';
-import type { Book } from './Book';
+import type { EObject, EList, BasicEObject, EClass, EStructuralFeature } from '@emfts/core';
+import type { Person } from './Person.js';
+import type { Book } from './Book.js';
 
 /**
  * Author
@@ -16,6 +16,6 @@ import type { Book } from './Book';
 export interface Author extends Person {
   biography?: string;
   website?: string;
-  books: Book[];
+  books: EList<Book>;
 
 }

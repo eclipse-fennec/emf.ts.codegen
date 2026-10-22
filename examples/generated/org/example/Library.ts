@@ -5,10 +5,10 @@
  * @generated
  */
 
-import type { EObject } from '@emfts/core';
-import type { Book } from './Book';
-import type { Author } from './Author';
-import type { Employee } from './Employee';
+import type { EObject, EList, BasicEObject, EClass, EStructuralFeature } from '@emfts/core';
+import type { Book } from './Book.js';
+import type { Author } from './Author.js';
+import type { Employee } from './Employee.js';
 
 /**
  * Library
@@ -17,8 +17,8 @@ import type { Employee } from './Employee';
 export interface Library extends EObject {
   name?: string;
   address?: string;
-  books: Book[];
-  authors: Author[];
-  employees: Employee[];
+  books: EList<Book>;
+  authors: EList<Author>;
+  employees: EList<Employee>;
 
 }
