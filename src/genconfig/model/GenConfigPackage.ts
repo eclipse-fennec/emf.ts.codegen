@@ -5,8 +5,8 @@
  * @generated
  */
 
-import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, EPackageRegistry, getEcorePackage } from '@emfts/core';
-import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
+import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, EPackageRegistry, getEcorePackage, BasicEEnum, BasicEEnumLiteral } from '@emfts/core';
+import type { EClass, EAttribute, EReference, EEnum, EDataType } from '@emfts/core';
 import { GenConfigFactory } from './GenConfigFactory.js';
 
 /**
@@ -77,6 +77,8 @@ export class GenConfigPackage extends BasicEPackage {
     FEATURE_OVERRIDE__PROPERTY: null as unknown as EAttribute | EReference,
     FEATURE_OVERRIDE__CUSTOM_GETTER: null as unknown as EAttribute | EReference,
     FEATURE_OVERRIDE__CUSTOM_SETTER: null as unknown as EAttribute | EReference,
+    GENERATION_MODE: null as unknown as EEnum,
+    PROPERTY_MODE: null as unknown as EEnum,
   };
 
   private constructor() {
@@ -467,6 +469,60 @@ export class GenConfigPackage extends BasicEPackage {
     featureOverrideClass.getEStructuralFeatures().push(featureOverride_customSetter);
     GenConfigPackage.Literals.FEATURE_OVERRIDE__CUSTOM_SETTER = featureOverride_customSetter;
 
+    // Create GenerationMode enum
+    const generationModeEnumType = new BasicEEnum();
+    generationModeEnumType.setName('GenerationMode');
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("emf");
+      literal.setValue(0);
+      literal.setLiteral("emf");
+      generationModeEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("decorator");
+      literal.setValue(1);
+      literal.setLiteral("decorator");
+      generationModeEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("plain");
+      literal.setValue(2);
+      literal.setLiteral("plain");
+      generationModeEnumType.addLiteral(literal);
+    }
+    GenConfigPackage.Literals.GENERATION_MODE = generationModeEnumType;
+    this.getEClassifiers().push(generationModeEnumType);
+
+    // Create PropertyMode enum
+    const propertyModeEnumType = new BasicEEnum();
+    propertyModeEnumType.setName('PropertyMode');
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("editable");
+      literal.setValue(0);
+      literal.setLiteral("editable");
+      propertyModeEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("readonly");
+      literal.setValue(1);
+      literal.setLiteral("readonly");
+      propertyModeEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("none");
+      literal.setValue(2);
+      literal.setLiteral("none");
+      propertyModeEnumType.addLiteral(literal);
+    }
+    GenConfigPackage.Literals.PROPERTY_MODE = propertyModeEnumType;
+    this.getEClassifiers().push(propertyModeEnumType);
+
 
     // ============================================
     // Set ESuperTypes (must be done after all classes are created)
@@ -486,6 +542,7 @@ export class GenConfigPackage extends BasicEPackage {
     (GenConfigPackage.Literals.GEN_CONFIG__REFERENCED_PACKAGES as BasicEReference).setEType(GenConfigPackage.Literals.REFERENCED_PACKAGE);
     (GenConfigPackage.Literals.REFERENCED_PACKAGE__NS_U_R_I as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.REFERENCED_PACKAGE__IMPORT_PATH as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (GenConfigPackage.Literals.GENERATION_SETTINGS__MODE as BasicEAttribute).setEType(GenConfigPackage.Literals.GENERATION_MODE);
     (GenConfigPackage.Literals.GENERATION_SETTINGS__OUTPUT_DIR as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.GENERATION_SETTINGS__FILE_EXTENSION as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.GENERATION_SETTINGS__HEADER_COMMENT as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
@@ -500,6 +557,7 @@ export class GenConfigPackage extends BasicEPackage {
     (GenConfigPackage.Literals.CLASS_DEFAULTS__ROOT_EXTENDS_CLASS as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.CLASS_DEFAULTS__ROOT_EXTENDS_INTERFACE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.FEATURE_DEFAULTS__NOTIFY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (GenConfigPackage.Literals.FEATURE_DEFAULTS__PROPERTY as BasicEAttribute).setEType(GenConfigPackage.Literals.PROPERTY_MODE);
     (GenConfigPackage.Literals.CLASS_OVERRIDE__ECORE_CLASS as BasicEReference).setEType(getEcorePackage().getEClassifier('EClass')!);
     (GenConfigPackage.Literals.CLASS_OVERRIDE__GENERATE_INTERFACE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBooleanObject')!);
     (GenConfigPackage.Literals.CLASS_OVERRIDE__GENERATE_IMPL as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBooleanObject')!);
@@ -508,6 +566,7 @@ export class GenConfigPackage extends BasicEPackage {
     (GenConfigPackage.Literals.CLASS_OVERRIDE__FEATURE_OVERRIDES as BasicEReference).setEType(GenConfigPackage.Literals.FEATURE_OVERRIDE);
     (GenConfigPackage.Literals.FEATURE_OVERRIDE__ECORE_FEATURE as BasicEReference).setEType(getEcorePackage().getEClassifier('EStructuralFeature')!);
     (GenConfigPackage.Literals.FEATURE_OVERRIDE__NOTIFY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBooleanObject')!);
+    (GenConfigPackage.Literals.FEATURE_OVERRIDE__PROPERTY as BasicEAttribute).setEType(GenConfigPackage.Literals.PROPERTY_MODE);
     (GenConfigPackage.Literals.FEATURE_OVERRIDE__CUSTOM_GETTER as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (GenConfigPackage.Literals.FEATURE_OVERRIDE__CUSTOM_SETTER as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
 
