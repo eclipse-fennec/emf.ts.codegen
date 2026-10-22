@@ -230,6 +230,9 @@ export class <%- packageName %>Package extends BasicEPackage {
     <%- uncapitalize(className) %>_<%- featureName %>.setName('<%- featureName %>');
     <%- uncapitalize(className) %>_<%- featureName %>.setLowerBound(<%- getLowerBound(feature) %>);
     <%- uncapitalize(className) %>_<%- featureName %>.setUpperBound(<%- getUpperBound(feature) %>);
+<% const featureDefaultLiteral = getDefaultValueLiteral(feature); if (!isRef && featureDefaultLiteral != null) { -%>
+    <%- uncapitalize(className) %>_<%- featureName %>.setDefaultValueLiteral(<%- JSON.stringify(featureDefaultLiteral) %>);
+<% } -%>
     <%- uncapitalize(className) %>Class.getEStructuralFeatures().push(<%- uncapitalize(className) %>_<%- featureName %>);
     <%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> = <%- uncapitalize(className) %>_<%- featureName %>;
 

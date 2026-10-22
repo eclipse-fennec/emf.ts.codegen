@@ -23,7 +23,7 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
   static readonly GENERATE_INDEX: number = 4;
 
   // Private fields
-  private _prefix: string = "";
+  private _prefix?: string;
   private _basePackage?: string;
   private _generateFactory: boolean = true;
   private _generatePackage: boolean = true;
@@ -218,7 +218,7 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PackageSettingsImpl.PREFIX:
-        return this._prefix !== "";
+        return this._prefix !== undefined;
       case PackageSettingsImpl.BASE_PACKAGE:
         return this._basePackage !== undefined;
       case PackageSettingsImpl.GENERATE_FACTORY:
@@ -239,7 +239,7 @@ export class PackageSettingsImpl extends BasicEObject implements PackageSettings
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PackageSettingsImpl.PREFIX:
-        this._prefix = "";
+        this._prefix = undefined;
         return;
       case PackageSettingsImpl.BASE_PACKAGE:
         this._basePackage = undefined;
