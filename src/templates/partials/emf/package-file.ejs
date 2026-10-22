@@ -233,6 +233,29 @@ export class <%- packageName %>Package extends BasicEPackage {
 <% const featureDefaultLiteral = getDefaultValueLiteral(feature); if (!isRef && featureDefaultLiteral != null) { -%>
     <%- uncapitalize(className) %>_<%- featureName %>.setDefaultValueLiteral(<%- JSON.stringify(featureDefaultLiteral) %>);
 <% } -%>
+<%# Feature flags that differ from the Ecore defaults (#59) -%>
+<% const featureVar = uncapitalize(className) + '_' + featureName; -%>
+<% if (feature.isUnsettable?.()) { -%>
+    <%- featureVar %>.setUnsettable(true);
+<% } -%>
+<% if (feature.isTransient?.()) { -%>
+    <%- featureVar %>.setTransient(true);
+<% } -%>
+<% if (feature.isDerived?.()) { -%>
+    <%- featureVar %>.setDerived(true);
+<% } -%>
+<% if (feature.isVolatile?.()) { -%>
+    <%- featureVar %>.setVolatile(true);
+<% } -%>
+<% if (feature.isChangeable?.() === false) { -%>
+    <%- featureVar %>.setChangeable(false);
+<% } -%>
+<% if (!isRef && feature.isID?.()) { -%>
+    <%- featureVar %>.setID(true);
+<% } -%>
+<% if (isRef && feature.isResolveProxies?.() === false) { -%>
+    <%- featureVar %>.setResolveProxies(false);
+<% } -%>
     <%- uncapitalize(className) %>Class.getEStructuralFeatures().push(<%- uncapitalize(className) %>_<%- featureName %>);
     <%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> = <%- uncapitalize(className) %>_<%- featureName %>;
 
@@ -352,6 +375,30 @@ function annotationLines(element, varName) {
        const castType = isRef ? 'BasicEReference' : 'BasicEAttribute';
 -%>
     (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as <%- castType %>).setEType(<%- typeRefExpr(eType) %>);
+<%   }
+   } -%>
+
+    // ============================================
+    // Set EOpposites (must be done after all features are created) (#59)
+    // ============================================
+<% for (const genClass of genClasses) {
+     const eClass = genClass.ecoreClass;
+     const className = getName(eClass);
+     const upperName = className.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+     for (const genFeature of genClass.genFeatures) {
+       const feature = genFeature.ecoreFeature;
+       if (!typeMapper.isReference(feature)) continue;
+       const opposite = getEOpposite(feature);
+       if (!opposite) continue;
+       const oppositeClass = opposite.getEContainingClass?.();
+       // only literals of this package exist - a cross-package opposite is
+       // wired by the owning package
+       if (!oppositeClass || !isLocalClassifier(oppositeClass)) continue;
+       const featureUpperName = getName(feature).replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+       const oppositeUpper = getName(oppositeClass).replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '')
+         + '__' + getName(opposite).replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
+-%>
+    (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as BasicEReference).setEOpposite(<%- packageName %>Package.Literals.<%- oppositeUpper %> as EReference);
 <%   }
    } -%>
 

@@ -603,6 +603,10 @@ export class GenConfigPackage extends BasicEPackage {
     (GenConfigPackage.Literals.FEATURE_OVERRIDE__CUSTOM_SETTER as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
 
     // ============================================
+    // Set EOpposites (must be done after all features are created) (#59)
+    // ============================================
+
+    // ============================================
     // Register XML name mappings from ExtendedMetaData annotations
     // ============================================
   }

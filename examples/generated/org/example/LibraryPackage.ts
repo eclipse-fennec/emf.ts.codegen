@@ -425,6 +425,14 @@ export class LibraryPackage extends BasicEPackage {
     (LibraryPackage.Literals.EMPLOYEE__SUPERVISOR as BasicEReference).setEType(LibraryPackage.Literals.EMPLOYEE);
 
     // ============================================
+    // Set EOpposites (must be done after all features are created) (#59)
+    // ============================================
+    (LibraryPackage.Literals.LIBRARY__BOOKS as BasicEReference).setEOpposite(LibraryPackage.Literals.BOOK__LIBRARY as EReference);
+    (LibraryPackage.Literals.BOOK__AUTHOR as BasicEReference).setEOpposite(LibraryPackage.Literals.AUTHOR__BOOKS as EReference);
+    (LibraryPackage.Literals.BOOK__LIBRARY as BasicEReference).setEOpposite(LibraryPackage.Literals.LIBRARY__BOOKS as EReference);
+    (LibraryPackage.Literals.AUTHOR__BOOKS as BasicEReference).setEOpposite(LibraryPackage.Literals.BOOK__AUTHOR as EReference);
+
+    // ============================================
     // Register XML name mappings from ExtendedMetaData annotations
     // ============================================
   }
