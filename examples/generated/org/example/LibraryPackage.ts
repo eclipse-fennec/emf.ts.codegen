@@ -5,8 +5,9 @@
  * @generated
  */
 
-import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference } from '@emfts/core';
-import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
+import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, EPackageRegistry, getEcorePackage, BasicEEnum, BasicEEnumLiteral } from '@emfts/core';
+import type { EClass, EAttribute, EReference, EEnum, EDataType } from '@emfts/core';
+import { LibraryFactory } from './LibraryFactory.js';
 
 /**
  * Library Package
@@ -61,6 +62,7 @@ export class LibraryPackage extends BasicEPackage {
     EMPLOYEE__SALARY: null as unknown as EAttribute | EReference,
     EMPLOYEE__HIRE_DATE: null as unknown as EAttribute | EReference,
     EMPLOYEE__SUPERVISOR: null as unknown as EAttribute | EReference,
+    BOOK_CATEGORY: null as unknown as EEnum,
   };
 
   private constructor() {
@@ -74,12 +76,20 @@ export class LibraryPackage extends BasicEPackage {
    * Initialize package contents
    */
   private init(): void {
+    // Register this package under its nsURI so other generated packages can
+    // resolve their cross-package references from the registry (#36).
+    // eINSTANCE is already assigned at this point
+    EPackageRegistry.INSTANCE.set(LibraryPackage.eNS_URI, this);
+    // Wire the generated factory so loaded/created instances are typed Impls.
+    this.setEFactoryInstance(LibraryFactory.eINSTANCE);
+
     // Create Library class
     const libraryClass = new BasicEClass();
     libraryClass.setName('Library');
     libraryClass.setAbstract(false);
     libraryClass.setInterface(false);
     this.getEClassifiers().push(libraryClass);
+    libraryClass.setEPackage(this);
     LibraryPackage.Literals.LIBRARY = libraryClass;
 
     // Create name feature
@@ -131,6 +141,7 @@ export class LibraryPackage extends BasicEPackage {
     bookClass.setAbstract(false);
     bookClass.setInterface(false);
     this.getEClassifiers().push(bookClass);
+    bookClass.setEPackage(this);
     LibraryPackage.Literals.BOOK = bookClass;
 
     // Create title feature
@@ -205,6 +216,7 @@ export class LibraryPackage extends BasicEPackage {
     personClass.setAbstract(true);
     personClass.setInterface(false);
     this.getEClassifiers().push(personClass);
+    personClass.setEPackage(this);
     LibraryPackage.Literals.PERSON = personClass;
 
     // Create firstName feature
@@ -245,6 +257,7 @@ export class LibraryPackage extends BasicEPackage {
     authorClass.setAbstract(false);
     authorClass.setInterface(false);
     this.getEClassifiers().push(authorClass);
+    authorClass.setEPackage(this);
     LibraryPackage.Literals.AUTHOR = authorClass;
 
     // Create biography feature
@@ -278,6 +291,7 @@ export class LibraryPackage extends BasicEPackage {
     employeeClass.setAbstract(false);
     employeeClass.setInterface(false);
     this.getEClassifiers().push(employeeClass);
+    employeeClass.setEPackage(this);
     LibraryPackage.Literals.EMPLOYEE = employeeClass;
 
     // Create employeeId feature
@@ -313,5 +327,86 @@ export class LibraryPackage extends BasicEPackage {
     employeeClass.getEStructuralFeatures().push(employee_supervisor);
     LibraryPackage.Literals.EMPLOYEE__SUPERVISOR = employee_supervisor;
 
+    // Create BookCategory enum
+    const bookCategoryEnumType = new BasicEEnum();
+    bookCategoryEnumType.setName('BookCategory');
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("FICTION");
+      literal.setValue(0);
+      literal.setLiteral("FICTION");
+      bookCategoryEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("NON_FICTION");
+      literal.setValue(1);
+      literal.setLiteral("NON_FICTION");
+      bookCategoryEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("SCIENCE");
+      literal.setValue(2);
+      literal.setLiteral("SCIENCE");
+      bookCategoryEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("HISTORY");
+      literal.setValue(3);
+      literal.setLiteral("HISTORY");
+      bookCategoryEnumType.addLiteral(literal);
+    }
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName("BIOGRAPHY");
+      literal.setValue(4);
+      literal.setLiteral("BIOGRAPHY");
+      bookCategoryEnumType.addLiteral(literal);
+    }
+    LibraryPackage.Literals.BOOK_CATEGORY = bookCategoryEnumType;
+    this.getEClassifiers().push(bookCategoryEnumType);
+
+
+    // ============================================
+    // Set ESuperTypes (must be done after all classes are created)
+    // ============================================
+    (LibraryPackage.Literals.AUTHOR as BasicEClass).getESuperTypes().push(LibraryPackage.Literals.PERSON);
+    (LibraryPackage.Literals.EMPLOYEE as BasicEClass).getESuperTypes().push(LibraryPackage.Literals.PERSON);
+
+    // ============================================
+    // Set ETypes for all features (must be done after all classes are created).
+    // An EAttribute without eType leaves the XMI reader no EDataType to
+    // convert against - every value would arrive as a raw string (#37)
+    // ============================================
+    (LibraryPackage.Literals.LIBRARY__NAME as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.LIBRARY__ADDRESS as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.LIBRARY__BOOKS as BasicEReference).setEType(LibraryPackage.Literals.BOOK);
+    (LibraryPackage.Literals.LIBRARY__AUTHORS as BasicEReference).setEType(LibraryPackage.Literals.AUTHOR);
+    (LibraryPackage.Literals.LIBRARY__EMPLOYEES as BasicEReference).setEType(LibraryPackage.Literals.EMPLOYEE);
+    (LibraryPackage.Literals.BOOK__TITLE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.BOOK__ISBN as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.BOOK__PAGES as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EInt')!);
+    (LibraryPackage.Literals.BOOK__PUBLICATION_YEAR as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EInt')!);
+    (LibraryPackage.Literals.BOOK__CATEGORY as BasicEAttribute).setEType(LibraryPackage.Literals.BOOK_CATEGORY);
+    (LibraryPackage.Literals.BOOK__AVAILABLE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EBoolean')!);
+    (LibraryPackage.Literals.BOOK__AUTHOR as BasicEReference).setEType(LibraryPackage.Literals.AUTHOR);
+    (LibraryPackage.Literals.BOOK__LIBRARY as BasicEReference).setEType(LibraryPackage.Literals.LIBRARY);
+    (LibraryPackage.Literals.PERSON__FIRST_NAME as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.PERSON__LAST_NAME as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.PERSON__BIRTH_DATE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EDate')!);
+    (LibraryPackage.Literals.PERSON__EMAIL as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.AUTHOR__BIOGRAPHY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.AUTHOR__WEBSITE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.AUTHOR__BOOKS as BasicEReference).setEType(LibraryPackage.Literals.BOOK);
+    (LibraryPackage.Literals.EMPLOYEE__EMPLOYEE_ID as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
+    (LibraryPackage.Literals.EMPLOYEE__SALARY as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EDouble')!);
+    (LibraryPackage.Literals.EMPLOYEE__HIRE_DATE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EDate')!);
+    (LibraryPackage.Literals.EMPLOYEE__SUPERVISOR as BasicEReference).setEType(LibraryPackage.Literals.EMPLOYEE);
+
+    // ============================================
+    // Register XML name mappings from ExtendedMetaData annotations
+    // ============================================
   }
 }

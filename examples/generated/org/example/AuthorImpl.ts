@@ -5,12 +5,13 @@
  * @generated
  */
 
-import type { EClass, EStructuralFeature } from '@emfts/core';
-import { Person } from './Person';
-import { Book } from './Book';
-import { PersonImpl } from './PersonImpl';
-import type { Author } from './Author';
-import { LibraryPackage } from './LibraryPackage';
+import { createEObjectEList } from '@emfts/core';
+import type { EClass, EStructuralFeature, EList, EReference } from '@emfts/core';
+import type { Person } from './Person.js';
+import type { Book } from './Book.js';
+import { PersonImpl } from './PersonImpl.js';
+import type { Author } from './Author.js';
+import { LibraryPackage } from './LibraryPackage.js';
 
 /**
  * Implementation of Author
@@ -18,14 +19,14 @@ import { LibraryPackage } from './LibraryPackage';
  */
 export class AuthorImpl extends PersonImpl implements Author {
   // Feature ID Constants (eLiterals)
-  static readonly BIOGRAPHY: number = 0;
-  static readonly WEBSITE: number = 1;
-  static readonly BOOKS: number = 2;
+  static readonly BIOGRAPHY: number = 4;
+  static readonly WEBSITE: number = 5;
+  static readonly BOOKS: number = 6;
 
   // Private fields
   private _biography?: string;
   private _website?: string;
-  private _books: Book[] = [];
+  private _books!: EList<Book>;
 
   /**
    * Returns the EClass of this object
@@ -83,12 +84,11 @@ export class AuthorImpl extends PersonImpl implements Author {
     }
   }
 
-  get books(): Book[] {
+  get books(): EList<Book> {
+    if (!this._books) {
+      this._books = createEObjectEList(this, this.eClass().getEStructuralFeature('books') as EReference) as unknown as EList<Book>;
+    }
     return this._books;
-  }
-
-  set books(value: Book[]) {
-    this._books = value;
   }
 
   // Reflective API
@@ -118,13 +118,17 @@ export class AuthorImpl extends PersonImpl implements Author {
     switch (featureID) {
       case AuthorImpl.BIOGRAPHY:
         this.biography = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case AuthorImpl.WEBSITE:
         this.website = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case AuthorImpl.BOOKS:
-        this.books = newValue as Book[];
-        return;
+        this.books.clear();
+        this.books.addAll(newValue as any[]);
+        super.eSet(feature, newValue);
+        break;
       default:
         super.eSet(feature, newValue);
     }
@@ -141,7 +145,7 @@ export class AuthorImpl extends PersonImpl implements Author {
       case AuthorImpl.WEBSITE:
         return this._website !== undefined;
       case AuthorImpl.BOOKS:
-        return this._books !== undefined && this._books.length > 0;
+        return this._books !== undefined && !this._books.isEmpty();
       default:
         return super.eIsSet(feature);
     }
@@ -160,7 +164,7 @@ export class AuthorImpl extends PersonImpl implements Author {
         this._website = undefined;
         return;
       case AuthorImpl.BOOKS:
-        this._books = [];
+        if (this._books) this._books.clear();
         return;
       default:
         super.eUnset(feature);

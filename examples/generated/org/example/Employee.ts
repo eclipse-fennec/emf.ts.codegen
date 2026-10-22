@@ -5,8 +5,8 @@
  * @generated
  */
 
-import type { EObject } from '@emfts/core';
-import type { Person } from './Person';
+import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/core';
+import type { Person } from './Person.js';
 
 /**
  * Employee

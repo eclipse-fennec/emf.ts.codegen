@@ -7,8 +7,8 @@
 
 import { BasicEObject } from '@emfts/core';
 import type { EClass, EStructuralFeature } from '@emfts/core';
-import type { Person } from './Person';
-import { LibraryPackage } from './LibraryPackage';
+import type { Person } from './Person.js';
+import { LibraryPackage } from './LibraryPackage.js';
 
 /**
  * Implementation of Person
@@ -160,16 +160,20 @@ export abstract class PersonImpl extends BasicEObject implements Person {
     switch (featureID) {
       case PersonImpl.FIRST_NAME:
         this.firstName = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case PersonImpl.LAST_NAME:
         this.lastName = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case PersonImpl.BIRTH_DATE:
         this.birthDate = newValue as Date;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case PersonImpl.EMAIL:
         this.email = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       default:
         super.eSet(feature, newValue);
     }

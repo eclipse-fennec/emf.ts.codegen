@@ -7,15 +7,15 @@
 
 import { BasicEFactory } from '@emfts/core';
 import type { EClass, EObject } from '@emfts/core';
-import { LibraryPackage } from './LibraryPackage';
-import type { Library } from './Library';
-import { LibraryImpl } from './LibraryImpl';
-import type { Book } from './Book';
-import { BookImpl } from './BookImpl';
-import type { Author } from './Author';
-import { AuthorImpl } from './AuthorImpl';
-import type { Employee } from './Employee';
-import { EmployeeImpl } from './EmployeeImpl';
+import { LibraryPackage } from './LibraryPackage.js';
+import type { Library } from './Library.js';
+import { LibraryImpl } from './LibraryImpl.js';
+import type { Book } from './Book.js';
+import { BookImpl } from './BookImpl.js';
+import type { Author } from './Author.js';
+import { AuthorImpl } from './AuthorImpl.js';
+import type { Employee } from './Employee.js';
+import { EmployeeImpl } from './EmployeeImpl.js';
 
 /**
  * Factory for creating Library model objects

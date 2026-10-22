@@ -6,10 +6,10 @@
  */
 
 import type { EClass, EStructuralFeature } from '@emfts/core';
-import { Person } from './Person';
-import { PersonImpl } from './PersonImpl';
-import type { Employee } from './Employee';
-import { LibraryPackage } from './LibraryPackage';
+import type { Person } from './Person.js';
+import { PersonImpl } from './PersonImpl.js';
+import type { Employee } from './Employee.js';
+import { LibraryPackage } from './LibraryPackage.js';
 
 /**
  * Implementation of Employee
@@ -17,10 +17,10 @@ import { LibraryPackage } from './LibraryPackage';
  */
 export class EmployeeImpl extends PersonImpl implements Employee {
   // Feature ID Constants (eLiterals)
-  static readonly EMPLOYEE_ID: number = 0;
-  static readonly SALARY: number = 1;
-  static readonly HIRE_DATE: number = 2;
-  static readonly SUPERVISOR: number = 3;
+  static readonly EMPLOYEE_ID: number = 4;
+  static readonly SALARY: number = 5;
+  static readonly HIRE_DATE: number = 6;
+  static readonly SUPERVISOR: number = 7;
 
   // Private fields
   private _employeeId: string = "";
@@ -145,16 +145,20 @@ export class EmployeeImpl extends PersonImpl implements Employee {
     switch (featureID) {
       case EmployeeImpl.EMPLOYEE_ID:
         this.employeeId = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case EmployeeImpl.SALARY:
         this.salary = newValue as number;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case EmployeeImpl.HIRE_DATE:
         this.hireDate = newValue as Date;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case EmployeeImpl.SUPERVISOR:
         this.supervisor = newValue as Employee;
-        return;
+        super.eSet(feature, newValue);
+        break;
       default:
         super.eSet(feature, newValue);
     }

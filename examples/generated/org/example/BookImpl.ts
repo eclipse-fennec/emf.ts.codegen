@@ -7,11 +7,11 @@
 
 import { BasicEObject } from '@emfts/core';
 import type { EClass, EStructuralFeature } from '@emfts/core';
-import { BookCategory } from './BookCategory';
-import { Author } from './Author';
-import { Library } from './Library';
-import type { Book } from './Book';
-import { LibraryPackage } from './LibraryPackage';
+import type { Author } from './Author.js';
+import type { Library } from './Library.js';
+import { BookCategory } from './BookCategory.js';
+import type { Book } from './Book.js';
+import { LibraryPackage } from './LibraryPackage.js';
 
 /**
  * Implementation of Book
@@ -239,28 +239,36 @@ export class BookImpl extends BasicEObject implements Book {
     switch (featureID) {
       case BookImpl.TITLE:
         this.title = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.ISBN:
         this.isbn = newValue as string;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.PAGES:
         this.pages = newValue as number;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.PUBLICATION_YEAR:
         this.publicationYear = newValue as number;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.CATEGORY:
         this.category = newValue as BookCategory;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.AVAILABLE:
         this.available = newValue as boolean;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.AUTHOR:
         this.author = newValue as Author;
-        return;
+        super.eSet(feature, newValue);
+        break;
       case BookImpl.LIBRARY:
         this.library = newValue as Library;
-        return;
+        super.eSet(feature, newValue);
+        break;
       default:
         super.eSet(feature, newValue);
     }

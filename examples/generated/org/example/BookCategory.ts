@@ -9,19 +9,21 @@
  * BookCategory
  * @generated
  */
-export enum BookCategory {
-  FICTION = 0,
-  NON_FICTION = 1,
-  SCIENCE = 2,
-  HISTORY = 3,
-  BIOGRAPHY = 4
-}
+export const BookCategory = {
+  FICTION: 'FICTION',
+  NON_FICTION: 'NON_FICTION',
+  SCIENCE: 'SCIENCE',
+  HISTORY: 'HISTORY',
+  BIOGRAPHY: 'BIOGRAPHY'
+} as const;
+
+export type BookCategory = typeof BookCategory[keyof typeof BookCategory];
 
 /**
  * Get enum value by name
  */
 export function getBookCategory(name: string): BookCategory | undefined {
-  return (BookCategory as any)[name];
+  return (BookCategory as Record<string, string>)[name] as BookCategory | undefined;
 }
 
 /**
