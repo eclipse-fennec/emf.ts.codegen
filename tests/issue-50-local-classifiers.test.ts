@@ -47,6 +47,12 @@ describe('Issue #50: local EEnums and EDataTypes as package metadata', () => {
     expect(pkg).toContain('layoutTypeEnumType.addLiteral(literal);');
   });
 
+  it('should set the generated string constant as the literal instance (#53)', () => {
+    // createFromString then returns the value the generated type declares
+    expect(pkg).toContain("import { LayoutType } from './LayoutType.js';");
+    expect(pkg).toContain('literal.setInstance(LayoutType.GRID);');
+  });
+
   it('should assign the Literals entry and register the enum as classifier', () => {
     expect(pkg).toContain('LAYOUT_TYPE: null as unknown as EEnum,');
     expect(pkg).toContain('UimodelPackage.Literals.LAYOUT_TYPE = layoutTypeEnumType;');

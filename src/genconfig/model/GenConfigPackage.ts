@@ -8,6 +8,8 @@
 import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, EPackageRegistry, getEcorePackage, BasicEEnum, BasicEEnumLiteral } from '@emfts/core';
 import type { EClass, EAttribute, EReference, EEnum, EDataType } from '@emfts/core';
 import { GenConfigFactory } from './GenConfigFactory.js';
+import { GenerationMode } from './GenerationMode.js';
+import { PropertyMode } from './PropertyMode.js';
 
 /**
  * GenConfig Package
@@ -477,6 +479,9 @@ export class GenConfigPackage extends BasicEPackage {
       literal.setName("emf");
       literal.setValue(0);
       literal.setLiteral("emf");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(GenerationMode.emf);
       generationModeEnumType.addLiteral(literal);
     }
     {
@@ -484,6 +489,9 @@ export class GenConfigPackage extends BasicEPackage {
       literal.setName("decorator");
       literal.setValue(1);
       literal.setLiteral("decorator");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(GenerationMode.decorator);
       generationModeEnumType.addLiteral(literal);
     }
     {
@@ -491,6 +499,9 @@ export class GenConfigPackage extends BasicEPackage {
       literal.setName("plain");
       literal.setValue(2);
       literal.setLiteral("plain");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(GenerationMode.plain);
       generationModeEnumType.addLiteral(literal);
     }
     GenConfigPackage.Literals.GENERATION_MODE = generationModeEnumType;
@@ -504,6 +515,9 @@ export class GenConfigPackage extends BasicEPackage {
       literal.setName("editable");
       literal.setValue(0);
       literal.setLiteral("editable");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(PropertyMode.editable);
       propertyModeEnumType.addLiteral(literal);
     }
     {
@@ -511,6 +525,9 @@ export class GenConfigPackage extends BasicEPackage {
       literal.setName("readonly");
       literal.setValue(1);
       literal.setLiteral("readonly");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(PropertyMode.readonly);
       propertyModeEnumType.addLiteral(literal);
     }
     {
@@ -518,6 +535,9 @@ export class GenConfigPackage extends BasicEPackage {
       literal.setName("none");
       literal.setValue(2);
       literal.setLiteral("none");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(PropertyMode.none);
       propertyModeEnumType.addLiteral(literal);
     }
     GenConfigPackage.Literals.PROPERTY_MODE = propertyModeEnumType;
