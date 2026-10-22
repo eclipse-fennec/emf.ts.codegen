@@ -52,10 +52,20 @@ export class EmfGenerator extends BaseGenerator {
           const stPackage = EObjectHelper.getEPackage(st);
           const stNsURI = stPackage?.getNsURI?.();
           if (stNsURI && stNsURI !== currentNsURI) {
-            // Cross-package: import Impl directly from its file, not via index
             const registeredPath = this.context.importResolver.getRegisteredPath(stNsURI);
             if (registeredPath) {
-              extendsImport = `${registeredPath}/${extendsClass}`;
+              const isRelative = registeredPath.startsWith('./') || registeredPath.startsWith('../');
+              const isModuleFile = /\.(js|ts|mjs|cjs)$/.test(registeredPath);
+              if (isRelative && !isModuleFile) {
+                // Relative directory mapping: import the Impl directly from
+                // its file (not via the index, which would create a cycle)
+                extendsImport = `${registeredPath}/${extendsClass}.js`;
+              } else {
+                // Bare specifier (or a mapping that already names a module):
+                // packages do not export subpaths - use the mapping literally
+                // and rely on the package entry re-exporting the Impl (#57)
+                extendsImport = registeredPath;
+              }
             } else {
               extendsImport = `./${extendsClass}.js`;
             }
