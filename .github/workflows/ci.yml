@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [snapshot]
   pull_request:
-    branches: [main]
+    branches: [snapshot]
 
 jobs:
   build:
@@ -28,6 +28,18 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Regenerate example output
+        run: npm run generate:example
+
+      - name: Regenerate genconfig model
+        run: node dist/cli/index.js generate -m model/genconfig.ecore -c model/genconfig.genconfig.xmi
+
+      - name: Checked-in generated code must match the templates
+        run: git diff --exit-code examples/generated src/genconfig/model
+
+      - name: Test
+        run: npx vitest run
 
       - name: Upload build artifacts
         if: matrix.node-version == 22

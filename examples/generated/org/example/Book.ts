@@ -5,10 +5,10 @@
  * @generated
  */
 
-import type { EObject } from '@emfts/core';
-import type { BookCategory } from './BookCategory';
-import type { Author } from './Author';
-import type { Library } from './Library';
+import type { EObject, BasicEObject, EClass, EStructuralFeature } from '@emfts/core';
+import type { BookCategory } from './BookCategory.js';
+import type { Author } from './Author.js';
+import type { Library } from './Library.js';
 
 /**
  * Book
