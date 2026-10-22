@@ -92,9 +92,34 @@ for (const genClass of genClasses) {
 // nsURI so that other generated packages can resolve their references (#36)
 const coreImports = ['BasicEPackage', 'BasicEClass', 'BasicEAttribute', 'BasicEReference', 'EPackageRegistry'];
 if (needsEcoreImport) coreImports.push('getEcorePackage');
+
+// Local EEnums and EDataTypes are materialized as package metadata (#50)
+const localEnums = genEnums || [];
+const localDataTypes = genDataTypes || [];
+// annotation entries of a loaded model element, as [key, value] pairs per source
+function getAnnotationEntries(element) {
+  const result = [];
+  for (const ann of element?.getEAnnotations?.() ?? []) {
+    const source = ann.getSource?.();
+    if (!source) continue;
+    const details = [];
+    for (const entry of ann.getDetails?.() ?? []) {
+      const key = entry.eGet?.(entry.eClass().getEStructuralFeature('key'));
+      const value = entry.eGet?.(entry.eClass().getEStructuralFeature('value'));
+      if (key != null) details.push([key, value ?? '']);
+    }
+    result.push({ source, details });
+  }
+  return result;
+}
+const hasClassifierAnnotations = [...localEnums.map(e => e.ecoreEnum), ...localDataTypes.map(d => d.ecoreDataType)]
+  .some(c => getAnnotationEntries(c).length > 0);
+if (localEnums.length > 0) coreImports.push('BasicEEnum', 'BasicEEnumLiteral');
+if (localDataTypes.length > 0) coreImports.push('BasicEDataType');
+if (hasClassifierAnnotations) coreImports.push('BasicEAnnotation');
 -%>
 import { <%- coreImports.join(', ') %> } from '@emfts/core';
-import type { EClass, EAttribute, EReference, EEnum } from '@emfts/core';
+import type { EClass, EAttribute, EReference, EEnum, EDataType } from '@emfts/core';
 <% if (generateFactory) { -%>
 import { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
 <% } -%>
@@ -142,6 +167,12 @@ export class <%- packageName %>Package extends BasicEPackage {
 <% for (const feat of cls.features) { -%>
     <%- cls.upperName %>__<%- feat.upperName %>: null as unknown as EAttribute | EReference,
 <% } -%>
+<% } -%>
+<% for (const genEnum of localEnums) { -%>
+    <%- toUpperSnake(getName(genEnum.ecoreEnum)) %>: null as unknown as EEnum,
+<% } -%>
+<% for (const genDataType of localDataTypes) { -%>
+    <%- toUpperSnake(getName(genDataType.ecoreDataType)) %>: null as unknown as EDataType,
 <% } -%>
   };
 
@@ -202,7 +233,79 @@ export class <%- packageName %>Package extends BasicEPackage {
 <% featureIndex++;
    } -%>
 <% } -%>
-<%# TODO: Enum package metadata initialization - requires BasicEEnum implementation in emfts -%>
+<%# Local EEnums and EDataTypes as package metadata (#50): without them an
+    attribute typed by a local classifier has no eType, XMI readers get no
+    EDataType to convert against and reflective consumers cannot tell an
+    enum from free text -%>
+<%
+function annotationLines(element, varName) {
+  const lines = [];
+  for (const ann of getAnnotationEntries(element)) {
+    lines.push('    {');
+    lines.push('      const annotation = new BasicEAnnotation();');
+    lines.push(`      annotation.setSource(${JSON.stringify(ann.source)});`);
+    for (const [key, value] of ann.details) {
+      lines.push(`      annotation.getDetails().putByKey(${JSON.stringify(key)}, ${JSON.stringify(value)});`);
+    }
+    lines.push(`      ${varName}.getEAnnotations().push(annotation);`);
+    lines.push('    }');
+  }
+  return lines.join('\n');
+}
+-%>
+<% for (const genEnum of localEnums) {
+  const eEnum = genEnum.ecoreEnum;
+  const enumName = getName(eEnum);
+  const varName = uncapitalize(enumName) + 'EnumType';
+  const upperName = toUpperSnake(enumName);
+-%>
+    // Create <%- enumName %> enum
+    const <%- varName %> = new BasicEEnum();
+    <%- varName %>.setName('<%- enumName %>');
+<% for (const lit of getELiterals(eEnum)) {
+     const litName = getName(lit);
+     const litValue = getValue(lit) ?? 0;
+     const litLiteral = getLiteral(lit) || litName;
+-%>
+    {
+      const literal = new BasicEEnumLiteral();
+      literal.setName(<%- JSON.stringify(litName) %>);
+      literal.setValue(<%- litValue %>);
+      literal.setLiteral(<%- JSON.stringify(litLiteral) %>);
+      <%- varName %>.addLiteral(literal);
+    }
+<% } -%>
+<% const enumAnnotations = annotationLines(eEnum, varName); if (enumAnnotations) { -%>
+<%- enumAnnotations %>
+<% } -%>
+    <%- packageName %>Package.Literals.<%- upperName %> = <%- varName %>;
+    this.getEClassifiers().push(<%- varName %>);
+
+<% } -%>
+<% for (const genDataType of localDataTypes) {
+  const eDataType = genDataType.ecoreDataType;
+  const dataTypeName = getName(eDataType);
+  const varName = uncapitalize(dataTypeName) + 'DataType';
+  const upperName = toUpperSnake(dataTypeName);
+  const instanceClassName = eDataType.getInstanceClassName?.();
+  const serializable = eDataType.isSerializable?.();
+-%>
+    // Create <%- dataTypeName %> datatype
+    const <%- varName %> = new BasicEDataType();
+    <%- varName %>.setName('<%- dataTypeName %>');
+<% if (instanceClassName) { -%>
+    <%- varName %>.setInstanceClassName(<%- JSON.stringify(instanceClassName) %>);
+<% } -%>
+<% if (serializable === false) { -%>
+    <%- varName %>.setSerializable(false);
+<% } -%>
+<% const dataTypeAnnotations = annotationLines(eDataType, varName); if (dataTypeAnnotations) { -%>
+<%- dataTypeAnnotations %>
+<% } -%>
+    <%- packageName %>Package.Literals.<%- upperName %> = <%- varName %>;
+    this.getEClassifiers().push(<%- varName %>);
+
+<% } -%>
 
     // ============================================
     // Set ESuperTypes (must be done after all classes are created)
@@ -237,9 +340,6 @@ export class <%- packageName %>Package extends BasicEPackage {
        const isRef = typeMapper.isReference(feature);
        const eType = getEType(feature);
        if (!eType) continue;
-       // Local enums and datatypes have no initialized Literals entry yet
-       // (see the enum TODO above) - only class literals exist locally
-       if (!isRef && isLocalClassifier(eType)) continue;
        const castType = isRef ? 'BasicEReference' : 'BasicEAttribute';
 -%>
     (<%- packageName %>Package.Literals.<%- upperName %>__<%- featureUpperName %> as <%- castType %>).setEType(<%- typeRefExpr(eType) %>);

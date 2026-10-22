@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="uimodel" nsURI="http://example.org/uimodel" nsPrefix="uimodel">
+
+  <!-- Issue #50: local EEnums and EDataTypes must be materialized as package
+       metadata so attributes typed by them carry an eType -->
+  <eClassifiers xsi:type="ecore:EEnum" name="LayoutType">
+    <eLiterals name="GRID" literal="grid"/>
+    <eLiterals name="FLOW" value="1" literal="flow"/>
+    <eLiterals name="STACK" value="2" literal="stack"/>
+  </eClassifiers>
+
+  <eClassifiers xsi:type="ecore:EDataType" name="LocalizedEString" instanceClassName="java.lang.String">
+    <eAnnotations source="http:///org/eclipse/emf/ecore/util/ExtendedMetaData">
+      <details key="baseType" value="http://www.eclipse.org/emf/2002/Ecore#EString"/>
+    </eAnnotations>
+  </eClassifiers>
+
+  <eClassifiers xsi:type="ecore:EClass" name="LayoutStyle">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="layout" eType="#//LayoutType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="label" eType="#//LocalizedEString"/>
+  </eClassifiers>
+
+</ecore:EPackage>

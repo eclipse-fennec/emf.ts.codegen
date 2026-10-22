@@ -59,14 +59,14 @@ describe('Issue #37: EAttributes get their eType in the generated Package', () =
     expect(servicesPackage).toMatch(/import \{[^}]*getEcorePackage[^}]*\} from '@emfts\/core';/);
   });
 
-  it('should skip attributes typed to local enums (no initialized Literals entry yet)', async () => {
-    // GenerationSettings.mode is typed to the local EEnum GenerationMode -
-    // emitting a Literals-based setEType for it would not compile
+  it('should type attributes of local enums against the generated enum literal (#50)', async () => {
     const genconfigPackage = await generatePackageSource(
       path.resolve(__dirname, '../model/genconfig.ecore'), 'http://www.emfts.org/genconfig/1.0', 'GenConfig'
     );
-    expect(genconfigPackage).not.toMatch(/GENERATION_SETTINGS__MODE as BasicEAttribute\)\.setEType/);
-    // while the EString attribute on the same class is typed
+    expect(genconfigPackage).toContain(
+      '(GenConfigPackage.Literals.GENERATION_SETTINGS__MODE as BasicEAttribute).setEType(GenConfigPackage.Literals.GENERATION_MODE);'
+    );
+    // while the EString attribute on the same class is typed against Ecore
     expect(genconfigPackage).toContain(
       "(GenConfigPackage.Literals.GENERATION_SETTINGS__OUTPUT_DIR as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);"
     );

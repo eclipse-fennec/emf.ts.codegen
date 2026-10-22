@@ -206,6 +206,7 @@ export class EmfGenerator extends BaseGenerator {
       classLiterals,
       genClasses: genPackage.genClasses,
       genEnums: genPackage.genEnums,
+      genDataTypes: genPackage.genDataTypes,
       generateFactory: this.context.genModel.generateFactory
     });
 
