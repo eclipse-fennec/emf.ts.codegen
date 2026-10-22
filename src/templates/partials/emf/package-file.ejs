@@ -123,6 +123,9 @@ import type { EClass, EAttribute, EReference, EEnum, EDataType } from '@emfts/co
 <% if (generateFactory) { -%>
 import { <%- packageName %>Factory } from './<%- packageName %>Factory.js';
 <% } -%>
+<% for (const genEnum of localEnums) { -%>
+import { <%- getName(genEnum.ecoreEnum) %> } from './<%- getName(genEnum.ecoreEnum) %>.js';
+<% } -%>
 <% if (needsRegistryImport) { -%>
 
 /**
@@ -272,6 +275,9 @@ function annotationLines(element, varName) {
       literal.setName(<%- JSON.stringify(litName) %>);
       literal.setValue(<%- litValue %>);
       literal.setLiteral(<%- JSON.stringify(litLiteral) %>);
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(<%- enumName %>.<%- litName %>);
       <%- varName %>.addLiteral(literal);
     }
 <% } -%>

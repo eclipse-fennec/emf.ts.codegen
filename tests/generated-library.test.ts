@@ -483,4 +483,39 @@ describe('Generated Library Model', () => {
       expect(library.employees[1].supervisor?.firstName).toBe('Alice');
     });
   });
+
+  // Issue #53: loaded enum attributes must hold the generated string constant
+  // (the literal's instance), not the BasicEEnumLiteral object
+  describe('enum values loaded from XMI (#53)', () => {
+    async function read(xml: string) {
+      const { BasicResourceSet, XMIResource, URI, getEcorePackage, ECORE_NS_URI } = await import('@emfts/core');
+      getEcorePackage();
+      const rs = new BasicResourceSet();
+      rs.getPackageRegistry().set(ECORE_NS_URI, getEcorePackage());
+      rs.getPackageRegistry().set(LibraryPackage.eNS_URI, LibraryPackage.eINSTANCE);
+      const res = new XMIResource(URI.createURI('test.xmi'));
+      res.setResourceSet(rs);
+      res.loadFromString('<?xml version="1.0" encoding="UTF-8"?>\n' + xml);
+      return res;
+    }
+
+    it('should read an enum attribute as the generated string constant', async () => {
+      const res = await read('<lib:Book xmlns:lib="http://example.org/library" title="Dune" category="SCIENCE"/>');
+      const book = res.getContents().get(0) as Book;
+      expect(typeof book.category).toBe('string');
+      expect(book.category).toBe(BookCategory.SCIENCE);
+    });
+
+    it('should report eIsSet false for an explicitly written default value', async () => {
+      const res = await read('<lib:Book xmlns:lib="http://example.org/library" title="Dune" category="FICTION"/>');
+      const book = res.getContents().get(0) as any;
+      const categoryFeature = LibraryPackage.eINSTANCE.getEClassifier('Book')!.getEStructuralFeature('category')!;
+      expect(book.eIsSet(categoryFeature)).toBe(false);
+    });
+
+    it('should write the literal back on a round trip', async () => {
+      const res = await read('<lib:Book xmlns:lib="http://example.org/library" title="Dune" category="SCIENCE"/>');
+      expect(res.saveToString()).toContain('category="SCIENCE"');
+    });
+  });
 });

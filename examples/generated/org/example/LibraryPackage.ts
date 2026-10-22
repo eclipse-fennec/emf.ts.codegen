@@ -8,6 +8,7 @@
 import { BasicEPackage, BasicEClass, BasicEAttribute, BasicEReference, EPackageRegistry, getEcorePackage, BasicEEnum, BasicEEnumLiteral } from '@emfts/core';
 import type { EClass, EAttribute, EReference, EEnum, EDataType } from '@emfts/core';
 import { LibraryFactory } from './LibraryFactory.js';
+import { BookCategory } from './BookCategory.js';
 
 /**
  * Library Package
@@ -335,6 +336,9 @@ export class LibraryPackage extends BasicEPackage {
       literal.setName("FICTION");
       literal.setValue(0);
       literal.setLiteral("FICTION");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(BookCategory.FICTION);
       bookCategoryEnumType.addLiteral(literal);
     }
     {
@@ -342,6 +346,9 @@ export class LibraryPackage extends BasicEPackage {
       literal.setName("NON_FICTION");
       literal.setValue(1);
       literal.setLiteral("NON_FICTION");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(BookCategory.NON_FICTION);
       bookCategoryEnumType.addLiteral(literal);
     }
     {
@@ -349,6 +356,9 @@ export class LibraryPackage extends BasicEPackage {
       literal.setName("SCIENCE");
       literal.setValue(2);
       literal.setLiteral("SCIENCE");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(BookCategory.SCIENCE);
       bookCategoryEnumType.addLiteral(literal);
     }
     {
@@ -356,6 +366,9 @@ export class LibraryPackage extends BasicEPackage {
       literal.setName("HISTORY");
       literal.setValue(3);
       literal.setLiteral("HISTORY");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(BookCategory.HISTORY);
       bookCategoryEnumType.addLiteral(literal);
     }
     {
@@ -363,6 +376,9 @@ export class LibraryPackage extends BasicEPackage {
       literal.setName("BIOGRAPHY");
       literal.setValue(4);
       literal.setLiteral("BIOGRAPHY");
+      // the generated string constant is the literal's instance, so
+      // createFromString returns the value the generated type declares (#53)
+      literal.setInstance(BookCategory.BIOGRAPHY);
       bookCategoryEnumType.addLiteral(literal);
     }
     LibraryPackage.Literals.BOOK_CATEGORY = bookCategoryEnumType;
