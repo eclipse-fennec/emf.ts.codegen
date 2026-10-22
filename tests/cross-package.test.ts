@@ -64,12 +64,13 @@ describe('Issue #9: Cross-package references', () => {
     expect(content).toContain('Expression');
   });
 
-  it('ChartViewImpl should extend ComponentImpl imported from external package file', () => {
+  it('ChartViewImpl should extend ComponentImpl imported from the external package', () => {
     const content = getFile('ChartViewImpl.ts');
     // Component is abstract (not interface), so its Impl is imported from the external package
     expect(content).toContain('extends ComponentImpl');
-    // Should import directly from the Impl file, not from index
-    expect(content).toContain("import { ComponentImpl } from '@base/model/ComponentImpl'");
+    // A bare specifier mapping is used literally - packages do not export
+    // subpaths like '@base/model/ComponentImpl' (#57)
+    expect(content).toContain("import { ComponentImpl } from '@base/model';");
   });
 
   it('ChartViewImpl should NOT have mixin name property (inherited via ComponentImpl)', () => {
