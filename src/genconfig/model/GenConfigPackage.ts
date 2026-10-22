@@ -212,6 +212,7 @@ export class GenConfigPackage extends BasicEPackage {
     generationSettings_mode.setName('mode');
     generationSettings_mode.setLowerBound(1);
     generationSettings_mode.setUpperBound(1);
+    generationSettings_mode.setDefaultValueLiteral("emf");
     generationSettingsClass.getEStructuralFeatures().push(generationSettings_mode);
     GenConfigPackage.Literals.GENERATION_SETTINGS__MODE = generationSettings_mode;
 
@@ -220,6 +221,7 @@ export class GenConfigPackage extends BasicEPackage {
     generationSettings_outputDir.setName('outputDir');
     generationSettings_outputDir.setLowerBound(1);
     generationSettings_outputDir.setUpperBound(1);
+    generationSettings_outputDir.setDefaultValueLiteral("./generated");
     generationSettingsClass.getEStructuralFeatures().push(generationSettings_outputDir);
     GenConfigPackage.Literals.GENERATION_SETTINGS__OUTPUT_DIR = generationSettings_outputDir;
 
@@ -228,6 +230,7 @@ export class GenConfigPackage extends BasicEPackage {
     generationSettings_fileExtension.setName('fileExtension');
     generationSettings_fileExtension.setLowerBound(0);
     generationSettings_fileExtension.setUpperBound(1);
+    generationSettings_fileExtension.setDefaultValueLiteral(".ts");
     generationSettingsClass.getEStructuralFeatures().push(generationSettings_fileExtension);
     GenConfigPackage.Literals.GENERATION_SETTINGS__FILE_EXTENSION = generationSettings_fileExtension;
 
@@ -277,6 +280,7 @@ export class GenConfigPackage extends BasicEPackage {
     packageSettings_generateFactory.setName('generateFactory');
     packageSettings_generateFactory.setLowerBound(0);
     packageSettings_generateFactory.setUpperBound(1);
+    packageSettings_generateFactory.setDefaultValueLiteral("true");
     packageSettingsClass.getEStructuralFeatures().push(packageSettings_generateFactory);
     GenConfigPackage.Literals.PACKAGE_SETTINGS__GENERATE_FACTORY = packageSettings_generateFactory;
 
@@ -285,6 +289,7 @@ export class GenConfigPackage extends BasicEPackage {
     packageSettings_generatePackage.setName('generatePackage');
     packageSettings_generatePackage.setLowerBound(0);
     packageSettings_generatePackage.setUpperBound(1);
+    packageSettings_generatePackage.setDefaultValueLiteral("true");
     packageSettingsClass.getEStructuralFeatures().push(packageSettings_generatePackage);
     GenConfigPackage.Literals.PACKAGE_SETTINGS__GENERATE_PACKAGE = packageSettings_generatePackage;
 
@@ -293,6 +298,7 @@ export class GenConfigPackage extends BasicEPackage {
     packageSettings_generateIndex.setName('generateIndex');
     packageSettings_generateIndex.setLowerBound(0);
     packageSettings_generateIndex.setUpperBound(1);
+    packageSettings_generateIndex.setDefaultValueLiteral("true");
     packageSettingsClass.getEStructuralFeatures().push(packageSettings_generateIndex);
     GenConfigPackage.Literals.PACKAGE_SETTINGS__GENERATE_INDEX = packageSettings_generateIndex;
 
@@ -310,6 +316,7 @@ export class GenConfigPackage extends BasicEPackage {
     classDefaults_generateInterface.setName('generateInterface');
     classDefaults_generateInterface.setLowerBound(0);
     classDefaults_generateInterface.setUpperBound(1);
+    classDefaults_generateInterface.setDefaultValueLiteral("true");
     classDefaultsClass.getEStructuralFeatures().push(classDefaults_generateInterface);
     GenConfigPackage.Literals.CLASS_DEFAULTS__GENERATE_INTERFACE = classDefaults_generateInterface;
 
@@ -318,6 +325,7 @@ export class GenConfigPackage extends BasicEPackage {
     classDefaults_generateImpl.setName('generateImpl');
     classDefaults_generateImpl.setLowerBound(0);
     classDefaults_generateImpl.setUpperBound(1);
+    classDefaults_generateImpl.setDefaultValueLiteral("true");
     classDefaultsClass.getEStructuralFeatures().push(classDefaults_generateImpl);
     GenConfigPackage.Literals.CLASS_DEFAULTS__GENERATE_IMPL = classDefaults_generateImpl;
 
@@ -326,6 +334,7 @@ export class GenConfigPackage extends BasicEPackage {
     classDefaults_rootExtendsClass.setName('rootExtendsClass');
     classDefaults_rootExtendsClass.setLowerBound(0);
     classDefaults_rootExtendsClass.setUpperBound(1);
+    classDefaults_rootExtendsClass.setDefaultValueLiteral("BasicEObject");
     classDefaultsClass.getEStructuralFeatures().push(classDefaults_rootExtendsClass);
     GenConfigPackage.Literals.CLASS_DEFAULTS__ROOT_EXTENDS_CLASS = classDefaults_rootExtendsClass;
 
@@ -334,6 +343,7 @@ export class GenConfigPackage extends BasicEPackage {
     classDefaults_rootExtendsInterface.setName('rootExtendsInterface');
     classDefaults_rootExtendsInterface.setLowerBound(0);
     classDefaults_rootExtendsInterface.setUpperBound(1);
+    classDefaults_rootExtendsInterface.setDefaultValueLiteral("EObject");
     classDefaultsClass.getEStructuralFeatures().push(classDefaults_rootExtendsInterface);
     GenConfigPackage.Literals.CLASS_DEFAULTS__ROOT_EXTENDS_INTERFACE = classDefaults_rootExtendsInterface;
 
@@ -351,6 +361,7 @@ export class GenConfigPackage extends BasicEPackage {
     featureDefaults_notify.setName('notify');
     featureDefaults_notify.setLowerBound(0);
     featureDefaults_notify.setUpperBound(1);
+    featureDefaults_notify.setDefaultValueLiteral("true");
     featureDefaultsClass.getEStructuralFeatures().push(featureDefaults_notify);
     GenConfigPackage.Literals.FEATURE_DEFAULTS__NOTIFY = featureDefaults_notify;
 
@@ -359,6 +370,7 @@ export class GenConfigPackage extends BasicEPackage {
     featureDefaults_property.setName('property');
     featureDefaults_property.setLowerBound(0);
     featureDefaults_property.setUpperBound(1);
+    featureDefaults_property.setDefaultValueLiteral("editable");
     featureDefaultsClass.getEStructuralFeatures().push(featureDefaults_property);
     GenConfigPackage.Literals.FEATURE_DEFAULTS__PROPERTY = featureDefaults_property;
 

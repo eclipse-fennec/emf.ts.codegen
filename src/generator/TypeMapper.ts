@@ -260,7 +260,31 @@ export class TypeMapper {
       }
     }
 
-    // Check if required
+    // EMF mode: the initializer follows the data type's intrinsic default -
+    // EInt 0, EBoolean false, EString null/undefined - so eGet agrees with
+    // the metadata's getDefaultValue(). The lower bound is a validation
+    // constraint, not a default. Only the Ecore PRIMITIVES carry an intrinsic
+    // default; the object wrappers (EBooleanObject, ...) are nullable
+    // tri-state values, like in Java (#55)
+    if (this.useEList) {
+      switch (eType ? EObjectHelper.getName(eType) : null) {
+        case 'EBoolean':
+          return 'false';
+        case 'EInt':
+        case 'ELong':
+        case 'EShort':
+        case 'EByte':
+        case 'EDouble':
+        case 'EFloat':
+          return '0';
+        case 'EBigInteger':
+          return '0n';
+        default:
+          return null;
+      }
+    }
+
+    // Decorator/plain mode: required features get a type default
     const lowerBound = EObjectHelper.getLowerBound(feature);
     if (lowerBound === 0) {
       return null; // Optional, no default

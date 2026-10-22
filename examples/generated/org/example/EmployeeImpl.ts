@@ -23,8 +23,8 @@ export class EmployeeImpl extends PersonImpl implements Employee {
   static readonly SUPERVISOR: number = 7;
 
   // Private fields
-  private _employeeId: string = "";
-  private _salary?: number;
+  private _employeeId?: string;
+  private _salary: number = 0;
   private _hireDate?: Date;
   private _supervisor?: Employee;
 
@@ -171,9 +171,9 @@ export class EmployeeImpl extends PersonImpl implements Employee {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case EmployeeImpl.EMPLOYEE_ID:
-        return this._employeeId !== "";
+        return this._employeeId !== undefined;
       case EmployeeImpl.SALARY:
-        return this._salary !== undefined;
+        return this._salary !== 0;
       case EmployeeImpl.HIRE_DATE:
         return this._hireDate !== undefined;
       case EmployeeImpl.SUPERVISOR:
@@ -190,10 +190,10 @@ export class EmployeeImpl extends PersonImpl implements Employee {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case EmployeeImpl.EMPLOYEE_ID:
-        this._employeeId = "";
+        this._employeeId = undefined;
         return;
       case EmployeeImpl.SALARY:
-        this._salary = undefined;
+        this._salary = 0;
         return;
       case EmployeeImpl.HIRE_DATE:
         this._hireDate = undefined;

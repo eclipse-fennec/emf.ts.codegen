@@ -166,6 +166,7 @@ export class LibraryPackage extends BasicEPackage {
     book_pages.setName('pages');
     book_pages.setLowerBound(0);
     book_pages.setUpperBound(1);
+    book_pages.setDefaultValueLiteral("0");
     bookClass.getEStructuralFeatures().push(book_pages);
     LibraryPackage.Literals.BOOK__PAGES = book_pages;
 
@@ -182,6 +183,7 @@ export class LibraryPackage extends BasicEPackage {
     book_category.setName('category');
     book_category.setLowerBound(0);
     book_category.setUpperBound(1);
+    book_category.setDefaultValueLiteral("FICTION");
     bookClass.getEStructuralFeatures().push(book_category);
     LibraryPackage.Literals.BOOK__CATEGORY = book_category;
 
@@ -190,6 +192,7 @@ export class LibraryPackage extends BasicEPackage {
     book_available.setName('available');
     book_available.setLowerBound(0);
     book_available.setUpperBound(1);
+    book_available.setDefaultValueLiteral("true");
     bookClass.getEStructuralFeatures().push(book_available);
     LibraryPackage.Literals.BOOK__AVAILABLE = book_available;
 

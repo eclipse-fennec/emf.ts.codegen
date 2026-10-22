@@ -29,10 +29,10 @@ export class BookImpl extends BasicEObject implements Book {
   static readonly LIBRARY: number = 7;
 
   // Private fields
-  private _title: string = "";
+  private _title?: string;
   private _isbn?: string;
   private _pages: number = 0;
-  private _publicationYear?: number;
+  private _publicationYear: number = 0;
   private _category: BookCategory = BookCategory.FICTION;
   private _available: boolean = true;
   private _author?: Author;
@@ -281,13 +281,13 @@ export class BookImpl extends BasicEObject implements Book {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case BookImpl.TITLE:
-        return this._title !== "";
+        return this._title !== undefined;
       case BookImpl.ISBN:
         return this._isbn !== undefined;
       case BookImpl.PAGES:
         return this._pages !== 0;
       case BookImpl.PUBLICATION_YEAR:
-        return this._publicationYear !== undefined;
+        return this._publicationYear !== 0;
       case BookImpl.CATEGORY:
         return this._category !== BookCategory.FICTION;
       case BookImpl.AVAILABLE:
@@ -308,7 +308,7 @@ export class BookImpl extends BasicEObject implements Book {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case BookImpl.TITLE:
-        this._title = "";
+        this._title = undefined;
         return;
       case BookImpl.ISBN:
         this._isbn = undefined;
@@ -317,7 +317,7 @@ export class BookImpl extends BasicEObject implements Book {
         this._pages = 0;
         return;
       case BookImpl.PUBLICATION_YEAR:
-        this._publicationYear = undefined;
+        this._publicationYear = 0;
         return;
       case BookImpl.CATEGORY:
         this._category = BookCategory.FICTION;

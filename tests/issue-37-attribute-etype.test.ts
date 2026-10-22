@@ -59,6 +59,11 @@ describe('Issue #37: EAttributes get their eType in the generated Package', () =
     expect(servicesPackage).toMatch(/import \{[^}]*getEcorePackage[^}]*\} from '@emfts\/core';/);
   });
 
+  it('should carry the defaultValueLiteral into the metadata (#55)', () => {
+    // typed-properties: threshold has defaultValueLiteral="5"
+    expect(servicesPackage).toContain('.setDefaultValueLiteral("5");');
+  });
+
   it('should type attributes of local enums against the generated enum literal (#50)', async () => {
     const genconfigPackage = await generatePackageSource(
       path.resolve(__dirname, '../model/genconfig.ecore'), 'http://www.emfts.org/genconfig/1.0', 'GenConfig'

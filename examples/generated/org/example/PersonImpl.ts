@@ -22,8 +22,8 @@ export abstract class PersonImpl extends BasicEObject implements Person {
   static readonly EMAIL: number = 3;
 
   // Private fields
-  private _firstName: string = "";
-  private _lastName: string = "";
+  private _firstName?: string;
+  private _lastName?: string;
   private _birthDate?: Date;
   private _email?: string;
 
@@ -186,9 +186,9 @@ export abstract class PersonImpl extends BasicEObject implements Person {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PersonImpl.FIRST_NAME:
-        return this._firstName !== "";
+        return this._firstName !== undefined;
       case PersonImpl.LAST_NAME:
-        return this._lastName !== "";
+        return this._lastName !== undefined;
       case PersonImpl.BIRTH_DATE:
         return this._birthDate !== undefined;
       case PersonImpl.EMAIL:
@@ -205,10 +205,10 @@ export abstract class PersonImpl extends BasicEObject implements Person {
     const featureID = this.eClass().getFeatureID(feature);
     switch (featureID) {
       case PersonImpl.FIRST_NAME:
-        this._firstName = "";
+        this._firstName = undefined;
         return;
       case PersonImpl.LAST_NAME:
-        this._lastName = "";
+        this._lastName = undefined;
         return;
       case PersonImpl.BIRTH_DATE:
         this._birthDate = undefined;

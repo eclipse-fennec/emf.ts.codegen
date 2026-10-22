@@ -114,7 +114,9 @@ describe('Generated Library Model', () => {
     });
 
     it('should have default values', () => {
-      expect(book.title).toBe('');
+      // EString has no intrinsic default (null in Java EMF); the lower bound
+      // is a validation constraint, not a default (#55)
+      expect(book.title).toBeUndefined();
       expect(book.pages).toBe(0);
       expect(book.available).toBe(true);
       expect(book.category).toBe(BookCategory.FICTION);
@@ -303,7 +305,7 @@ describe('Generated Library Model', () => {
     it('should reset title to default via eUnset', () => {
       book.title = 'Some Title';
       book.eUnset(LibraryPackage.Literals.BOOK__TITLE);
-      expect(book.title).toBe('');
+      expect(book.title).toBeUndefined();
     });
 
     it('should reset pages to default via eUnset', () => {
@@ -516,6 +518,31 @@ describe('Generated Library Model', () => {
     it('should write the literal back on a round trip', async () => {
       const res = await read('<lib:Book xmlns:lib="http://example.org/library" title="Dune" category="SCIENCE"/>');
       expect(res.saveToString()).toContain('category="SCIENCE"');
+    });
+  });
+
+  // Issue #55: the generated field initializers and the EAttribute metadata
+  // must agree on the default - for every single-valued attribute of a fresh
+  // object: eGet(attr) equals attr.getDefaultValue() and eIsSet(attr) is false
+  // (eGet answers undefined where the metadata says null - both mean unset)
+  describe('initializers agree with the attribute metadata (#55)', () => {
+    it('holds for every single-valued attribute of every class', () => {
+      const pkg = LibraryPackage.eINSTANCE;
+      const eFactory = (pkg as any).getEFactoryInstance();
+      for (const classifier of pkg.getEClassifiers()) {
+        const cls = classifier as any;
+        if (typeof cls.getEStructuralFeatures !== 'function') continue; // enums/datatypes
+        if (cls.isAbstract?.() || cls.isInterface?.()) continue;
+        const instance = eFactory.create(cls) as any;
+        for (const feature of cls.getEAllStructuralFeatures()) {
+          const attr = feature as any;
+          if (typeof attr.getEAttributeType !== 'function' && attr.eClass?.()?.getName?.() !== 'EAttribute') continue;
+          if (attr.isMany?.()) continue;
+          const label = `${cls.getName()}.${attr.getName()}`;
+          expect(instance.eGet(attr) ?? null, `eGet default of ${label}`).toBe(attr.getDefaultValue() ?? null);
+          expect(instance.eIsSet(attr), `eIsSet of fresh ${label}`).toBe(false);
+        }
+      }
     });
   });
 });
