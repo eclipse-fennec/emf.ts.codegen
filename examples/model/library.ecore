@@ -18,6 +18,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="books" upperBound="-1" eType="#//Book" containment="true" eOpposite="#//Book/library"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="authors" upperBound="-1" eType="#//Author" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="employees" upperBound="-1" eType="#//Employee" containment="true"/>
+    <!-- single-valued containment: the setter must manage the container (#61) -->
+    <eStructuralFeatures xsi:type="ecore:EReference" name="featuredBook" eType="#//Book" containment="true"/>
   </eClassifiers>
 
   <!-- Class: Book -->

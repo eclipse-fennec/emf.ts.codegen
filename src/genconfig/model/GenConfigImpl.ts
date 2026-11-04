@@ -78,6 +78,16 @@ export class GenConfigImpl extends BasicEObject implements GenConfig {
 
   set generation(value: GenerationSettings) {
     const oldValue = this._generation;
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('generation'));
+      }
+    }
     this._generation = value;
     if (this.eDeliver()) {
       this.eNotify({
@@ -102,6 +112,16 @@ export class GenConfigImpl extends BasicEObject implements GenConfig {
 
   set package(value: PackageSettings) {
     const oldValue = this._package;
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('package'));
+      }
+    }
     this._package = value;
     if (this.eDeliver()) {
       this.eNotify({
@@ -126,6 +146,16 @@ export class GenConfigImpl extends BasicEObject implements GenConfig {
 
   set classDefaults(value: ClassDefaults) {
     const oldValue = this._classDefaults;
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('classDefaults'));
+      }
+    }
     this._classDefaults = value;
     if (this.eDeliver()) {
       this.eNotify({
@@ -150,6 +180,16 @@ export class GenConfigImpl extends BasicEObject implements GenConfig {
 
   set featureDefaults(value: FeatureDefaults) {
     const oldValue = this._featureDefaults;
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('featureDefaults'));
+      }
+    }
     this._featureDefaults = value;
     if (this.eDeliver()) {
       this.eNotify({
@@ -180,6 +220,30 @@ export class GenConfigImpl extends BasicEObject implements GenConfig {
       this._referencedPackages = createContainmentEList<any>(this, this.eClass().getEStructuralFeature('referencedPackages') as EReference);
     }
     return this._referencedPackages;
+  }
+
+  /**
+   * Remove a value from its previous container before it is contained here,
+   * like Java EMF's eInverseRemove on the old container (#61)
+   */
+  private removeFromPreviousContainer(value: unknown): void {
+    const v = value as any;
+    const oldContainer = v?.eContainer?.();
+    if (!oldContainer || oldContainer === this) {
+      return;
+    }
+    const oldFeature = v.eContainmentFeature?.();
+    if (!oldFeature) {
+      return;
+    }
+    if (oldFeature.isMany()) {
+      const list = oldContainer.eGet(oldFeature);
+      if (list && typeof list.remove === 'function') {
+        list.remove(v);
+      }
+    } else {
+      oldContainer.eUnset(oldFeature);
+    }
   }
 
   // Reflective API
@@ -285,15 +349,19 @@ export class GenConfigImpl extends BasicEObject implements GenConfig {
         this._ecorePackage = undefined;
         return;
       case GenConfigImpl.GENERATION:
+        if (this._generation) (this._generation as any).eSetContainer?.(null, null);
         this._generation = undefined;
         return;
       case GenConfigImpl.PACKAGE:
+        if (this._package) (this._package as any).eSetContainer?.(null, null);
         this._package = undefined;
         return;
       case GenConfigImpl.CLASS_DEFAULTS:
+        if (this._classDefaults) (this._classDefaults as any).eSetContainer?.(null, null);
         this._classDefaults = undefined;
         return;
       case GenConfigImpl.FEATURE_DEFAULTS:
+        if (this._featureDefaults) (this._featureDefaults as any).eSetContainer?.(null, null);
         this._featureDefaults = undefined;
         return;
       case GenConfigImpl.CLASS_OVERRIDES:

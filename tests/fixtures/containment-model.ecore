@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="widgets" nsURI="http://example.org/widgets" nsPrefix="widgets">
+  <!-- Issue #61: a single-valued containment setter must set the container -->
+  <eClassifiers xsi:type="ecore:EClass" name="Widget">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="selection"
+        eType="#//DataSelection" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="archive" upperBound="-1"
+        eType="#//DataSelection" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataSelection">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="query"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+</ecore:EPackage>
