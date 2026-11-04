@@ -6,7 +6,7 @@
  */
 
 import { BasicEObject } from '@emfts/core';
-import { createContainmentEList } from '@emfts/core';
+import { createContainmentEList, createContainmentWithInverseEList } from '@emfts/core';
 import type { EClass, EStructuralFeature, EList, EReference } from '@emfts/core';
 import type { Book } from './Book.js';
 import type { Author } from './Author.js';
@@ -93,7 +93,18 @@ export class LibraryImpl extends BasicEObject implements Library {
 
   get books(): EList<Book> {
     if (!this._books) {
-      this._books = createContainmentEList<any>(this, this.eClass().getEStructuralFeature('books') as EReference);
+      this._books = createContainmentWithInverseEList<any>(this, this.eClass().getEStructuralFeature('books') as EReference, (element: any, owner: any): void => {
+      if (owner) {
+        const previous = element.library;
+        if (previous && previous !== owner) {
+          const previousList = previous.books;
+          if (previousList && previousList.contains(element)) previousList.remove(element);
+        }
+        element.basicSetLibrary?.(owner);
+      } else if (element.library === this) {
+        element.basicSetLibrary?.(undefined);
+      }
+    }) as unknown as EList<Book>;
     }
     return this._books;
   }
