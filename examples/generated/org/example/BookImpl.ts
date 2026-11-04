@@ -195,11 +195,73 @@ export class BookImpl extends BasicEObject implements Book {
   }
 
   set author(value: Author) {
+    const oldValue = this._author;
     this._author = value;
+    if (oldValue !== value) {
+      this.updateInverseAuthor(oldValue, value);
+    }
+  }
+
+  /**
+   * Keeps the opposite end of the bidirectional reference in sync after the
+   * field changed from oldValue to value (#63). The field is stored first, so
+   * the other end's hooks find nothing left to do
+   */
+  private updateInverseAuthor(oldValue: Author | undefined, value: Author | undefined): void {
+    if (oldValue) {
+      const list = (oldValue as any).books;
+      if (list && list.contains(this)) list.remove(this);
+    }
+    if (value) {
+      const list = (value as any).books;
+      if (list && !list.contains(this)) list.add(this);
+    }
+  }
+
+  /**
+   * Sets the value without updating the opposite end - the entry point for the
+   * other end of the bidirectional reference when it maintains the inverse (#63)
+   * @internal
+   */
+  basicSetAuthor(value: Author | undefined): void {
+    const oldValue = this._author;
+    if (oldValue === value) {
+      return;
+    }
+    this._author = value as Author;
   }
 
   get library(): Library {
     return this._library!;
+  }
+
+  /**
+   * Keeps the opposite end of the bidirectional reference in sync after the
+   * field changed from oldValue to value (#63). The field is stored first, so
+   * the other end's hooks find nothing left to do
+   */
+  private updateInverseLibrary(oldValue: Library | undefined, value: Library | undefined): void {
+    if (oldValue) {
+      const list = (oldValue as any).books;
+      if (list && list.contains(this)) list.remove(this);
+    }
+    if (value) {
+      const list = (value as any).books;
+      if (list && !list.contains(this)) list.add(this);
+    }
+  }
+
+  /**
+   * Sets the value without updating the opposite end - the entry point for the
+   * other end of the bidirectional reference when it maintains the inverse (#63)
+   * @internal
+   */
+  basicSetLibrary(value: Library | undefined): void {
+    const oldValue = this._library;
+    if (oldValue === value) {
+      return;
+    }
+    this._library = value as Library;
   }
 
   // Reflective API
@@ -266,7 +328,8 @@ export class BookImpl extends BasicEObject implements Book {
         super.eSet(feature, newValue);
         break;
       case BookImpl.LIBRARY:
-        this.library = newValue as Library;
+        // no public setter (readonly): go through the inverse entry point (#63)
+        this.basicSetLibrary(newValue as Library);
         super.eSet(feature, newValue);
         break;
       default:
@@ -326,10 +389,18 @@ export class BookImpl extends BasicEObject implements Book {
         this._available = true;
         return;
       case BookImpl.AUTHOR:
-        this._author = undefined;
+        {
+          const oldValue = this._author;
+          this._author = undefined;
+          if (oldValue !== undefined) this.updateInverseAuthor(oldValue, undefined);
+        }
         return;
       case BookImpl.LIBRARY:
-        this._library = undefined;
+        {
+          const oldValue = this._library;
+          this._library = undefined;
+          if (oldValue !== undefined) this.updateInverseLibrary(oldValue, undefined);
+        }
         return;
       default:
         super.eUnset(feature);

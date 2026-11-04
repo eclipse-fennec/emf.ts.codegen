@@ -5,7 +5,7 @@
  * @generated
  */
 
-import { createEObjectEList } from '@emfts/core';
+import { createEObjectWithInverseEList } from './EObjectWithInverseEList.js';
 import type { EClass, EStructuralFeature, EList, EReference } from '@emfts/core';
 import type { Person } from './Person.js';
 import type { Book } from './Book.js';
@@ -86,7 +86,18 @@ export class AuthorImpl extends PersonImpl implements Author {
 
   get books(): EList<Book> {
     if (!this._books) {
-      this._books = createEObjectEList(this, this.eClass().getEStructuralFeature('books') as EReference) as unknown as EList<Book>;
+      this._books = createEObjectWithInverseEList<any>(this, this.eClass().getEStructuralFeature('books') as EReference, (element: any, owner: any): void => {
+      if (owner) {
+        const previous = element.author;
+        if (previous && previous !== owner) {
+          const previousList = previous.books;
+          if (previousList && previousList.contains(element)) previousList.remove(element);
+        }
+        element.basicSetAuthor?.(owner);
+      } else if (element.author === this) {
+        element.basicSetAuthor?.(undefined);
+      }
+    }) as unknown as EList<Book>;
     }
     return this._books;
   }

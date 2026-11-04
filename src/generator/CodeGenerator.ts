@@ -162,6 +162,10 @@ export class CodeGenerator {
     }
 
     if (this.generator instanceof EmfGenerator) {
+      const inverseListFile = await this.generator.generateInverseList(genPackage);
+      if (inverseListFile) {
+        files.push(inverseListFile);
+      }
       const indexFile = await this.generator.generateIndex(genPackage);
       files.push(indexFile);
     }

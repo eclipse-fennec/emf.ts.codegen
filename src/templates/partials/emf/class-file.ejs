@@ -1,6 +1,16 @@
 <%- header %>
 
 <%
+// eOpposite maintenance (#63): the opposite end of a bidirectional reference
+// as { name, many, cap }, or null when the feature has none. Mixin features
+// keep the plain behavior.
+function inverseInfo(f) {
+  if (!typeMapper.isReference(f)) return null;
+  const opposite = getEOpposite(f);
+  const name = opposite ? getName(opposite) : null;
+  if (!name) return null;
+  return { name, many: isMany(opposite), cap: capitalize(name) };
+}
 const imports = importResolver.resolveImportsForClass(eClass, genPackage, 'emf');
 const hardcodedCoreTypes = ['BasicEObject', 'EClass', 'EStructuralFeature'];
 const coreTypeImports = ['EClass', 'EStructuralFeature'];
@@ -14,17 +24,26 @@ const hasManyFeature = features.some(gf => isMany(gf.ecoreFeature));
 const hasManyMixin = (mixinFeatures || []).some(mf => isMany(mf.feature));
 if (useEList && (hasManyFeature || hasManyMixin)) {
   coreTypeImports.push('EList', 'EReference');
-  // Determine which factory functions are needed
-  const needsContainment = features.some(gf => isMany(gf.ecoreFeature) && isContainment(gf.ecoreFeature))
+  // Determine which factory functions are needed - features with an
+  // eOpposite use the inverse-aware variants (#63)
+  const manyOwn = features.map(gf => gf.ecoreFeature).filter(f => isMany(f));
+  const needsContainment = manyOwn.some(f => isContainment(f) && !inverseInfo(f))
     || (mixinFeatures || []).some(mf => isMany(mf.feature) && isContainment(mf.feature));
-  const needsEObjectList = features.some(gf => isMany(gf.ecoreFeature) && !isContainment(gf.ecoreFeature) && typeMapper.isReference(gf.ecoreFeature))
+  const needsContainmentInverse = manyOwn.some(f => isContainment(f) && inverseInfo(f));
+  const needsEObjectList = manyOwn.some(f => !isContainment(f) && typeMapper.isReference(f) && !inverseInfo(f))
     || (mixinFeatures || []).some(mf => isMany(mf.feature) && !isContainment(mf.feature) && typeMapper.isReference(mf.feature));
   const needsBasicList = features.some(gf => isMany(gf.ecoreFeature) && typeMapper.isAttribute(gf.ecoreFeature))
     || (mixinFeatures || []).some(mf => isMany(mf.feature) && typeMapper.isAttribute(mf.feature));
   if (needsContainment) coreValueImports.push('createContainmentEList');
+  if (needsContainmentInverse) coreValueImports.push('createContainmentWithInverseEList');
   if (needsEObjectList) coreValueImports.push('createEObjectEList');
   if (needsBasicList) coreValueImports.push('createBasicEList');
 }
+// The inverse-aware list for non-containment references is generated per package
+const needsInverseList = features.some(gf => {
+  const f = gf.ecoreFeature;
+  return isMany(f) && !isContainment(f) && inverseInfo(f);
+});
 // A type that appears in a value position of a field initializer needs a
 // value import - `import type` is erased and `new T()` would throw at
 // runtime (#35). Value positions: enum member access and instantiation
@@ -81,6 +100,9 @@ import { BasicEObject } from '@emfts/core';
 <% } -%>
 <% if (coreValueImports.length > 0) { -%>
 import { <%- coreValueImports.join(', ') %> } from '@emfts/core';
+<% } -%>
+<% if (needsInverseList) { -%>
+import { createEObjectWithInverseEList } from './EObjectWithInverseEList.js';
 <% } -%>
 import type { <%- coreTypeImports.join(', ') %> } from '@emfts/core';
 <% for (const imp of typeOnlyImports) { -%>
@@ -157,8 +179,41 @@ for (const genFeature of features) {
   // EList lazy-init getter: creates the right EList on first access
   const isRef = typeMapper.isReference(feature);
   const isCont = isRef && isContainment(feature);
+  const inv = inverseInfo(feature);
+  const featureRef = `this.eClass().getEStructuralFeature('${featureName}') as EReference`;
+  // inverse setter: mirrors list changes to the opposite end; idempotent, so
+  // the other end may call back without recursing (#63)
+  let inverseSetter = '';
+  if (inv && !inv.many) {
+    inverseSetter = `(element: any, owner: any): void => {
+      if (owner) {
+        const previous = element.${inv.name};
+        if (previous && previous !== owner) {
+          const previousList = previous.${featureName};
+          if (previousList && previousList.contains(element)) previousList.remove(element);
+        }
+        element.basicSet${inv.cap}?.(owner);
+      } else if (element.${inv.name} === this) {
+        element.basicSet${inv.cap}?.(undefined);
+      }
+    }`;
+  } else if (inv) {
+    inverseSetter = `(element: any, owner: any): void => {
+      const list = element.${inv.name};
+      if (!list) return;
+      if (owner) {
+        if (!list.contains(owner)) list.add(owner);
+      } else if (list.contains(this)) {
+        list.remove(this);
+      }
+    }`;
+  }
   let factoryCall;
-  if (isCont) {
+  if (isCont && inv) {
+    factoryCall = `createContainmentWithInverseEList<any>(this, ${featureRef}, ${inverseSetter}) as unknown as ${featureType}`;
+  } else if (isRef && inv) {
+    factoryCall = `createEObjectWithInverseEList<any>(this, ${featureRef}, ${inverseSetter}) as unknown as ${featureType}`;
+  } else if (isCont) {
     factoryCall = `createContainmentEList<any>(this, this.eClass().getEStructuralFeature('${featureName}') as EReference)`;
   } else if (isRef) {
     factoryCall = `createEObjectEList(this, this.eClass().getEStructuralFeature('${featureName}') as EReference) as unknown as ${featureType}`;
@@ -178,10 +233,11 @@ for (const genFeature of features) {
     return this._<%- featureName %><% if (!featureIsMany) { %>!<% } %>;
   }
 
+<% const inv = inverseInfo(feature); -%>
 <% if (genFeature.property !== 'readonly') { -%>
 <% const isSingleContainment = typeMapper.isReference(feature) && isContainment(feature) && !featureIsMany; -%>
   set <%- featureName %>(value: <%- featureType %>) {
-<% if (genFeature.notify || isSingleContainment) { -%>
+<% if (genFeature.notify || isSingleContainment || inv) { -%>
     const oldValue = this._<%- featureName %>;
 <% } -%>
 <% if (isSingleContainment) { -%>
@@ -197,6 +253,88 @@ for (const genFeature of features) {
     }
 <% } -%>
     this._<%- featureName %> = value;
+<% if (isUnsettableFeature(feature)) { -%>
+    this._<%- featureName %>IsSet = true;
+<% } -%>
+<% if (inv) { -%>
+    if (oldValue !== value) {
+      this.updateInverse<%- capitalize(featureName) %>(oldValue, value);
+    }
+<% } -%>
+<% if (genFeature.notify) { -%>
+    if (this.eDeliver()) {
+      this.eNotify({
+        getNotifier: () => this,
+        getEventType: () => 1, // SET
+        getFeature: () => this.eClass().getEStructuralFeature(<%- className %>.<%- upperName %>),
+        getOldValue: () => oldValue,
+        getNewValue: () => value,
+        getPosition: () => -1,
+        wasSet: () => true,
+        isTouch: () => false,
+        isReset: () => false,
+        getFeatureID: () => <%- className %>.<%- upperName %>,
+        merge: () => false
+      });
+    }
+<% } -%>
+  }
+
+<% } -%>
+<% if (inv) { -%>
+  /**
+   * Keeps the opposite end of the bidirectional reference in sync after the
+   * field changed from oldValue to value (#63). The field is stored first, so
+   * the other end's hooks find nothing left to do
+   */
+  private updateInverse<%- capitalize(featureName) %>(oldValue: <%- featureType %> | undefined, value: <%- featureType %> | undefined): void {
+<% if (!inv.many) { -%>
+    if (oldValue && (oldValue as any).<%- inv.name %> === this) {
+      (oldValue as any).basicSet<%- inv.cap %>?.(undefined);
+    }
+    if (value) {
+      const previous = (value as any).<%- inv.name %>;
+      if (previous && previous !== this) {
+        previous.basicSet<%- capitalize(featureName) %>?.(undefined);
+      }
+      (value as any).basicSet<%- inv.cap %>?.(this);
+    }
+<% } else { -%>
+    if (oldValue) {
+      const list = (oldValue as any).<%- inv.name %>;
+      if (list && list.contains(this)) list.remove(this);
+    }
+    if (value) {
+      const list = (value as any).<%- inv.name %>;
+      if (list && !list.contains(this)) list.add(this);
+    }
+<% } -%>
+  }
+
+<% } -%>
+<% if (inv) { -%>
+  /**
+   * Sets the value without updating the opposite end - the entry point for the
+   * other end of the bidirectional reference when it maintains the inverse (#63)
+   * @internal
+   */
+  basicSet<%- capitalize(featureName) %>(value: <%- featureType %> | undefined): void {
+    const oldValue = this._<%- featureName %>;
+    if (oldValue === value) {
+      return;
+    }
+<% if (isContainment(feature)) { -%>
+    // containment: the owner becomes the container of the value (#61), also
+    // when the other end of the bidirectional reference initiated the change
+    if (oldValue) {
+      (oldValue as any).eSetContainer?.(null, null);
+    }
+    if (value) {
+      this.removeFromPreviousContainer(value);
+      (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('<%- featureName %>'));
+    }
+<% } -%>
+    this._<%- featureName %> = value as <%- featureType %>;
 <% if (isUnsettableFeature(feature)) { -%>
     this._<%- featureName %>IsSet = true;
 <% } -%>
@@ -315,6 +453,9 @@ for (const genFeature of features) {
 <% if (useEList && featureIsMany) { -%>
         this.<%- featureName %>.clear();
         this.<%- featureName %>.addAll(newValue as any[]);
+<% } else if (fid.feature.property === 'readonly' && inverseInfo(feat)) { -%>
+        // no public setter (readonly): go through the inverse entry point (#63)
+        this.basicSet<%- capitalize(featureName) %>(newValue as <%- featureType %>);
 <% } else { -%>
         this.<%- featureName %> = newValue as <%- featureType %>;
 <% } -%>
@@ -400,6 +541,21 @@ for (const genFeature of features) {
   const featureName = getName(feature);
 -%>
       case <%- className %>.<%- fid.name %>:
+<% const unsetInv = !featureIsMany ? inverseInfo(feature) : null; -%>
+<% if (unsetInv) { -%>
+        {
+          const oldValue = this._<%- featureName %>;
+<% if (isContainment(feature)) { -%>
+          if (oldValue) (oldValue as any).eSetContainer?.(null, null);
+<% } -%>
+          this._<%- featureName %> = undefined;
+<% if (isUnsettableFeature(feature)) { -%>
+          this._<%- featureName %>IsSet = false;
+<% } -%>
+          if (oldValue !== undefined) this.updateInverse<%- capitalize(featureName) %>(oldValue, undefined);
+        }
+        return;
+<% } else { -%>
 <% if (!featureIsMany && typeMapper.isReference(feature) && isContainment(feature)) { -%>
         if (this._<%- featureName %>) (this._<%- featureName %> as any).eSetContainer?.(null, null);
 <% } -%>
@@ -416,6 +572,7 @@ for (const genFeature of features) {
         this._<%- featureName %>IsSet = false;
 <% } -%>
         return;
+<% } -%>
 <% } -%>
 <% for (const mf of (mixinFeatures || [])) {
   const featureIsMany = isMany(mf.feature);

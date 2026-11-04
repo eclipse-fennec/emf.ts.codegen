@@ -251,6 +251,32 @@ export class EmfGenerator extends BaseGenerator {
   /**
    * Generate barrel index file
    */
+  /**
+   * Generate the inverse-aware list for non-containment many-valued references
+   * with an eOpposite (#63) - only when the package has such a feature, since
+   * core offers an inverse list for containment references only
+   * (eclipse-fennec/emf.ts#130 asks for the missing one)
+   */
+  async generateInverseList(genPackage: GenPackage): Promise<GeneratedFile | null> {
+    const needed = genPackage.genClasses.some(genClass =>
+      genClass.genFeatures.some(genFeature => {
+        const feature = genFeature.ecoreFeature;
+        return this.context.typeMapper.isReference(feature)
+          && EObjectHelper.isMany(feature)
+          && !EObjectHelper.isContainment(feature)
+          && !!EObjectHelper.getName(EObjectHelper.getEOpposite(feature));
+      })
+    );
+    if (!needed) {
+      return null;
+    }
+
+    this.context.setCurrentPackage(genPackage);
+    const content = await this.render('inverse-list-file', {});
+    const packagePath = this.getPackagePath(genPackage);
+    return this.createFile(join(packagePath, 'EObjectWithInverseEList.ts'), content);
+  }
+
   async generateIndex(genPackage: GenPackage): Promise<GeneratedFile> {
     const ePackage = genPackage.ecorePackage;
     const packageName = genPackage.prefix ?? EObjectHelper.getName(ePackage) ?? 'Model';

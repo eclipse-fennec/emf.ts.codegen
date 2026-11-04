@@ -2,3 +2,5 @@ node_modules/
 dist/
 .idea/
 *.tsbuildinfo
+.tmp-*/
+tests/.generated-tmp/

@@ -587,4 +587,118 @@ describe('Generated Library Model', () => {
       expect(library.featuredBook).toBeUndefined();
     });
   });
+
+  // Issue #63: eOpposite pairs are maintained from either end
+  describe('eOpposite maintenance (#63)', () => {
+    it('many-containment add sets the single opposite (Library.books -> Book.library)', () => {
+      const library = factory.createLibrary();
+      const book = factory.createBook();
+      library.books.add(book);
+      expect(book.library).toBe(library);
+    });
+
+    it('moving a book between libraries releases the previous one', () => {
+      const first = factory.createLibrary();
+      const second = factory.createLibrary();
+      const book = factory.createBook();
+      first.books.add(book);
+      second.books.add(book);
+      expect(first.books.size()).toBe(0);
+      expect(second.books.size()).toBe(1);
+      expect(book.library).toBe(second);
+    });
+
+    it('removing a book from the containment list clears the opposite', () => {
+      const library = factory.createLibrary();
+      const book = factory.createBook();
+      library.books.add(book);
+      library.books.remove(book);
+      expect(book.library).toBeUndefined();
+    });
+
+    it('single set adds to the many opposite (Book.author -> Author.books)', () => {
+      const author = factory.createAuthor();
+      const book = factory.createBook();
+      book.author = author;
+      expect(author.books.contains(book)).toBe(true);
+      expect(author.books.size()).toBe(1);
+    });
+
+    it('reassigning the author moves the book between the lists', () => {
+      const first = factory.createAuthor();
+      const second = factory.createAuthor();
+      const book = factory.createBook();
+      book.author = first;
+      book.author = second;
+      expect(first.books.size()).toBe(0);
+      expect(second.books.contains(book)).toBe(true);
+    });
+
+    it('clearing the single end removes the book from the list', () => {
+      const author = factory.createAuthor();
+      const book = factory.createBook();
+      book.author = author;
+      book.author = undefined as any;
+      expect(author.books.size()).toBe(0);
+    });
+
+    it('eUnset on the single end releases the opposite as well', () => {
+      const author = factory.createAuthor();
+      const book = factory.createBook();
+      book.author = author;
+      book.eUnset(LibraryPackage.Literals.BOOK__AUTHOR);
+      expect(author.books.size()).toBe(0);
+      expect(book.author).toBeUndefined();
+    });
+
+    it('many add sets the single opposite and moves from the previous list', () => {
+      const first = factory.createAuthor();
+      const second = factory.createAuthor();
+      const book = factory.createBook();
+      first.books.add(book);
+      expect(book.author).toBe(first);
+      second.books.add(book);
+      expect(first.books.size()).toBe(0);
+      expect(book.author).toBe(second);
+    });
+
+    it('clearing the list clears every opposite', () => {
+      const author = factory.createAuthor();
+      const books = [factory.createBook(), factory.createBook()];
+      books.forEach(b => author.books.add(b));
+      author.books.clear();
+      expect(books.every(b => b.author === undefined)).toBe(true);
+    });
+
+    it('adding the same element twice is ignored (unique reference list)', () => {
+      const author = factory.createAuthor();
+      const book = factory.createBook();
+      author.books.add(book);
+      author.books.add(book);
+      expect(author.books.size()).toBe(1);
+    });
+
+    it('a document that serializes both ends does not duplicate list entries', async () => {
+      const { BasicResourceSet, XMIResource, URI, getEcorePackage, ECORE_NS_URI } = await import('@emfts/core');
+      getEcorePackage();
+      const rs = new BasicResourceSet();
+      rs.getPackageRegistry().set(ECORE_NS_URI, getEcorePackage());
+      rs.getPackageRegistry().set(LibraryPackage.eNS_URI, LibraryPackage.eINSTANCE);
+      const res = new XMIResource(URI.createURI('both-ends.xmi'));
+      res.setResourceSet(rs);
+      res.loadFromString(`<?xml version="1.0" encoding="UTF-8"?>
+<lib:Library xmlns:lib="http://example.org/library" xmlns:xmi="http://www.omg.org/XMI" name="L">
+  <books title="T1" author="//@authors.0"/>
+  <books title="T2" author="//@authors.0"/>
+  <authors firstName="F" lastName="N" books="//@books.0 //@books.1"/>
+</lib:Library>`);
+      expect(res.getErrors()).toHaveLength(0);
+      const library = res.getContents().get(0) as any;
+      const author = library.authors.get(0);
+      expect(author.books.size()).toBe(2);
+      expect(library.books.get(0).author).toBe(author);
+      expect(library.books.get(1).author).toBe(author);
+      expect(library.books.get(0).library).toBe(library);
+    });
+  });
 });

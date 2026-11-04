@@ -128,7 +128,8 @@ describe('Library API', () => {
       const generator = new CodeGenerator(genModel);
       const result = await generator.generate();
       expect(result.success).toBe(true);
-      expect(result.files.length).toBe(14);
+      // 14 model files + the package-level EObjectWithInverseEList (#63)
+      expect(result.files.length).toBe(15);
     });
   });
 
