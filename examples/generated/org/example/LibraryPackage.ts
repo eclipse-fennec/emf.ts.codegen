@@ -40,6 +40,7 @@ export class LibraryPackage extends BasicEPackage {
     LIBRARY__BOOKS: null as unknown as EAttribute | EReference,
     LIBRARY__AUTHORS: null as unknown as EAttribute | EReference,
     LIBRARY__EMPLOYEES: null as unknown as EAttribute | EReference,
+    LIBRARY__FEATURED_BOOK: null as unknown as EAttribute | EReference,
     BOOK: null as unknown as EClass,
     BOOK__TITLE: null as unknown as EAttribute | EReference,
     BOOK__ISBN: null as unknown as EAttribute | EReference,
@@ -135,6 +136,15 @@ export class LibraryPackage extends BasicEPackage {
     library_employees.setUpperBound(-1);
     libraryClass.getEStructuralFeatures().push(library_employees);
     LibraryPackage.Literals.LIBRARY__EMPLOYEES = library_employees;
+
+    // Create featuredBook feature
+    const library_featuredBook = new BasicEReference();
+    library_featuredBook.setContainment(true);
+    library_featuredBook.setName('featuredBook');
+    library_featuredBook.setLowerBound(0);
+    library_featuredBook.setUpperBound(1);
+    libraryClass.getEStructuralFeatures().push(library_featuredBook);
+    LibraryPackage.Literals.LIBRARY__FEATURED_BOOK = library_featuredBook;
 
     // Create Book class
     const bookClass = new BasicEClass();
@@ -404,6 +414,7 @@ export class LibraryPackage extends BasicEPackage {
     (LibraryPackage.Literals.LIBRARY__BOOKS as BasicEReference).setEType(LibraryPackage.Literals.BOOK);
     (LibraryPackage.Literals.LIBRARY__AUTHORS as BasicEReference).setEType(LibraryPackage.Literals.AUTHOR);
     (LibraryPackage.Literals.LIBRARY__EMPLOYEES as BasicEReference).setEType(LibraryPackage.Literals.EMPLOYEE);
+    (LibraryPackage.Literals.LIBRARY__FEATURED_BOOK as BasicEReference).setEType(LibraryPackage.Literals.BOOK);
     (LibraryPackage.Literals.BOOK__TITLE as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (LibraryPackage.Literals.BOOK__ISBN as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EString')!);
     (LibraryPackage.Literals.BOOK__PAGES as BasicEAttribute).setEType(getEcorePackage().getEClassifier('EInt')!);

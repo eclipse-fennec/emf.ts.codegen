@@ -20,5 +20,6 @@ export interface Library extends EObject {
   books: EList<Book>;
   authors: EList<Author>;
   employees: EList<Employee>;
+  featuredBook?: Book;
 
 }

@@ -25,6 +25,7 @@ export class LibraryImpl extends BasicEObject implements Library {
   static readonly BOOKS: number = 2;
   static readonly AUTHORS: number = 3;
   static readonly EMPLOYEES: number = 4;
+  static readonly FEATURED_BOOK: number = 5;
 
   // Private fields
   private _name?: string;
@@ -32,6 +33,7 @@ export class LibraryImpl extends BasicEObject implements Library {
   private _books!: EList<Book>;
   private _authors!: EList<Author>;
   private _employees!: EList<Employee>;
+  private _featuredBook?: Book;
 
   /**
    * Returns the EClass of this object
@@ -110,6 +112,64 @@ export class LibraryImpl extends BasicEObject implements Library {
     return this._employees;
   }
 
+  get featuredBook(): Book {
+    return this._featuredBook!;
+  }
+
+  set featuredBook(value: Book) {
+    const oldValue = this._featuredBook;
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('featuredBook'));
+      }
+    }
+    this._featuredBook = value;
+    if (this.eDeliver()) {
+      this.eNotify({
+        getNotifier: () => this,
+        getEventType: () => 1, // SET
+        getFeature: () => this.eClass().getEStructuralFeature(LibraryImpl.FEATURED_BOOK),
+        getOldValue: () => oldValue,
+        getNewValue: () => value,
+        getPosition: () => -1,
+        wasSet: () => true,
+        isTouch: () => false,
+        isReset: () => false,
+        getFeatureID: () => LibraryImpl.FEATURED_BOOK,
+        merge: () => false
+      });
+    }
+  }
+
+  /**
+   * Remove a value from its previous container before it is contained here,
+   * like Java EMF's eInverseRemove on the old container (#61)
+   */
+  private removeFromPreviousContainer(value: unknown): void {
+    const v = value as any;
+    const oldContainer = v?.eContainer?.();
+    if (!oldContainer || oldContainer === this) {
+      return;
+    }
+    const oldFeature = v.eContainmentFeature?.();
+    if (!oldFeature) {
+      return;
+    }
+    if (oldFeature.isMany()) {
+      const list = oldContainer.eGet(oldFeature);
+      if (list && typeof list.remove === 'function') {
+        list.remove(v);
+      }
+    } else {
+      oldContainer.eUnset(oldFeature);
+    }
+  }
+
   // Reflective API
 
   /**
@@ -128,6 +188,8 @@ export class LibraryImpl extends BasicEObject implements Library {
         return this.authors;
       case LibraryImpl.EMPLOYEES:
         return this.employees;
+      case LibraryImpl.FEATURED_BOOK:
+        return this.featuredBook;
       default:
         return super.eGet(feature);
     }
@@ -162,6 +224,10 @@ export class LibraryImpl extends BasicEObject implements Library {
         this.employees.addAll(newValue as any[]);
         super.eSet(feature, newValue);
         break;
+      case LibraryImpl.FEATURED_BOOK:
+        this.featuredBook = newValue as Book;
+        super.eSet(feature, newValue);
+        break;
       default:
         super.eSet(feature, newValue);
     }
@@ -183,6 +249,8 @@ export class LibraryImpl extends BasicEObject implements Library {
         return this._authors !== undefined && !this._authors.isEmpty();
       case LibraryImpl.EMPLOYEES:
         return this._employees !== undefined && !this._employees.isEmpty();
+      case LibraryImpl.FEATURED_BOOK:
+        return this._featuredBook !== undefined;
       default:
         return super.eIsSet(feature);
     }
@@ -208,6 +276,10 @@ export class LibraryImpl extends BasicEObject implements Library {
         return;
       case LibraryImpl.EMPLOYEES:
         if (this._employees) this._employees.clear();
+        return;
+      case LibraryImpl.FEATURED_BOOK:
+        if (this._featuredBook) (this._featuredBook as any).eSetContainer?.(null, null);
+        this._featuredBook = undefined;
         return;
       default:
         super.eUnset(feature);

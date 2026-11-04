@@ -545,4 +545,46 @@ describe('Generated Library Model', () => {
       }
     });
   });
+
+  // Issue #61: the setter of a single-valued containment reference manages
+  // the container, like Java EMF's basicSet with eInverseRemove/eInverseAdd
+  describe('single-valued containment setter (#61)', () => {
+    it('should make the owner the container of the assigned value', () => {
+      const library = factory.createLibrary();
+      const book = factory.createBook();
+      library.featuredBook = book;
+      expect((book as any).eContainer()).toBe(library);
+    });
+
+    it('should release the previous value', () => {
+      const library = factory.createLibrary();
+      const first = factory.createBook();
+      const second = factory.createBook();
+      library.featuredBook = first;
+      library.featuredBook = second;
+      expect((first as any).eContainer() ?? null).toBeNull();
+      expect((second as any).eContainer()).toBe(library);
+    });
+
+    it('should remove the value from its previous containment list', () => {
+      const library = factory.createLibrary();
+      const book = factory.createBook();
+      library.books.add(book);
+      expect(library.books.size()).toBe(1);
+
+      const other = factory.createLibrary();
+      other.featuredBook = book;
+      expect((book as any).eContainer()).toBe(other);
+      expect(library.books.size()).toBe(0);
+    });
+
+    it('should release the value on eUnset', () => {
+      const library = factory.createLibrary();
+      const book = factory.createBook();
+      library.featuredBook = book;
+      library.eUnset(LibraryPackage.Literals.LIBRARY__FEATURED_BOOK);
+      expect((book as any).eContainer() ?? null).toBeNull();
+      expect(library.featuredBook).toBeUndefined();
+    });
+  });
 });

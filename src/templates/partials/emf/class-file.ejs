@@ -179,9 +179,22 @@ for (const genFeature of features) {
   }
 
 <% if (genFeature.property !== 'readonly') { -%>
+<% const isSingleContainment = typeMapper.isReference(feature) && isContainment(feature) && !featureIsMany; -%>
   set <%- featureName %>(value: <%- featureType %>) {
-<% if (genFeature.notify) { -%>
+<% if (genFeature.notify || isSingleContainment) { -%>
     const oldValue = this._<%- featureName %>;
+<% } -%>
+<% if (isSingleContainment) { -%>
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('<%- featureName %>'));
+      }
+    }
 <% } -%>
     this._<%- featureName %> = value;
 <% if (isUnsettableFeature(feature)) { -%>
@@ -218,10 +231,50 @@ for (const genFeature of features) {
   }
 
   set <%- mf.name %>(value: <%- featureType %>) {
+<% if (typeMapper.isReference(mf.feature) && isContainment(mf.feature) && !featureIsMany) { -%>
+    const oldValue = this._<%- mf.name %>;
+    if (oldValue !== value) {
+      // containment: the owner becomes the container of the value (#61)
+      if (oldValue) {
+        (oldValue as any).eSetContainer?.(null, null);
+      }
+      if (value) {
+        this.removeFromPreviousContainer(value);
+        (value as any).eSetContainer?.(this, this.eClass().getEStructuralFeature('<%- mf.name %>'));
+      }
+    }
+<% } -%>
     this._<%- mf.name %> = value;
 <% if (isUnsettableFeature(mf.feature)) { -%>
     this._<%- mf.name %>IsSet = true;
 <% } -%>
+  }
+
+<% } -%>
+<% const hasSingleContainment = allFeatures.some(f => typeMapper.isReference(f) && isContainment(f) && !isMany(f)); -%>
+<% if (hasSingleContainment) { -%>
+  /**
+   * Remove a value from its previous container before it is contained here,
+   * like Java EMF's eInverseRemove on the old container (#61)
+   */
+  private removeFromPreviousContainer(value: unknown): void {
+    const v = value as any;
+    const oldContainer = v?.eContainer?.();
+    if (!oldContainer || oldContainer === this) {
+      return;
+    }
+    const oldFeature = v.eContainmentFeature?.();
+    if (!oldFeature) {
+      return;
+    }
+    if (oldFeature.isMany()) {
+      const list = oldContainer.eGet(oldFeature);
+      if (list && typeof list.remove === 'function') {
+        list.remove(v);
+      }
+    } else {
+      oldContainer.eUnset(oldFeature);
+    }
   }
 
 <% } -%>
@@ -347,6 +400,9 @@ for (const genFeature of features) {
   const featureName = getName(feature);
 -%>
       case <%- className %>.<%- fid.name %>:
+<% if (!featureIsMany && typeMapper.isReference(feature) && isContainment(feature)) { -%>
+        if (this._<%- featureName %>) (this._<%- featureName %> as any).eSetContainer?.(null, null);
+<% } -%>
 <% if (useEList && featureIsMany) { -%>
         if (this._<%- featureName %>) this._<%- featureName %>.clear();
 <% } else if (featureIsMany) { -%>
@@ -366,6 +422,9 @@ for (const genFeature of features) {
   const defaultValue = typeMapper.getDefaultValue(mf.feature);
 -%>
       case <%- className %>.<%- mf.upperName %>:
+<% if (!featureIsMany && typeMapper.isReference(mf.feature) && isContainment(mf.feature)) { -%>
+        if (this._<%- mf.name %>) (this._<%- mf.name %> as any).eSetContainer?.(null, null);
+<% } -%>
 <% if (useEList && featureIsMany) { -%>
         if (this._<%- mf.name %>) this._<%- mf.name %>.clear();
 <% } else if (featureIsMany) { -%>
