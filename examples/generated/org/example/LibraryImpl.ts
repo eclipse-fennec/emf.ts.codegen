@@ -161,7 +161,7 @@ export class LibraryImpl extends BasicEObject implements Library {
    * Remove a value from its previous container before it is contained here,
    * like Java EMF's eInverseRemove on the old container (#61)
    */
-  private removeFromPreviousContainer(value: unknown): void {
+  protected removeFromPreviousContainer(value: unknown): void {
     const v = value as any;
     const oldContainer = v?.eContainer?.();
     if (!oldContainer || oldContainer === this) {

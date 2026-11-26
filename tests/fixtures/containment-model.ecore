@@ -8,6 +8,13 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="archive" upperBound="-1"
         eType="#//DataSelection" containment="true"/>
   </eClassifiers>
+  <!-- A subclass with its own single-valued containment: the helper for #61
+       must not be re-declared as private, or the generated code stops
+       compiling (TS2415). -->
+  <eClassifiers xsi:type="ecore:EClass" name="SpecialWidget" eSuperTypes="#//Widget">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fallback"
+        eType="#//DataSelection" containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DataSelection">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="query"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
