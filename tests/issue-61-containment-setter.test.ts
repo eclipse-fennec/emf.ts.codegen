@@ -17,6 +17,7 @@ import { generateGenConfigXMI } from '../src/cli/commands/init.js';
  */
 describe('Issue #61: single-valued containment setter', () => {
   let impl: string;
+  let subclassImpl: string;
 
   beforeAll(async () => {
     const tmpDir = await mkdtemp(path.join(tmpdir(), 'issue-61-'));
@@ -33,6 +34,9 @@ describe('Issue #61: single-valued containment setter', () => {
       const file = result.files.find(f => path.basename(f.path) === 'WidgetImpl.ts');
       if (!file) throw new Error('WidgetImpl.ts not found');
       impl = file.content;
+      const subclass = result.files.find(f => path.basename(f.path) === 'SpecialWidgetImpl.ts');
+      if (!subclass) throw new Error('SpecialWidgetImpl.ts not found');
+      subclassImpl = subclass.content;
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }
@@ -45,7 +49,15 @@ describe('Issue #61: single-valued containment setter', () => {
   });
 
   it('should generate the previous-container helper once', () => {
-    expect(impl.match(/private removeFromPreviousContainer/g)).toHaveLength(1);
+    expect(impl.match(/protected removeFromPreviousContainer/g)).toHaveLength(1);
+  });
+
+  it('should emit the helper as protected so a subclass may redeclare it', () => {
+    // A subclass inherits the feature and emits the helper again. As a
+    // private member that is TS2415 ("separate declarations of a private
+    // property"), and the whole package stops compiling.
+    expect(impl).not.toContain('private removeFromPreviousContainer');
+    expect(subclassImpl).toContain('protected removeFromPreviousContainer');
   });
 
   it('eUnset should release the contained value', () => {
